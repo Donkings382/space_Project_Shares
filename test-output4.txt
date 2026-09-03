@@ -1,0 +1,37 @@
+== registering admin ==
+admin register status: The remote server returned an error: (409) Conflict.
+== registering user ==
+user registered
+== login user (should succeed) ==
+user role: USER
+== login with wrong password (expect LOGIN_FAILED) ==
+got 401: The remote server returned an error: (401) Unauthorized.
+== login admin ==
+admin role: ADMIN
+== PUT /api/kyc/profile (user) ==
+profile saved, masked idNumber: ********8XYZ
+== GET /api/kyc/profile (user) => idNumber must be masked ==
+masked idNumber: ********8XYZ
+== GET /api/kyc/profile (user directly via admin token) => masked ==
+admin-request masked idNumber: 
+== GET /api/admin/kyc (admin) => idNumber must be full ==
+no kyc documents yet with profile
+== GET /api/admin/logs (admin) ==
+total logs: 30
+  [KYC_PROFILE_SUBMITTED] user=test.user.1788390506@example.com ip=::1
+  [LOGIN_SUCCESS] user=admin@yourdomain.com ip=::1
+  [LOGIN_FAILED] user=test.user.1788390506@example.com ip=::1
+  [LOGIN_SUCCESS] user=test.user.1788390506@example.com ip=::1
+  [USER_SIGNUP] user=test.user.1788390506@example.com ip=::1
+  [KYC_PROFILE_SUBMITTED] user=test.user.1788390462@example.com ip=::1
+  [LOGIN_SUCCESS] user=admin@yourdomain.com ip=::1
+  [LOGIN_FAILED] user=test.user.1788390462@example.com ip=::1
+  [LOGIN_SUCCESS] user=test.user.1788390462@example.com ip=::1
+  [USER_SIGNUP] user=test.user.1788390462@example.com ip=::1
+  [LOGIN_FAILED] user=admin@yourdomain.com ip=::1
+  [LOGIN_FAILED] user=test.user.1788390422@example.com ip=::1
+== GET /api/admin/logs?action=LOGIN_FAILED (admin) ==
+LOGIN_FAILED count: 5
+== GET /api/admin/logs as NON-admin user (expect 403) ==
+403 as expected: The remote server returned an error: (403) Forbidden.
+== GET /api/admin/uploads/:file (admin) ==

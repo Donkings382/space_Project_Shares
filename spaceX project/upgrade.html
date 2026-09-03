@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPACEX — Upgrade</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        color: inherit;
+      }
+      .wrap {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 36px 22px 50px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 36px;
+      }
+      .lead {
+        color: #cfcfcf;
+        margin: 0 0 22px;
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .card {
+        border: 1px solid #3a3a3a;
+        border-radius: 12px;
+        padding: 22px;
+      }
+      h2 {
+        margin: 0 0 10px;
+        font-size: 28px;
+      }
+      .tag {
+        display: inline-block;
+        border: 1px solid #fff;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 13px;
+        margin-bottom: 14px;
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid #2a2a2a;
+        margin: 0 0 16px;
+      }
+      .card ul {
+        margin: 0;
+        padding: 0;
+      }
+      .card li {
+        list-style: none;
+        margin: 10px 0;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .ok {
+        width: 20px;
+        height: 20px;
+        border: 1.5px solid #fff;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        font-size: 12px;
+      }
+      .go {
+        width: 100%;
+        height: 46px;
+        margin-top: 18px;
+        border: 0;
+        border-radius: 8px;
+        background: #fff;
+        color: #000;
+        font-weight: 700;
+      }
+      .ghost {
+        height: 40px;
+        border: 1px solid #fff;
+        border-radius: 8px;
+        background: #000;
+        color: #fff;
+        padding: 0 14px;
+        margin-bottom: 18px;
+      }
+      .note {
+        text-align: center;
+        color: #9a9a9a;
+        margin: 22px 0 0;
+      }
+      @media (max-width: 700px) {
+        .cols {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <button class="ghost" type="button" id="back">← Home</button>
+      <h1>Upgrade to Premium</h1>
+      <p class="lead">Unlock share ownership and a full wealth dashboard.</p>
+      <div class="cols">
+        <div class="card">
+          <h2>Regular</h2>
+          <span class="tag" id="reg-tag">Current plan</span>
+          <hr />
+          <ul>
+            <li><span class="ok">✓</span> Weekly income</li>
+            <li><span class="ok">✓</span> Monthly income</li>
+            <li><span class="ok">✓</span> Basic dashboard</li>
+            <li><span class="ok">✓</span> Market charts</li>
+            <li><span class="ok">✓</span> Standard support</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Premium</h2>
+          <span class="tag" id="pre-tag">Recommended</span>
+          <hr />
+          <ul>
+            <li><span class="ok">✓</span> Buy company shares</li>
+            <li><span class="ok">✓</span> Higher profits</li>
+            <li><span class="ok">✓</span> More benefits</li>
+            <li><span class="ok">✓</span> Full wealth dashboard</li>
+            <li><span class="ok">✓</span> Priority support</li>
+            <li><span class="ok">✓</span> Market charts</li>
+          </ul>
+          <button class="go" type="button" id="up">Upgrade to Premium</button>
+        </div>
+      </div>
+      <!-- PAYMENT API REQUIRED: connect this action to Paystack before enabling Premium upgrades. -->
+    </div>
+    <script>
+      function get() {
+        try {
+          return JSON.parse(
+            localStorage.getItem("spacex.v1") || '{"users":[],"session":null}',
+          );
+        } catch (e) {
+          return { users: [], session: null };
+        }
+      }
+      var db = get(),
+        me = null;
+      for (var i = 0; i < (db.users || []).length; i++)
+        if (
+          String(db.users[i].email || "").toLowerCase() ===
+          String(db.session || "").toLowerCase()
+        )
+          me = db.users[i];
+      if (!me) window.location.href = "login.html";
+      var prem = (me.plan || "regular") === "premium";
+      if (prem) {
+        document.getElementById("reg-tag").textContent = "Starter";
+        document.getElementById("pre-tag").textContent = "Current plan";
+        document.getElementById("up").textContent = "You are on Premium";
+        document.getElementById("up").disabled = true;
+        document.getElementById("note").textContent =
+          "Your Premium plan is already active.";
+      }
+
+      // KYC status: if pending, show a small banner; if missing/declined, upgrade action will redirect to settings (existing behavior)
+      if (me.kyc === "pending") {
+        try {
+          var kb = document.createElement("div");
+          kb.id = "kyc-pending-banner";
+          kb.textContent = "KYC: Pending";
+          kb.style.position = "fixed";
+          kb.style.right = "16px";
+          kb.style.top = "80px";
+          kb.style.background = "#fff7ed";
+          kb.style.border = "1px solid #f59e0b";
+          kb.style.color = "#92400e";
+          kb.style.padding = "8px 10px";
+          kb.style.borderRadius = "8px";
+          kb.style.zIndex = 60;
+          kb.style.fontWeight = 600;
+          document.body.appendChild(kb);
+        } catch (e) {}
+      }
+      document.getElementById("back").onclick = function () {
+        window.location.href = "home.html";
+      };
+      document.getElementById("up").onclick = function () {
+        if (!prem) {
+          // If KYC missing or declined, send user to settings to verify
+          if (
+            !(me.isAdmin || me.role === "ADMIN") &&
+            (!me.kyc || me.kyc === "declined")
+          ) {
+            window.location.href = "settings.html";
+            return;
+          }
+          // Otherwise open Live Support widget
+          if (window.openLiveChat) window.openLiveChat();
+          else window.__openLiveChatRequested = true;
+        }
+      };
+      document.getElementById("btn-livesupport").onclick = function () {
+        if (window.openLiveChat) window.openLiveChat();
+        else window.__openLiveChatRequested = true;
+      };
+
+      // Load small loader that injects the live chat widget (only on deposit/upgrade pages)
+      (function () {
+        var s = document.createElement("script");
+        s.src = "livechat-loader.js";
+        s.async = false;
+        document.body.appendChild(s);
+      })();
+      function loadChatMessages(sessionId) {
+        var token = localStorage.getItem("authToken");
+        fetch(
+          "http://localhost:4000/api/support/sessions/" +
+            sessionId +
+            "/messages",
+          {
+            headers: { Authorization: "Bearer " + token },
+          },
+        )
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (data) {
+            var messages = data.messages || [];
+            var html = "";
+            messages.forEach(function (msg) {
+              var isUser = msg.senderRole === "USER";
+              var bgColor = isUser ? "#f1f5f9" : "#4f46e5";
+              var textColor = isUser ? "#1e293b" : "#ffffff";
+              var align = isUser ? "flex-start" : "flex-end";
+              html +=
+                '<div style="display:flex;justify-content:' +
+                align +
+                ';margin-bottom:8px;"><div style="background:' +
+                bgColor +
+                ";color:" +
+                textColor +
+                ';border-radius:8px;padding:8px 12px;max-width:70%;"><div class="muted" style="font-size:10px;margin-bottom:2px;">' +
+                (isUser ? "You" : "Support") +
+                "</div>" +
+                msg.content +
+                (msg.createdAt
+                  ? '<div style="font-size:11px;margin-top:6px;opacity:0.7;text-align:right;">' +
+                    (isUser ? "✓ " : "") +
+                    new Date(msg.createdAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }) +
+                    "</div>"
+                  : "") +
+                "</div></div>";
+            });
+            document.getElementById("chat-messages").innerHTML = html;
+            document.getElementById("chat-messages").scrollTop =
+              document.getElementById("chat-messages").scrollHeight;
+          });
+      }
+    </script>
+  </body>
+</html>

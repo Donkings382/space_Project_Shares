@@ -1,0 +1,1445 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPACEX — Settings</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button,
+      input,
+      select {
+        font-family: inherit;
+        color: inherit;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        height: 64px;
+        padding: 0 22px;
+        border-bottom: 1px solid #2a2a2a;
+      }
+      .top .mark {
+        width: 132px;
+        height: auto;
+        flex-shrink: 0;
+        display: block;
+      }
+      .search-wrap {
+        position: relative;
+        width: min(340px, 36vw);
+        margin-left: 20px;
+      }
+      .search-wrap svg {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #888;
+      }
+      .search {
+        width: 100%;
+        height: 38px;
+        border: 1px solid #3a3a3a;
+        border-radius: 8px;
+        background: #000;
+        padding: 0 12px 0 36px;
+        color: #fff;
+      }
+      .right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .who {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: none;
+        border: 0;
+        cursor: pointer;
+      }
+      .who-pic {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        display: none;
+      }
+      .avatar {
+        width: 92px;
+        height: 92px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #3a3a3a;
+        display: block;
+        margin: 8px 0;
+        background: #111;
+      }
+      .app {
+        display: flex;
+        min-height: calc(100dvh - 64px);
+      }
+      .side {
+        width: 210px;
+        border-right: 1px solid #2a2a2a;
+        padding: 14px 10px;
+      }
+      .nav a {
+        display: flex;
+        padding: 10px 12px;
+        border-radius: 8px;
+        color: #d0d0d0;
+      }
+      .nav a.on {
+        background: #1a1a1a;
+        color: #fff;
+      }
+      .main {
+        flex: 1;
+        padding: 22px 28px;
+        max-width: 860px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+      }
+      .lead {
+        color: #cfcfcf;
+        margin: 0 0 16px;
+      }
+      .box {
+        border: 1px solid #3a3a3a;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .sec {
+        padding: 14px 18px 6px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        color: #cfcfcf;
+      }
+      .item {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 18px;
+        background: none;
+        border: 0;
+        border-top: 1px solid #2a2a2a;
+        text-align: left;
+        cursor: pointer;
+        font-size: 15px;
+      }
+      .chev {
+        color: #8a8a8a;
+      }
+      .panel {
+        display: none;
+      }
+      .panel.on {
+        display: block;
+      }
+      .back {
+        background: none;
+        border: 0;
+        color: #cfcfcf;
+        cursor: pointer;
+        margin-bottom: 12px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: #9a9a9a;
+        margin: 10px 0 4px;
+      }
+      input,
+      select {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #3a3a3a;
+        border-radius: 8px;
+        background: #000;
+        padding: 0 12px;
+      }
+      .go {
+        height: 44px;
+        margin-top: 14px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 8px;
+        background: #fff;
+        color: #000;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .ghost {
+        height: 40px;
+        padding: 0 16px;
+        border: 1px solid #fff;
+        border-radius: 8px;
+        background: #000;
+        cursor: pointer;
+      }
+      .err {
+        color: #f87171;
+        min-height: 16px;
+      }
+      .ok {
+        color: #86efac;
+      }
+      .banner {
+        border: 1px solid #3a3a3a;
+        border-radius: 10px;
+        padding: 16px 18px;
+        margin-bottom: 18px;
+      }
+      .banner.on {
+        border-color: #86efac;
+      }
+      .h3 {
+        margin: 18px 0 10px;
+        font-size: 16px;
+      }
+      .card2 {
+        border: 1px solid #3a3a3a;
+        border-radius: 10px;
+        padding: 16px 18px;
+        margin-bottom: 12px;
+        display: grid;
+        grid-template-columns: 36px 1fr auto;
+        gap: 12px;
+        align-items: start;
+      }
+      .card2 b {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .card2 p {
+        margin: 0;
+        color: #9a9a9a;
+        font-size: 13px;
+      }
+      .okline {
+        color: #86efac;
+        font-size: 13px;
+        margin-top: 8px;
+      }
+      .offline {
+        color: #9a9a9a;
+        font-size: 13px;
+        margin-top: 8px;
+      }
+      .secret {
+        font-family: ui-monospace, monospace;
+        letter-spacing: 0.12em;
+        border: 1px solid #3a3a3a;
+        border-radius: 8px;
+        padding: 12px;
+        margin: 10px 0;
+      }
+      .otp {
+        display: flex;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .otp input {
+        width: 42px;
+        height: 48px;
+        text-align: center;
+        font-size: 20px;
+      }
+      .codes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .codes span {
+        border: 1px solid #3a3a3a;
+        border-radius: 8px;
+        padding: 10px;
+        font-family: ui-monospace, monospace;
+        text-align: center;
+      }
+      .kyc-row {
+        display: grid;
+        grid-template-columns: 170px 1fr;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .kbox {
+        border: 1px solid #3a3a3a;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+      }
+      .idpick {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+      .idpick button {
+        height: 46px;
+        border: 1px solid #3a3a3a;
+        background: #000;
+        border-radius: 8px;
+      }
+      .idpick button.on {
+        border-color: #fff;
+      }
+      .drops {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .dropz {
+        border: 1px dashed #555;
+        border-radius: 10px;
+        min-height: 130px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        cursor: pointer;
+        color: #9a9a9a;
+        overflow: hidden;
+      }
+      .dropz img {
+        max-height: 128px;
+        max-width: 100%;
+        display: block;
+      }
+      .phone {
+        display: grid;
+        grid-template-columns: 230px 1fr;
+        gap: 8px;
+      }
+      .st-v {
+        color: #86efac;
+        border-color: #86efac;
+      }
+      .st-n {
+        color: #f87171;
+        border-color: #7f1d1d;
+      }
+      .st-p {
+        color: #fbbf24;
+        border-color: #854d0e;
+      }
+      .rowbtns {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      @media (max-width: 800px) {
+        .kyc-row,
+        .idpick,
+        .drops,
+        .phone {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 980px) {
+        .side {
+          display: none;
+        }
+        .card2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <svg
+        class="mark"
+        viewBox="0 0 331.644 40.825"
+        fill="#fff"
+        aria-label="SpaceX"
+      >
+        <path
+          d="M77.292,15.094H49.249l-1.039,0.777v24.947h7.763v-9.355l0.741-0.664h20.579 c5.196,0,7.632-1.398,7.632-4.985v-5.728C84.924,16.493,82.489,15.094,77.292,15.094 M77.292,24.317 c0,1.69-1.118,2.041-3.554,2.041H56.799l-0.827-0.804V20.21l0.741-0.678h17.025c2.436,0,3.554,0.347,3.554,2.045V24.317z"
+        />
+        <polyline
+          points="99.081,19.813 105.761,29.6 105.391,30.548 90.618,30.548 86.847,35.187 108.837,35.187 110.361,36.115 113.775,40.824 122.659,40.824 103.186,14.775"
+        />
+        <polyline
+          points="187.418,35.757 187.418,28.833 188.217,28.143 203.079,28.143 203.079,23.734 179.524,23.734 179.524,40.823 214.27,40.823 214.27,36.435 188.252,36.435"
+        />
+        <rect x="179.524" y="15.094" width="35.113" height="4.848" />
+        <path
+          d="M140.361,19.685h28.288c-0.436-3.597-2.668-4.595-8.33-4.595H140.06c-6.389,0-8.427,1.247-8.427,6.082 v13.565c0,4.84,2.038,6.087,8.427,6.087h20.259c5.745,0,7.945-1.079,8.095-4.81h-28.053l-0.832-0.783V20.209"
+        />
+        <path
+          d="M29.333,25.118H8.754l-0.606-0.667v-4.402l0.603-0.466h27.742l0.379-0.927 c-0.945-2.431-3.392-3.565-7.936-3.565H9.665c-6.385,0-8.426,1.247-8.426,6.082v2.844c0,4.841,2.041,6.086,8.426,6.086h20.533 l0.645,0.566v4.602l-0.526,0.718H6.83v-0.022H0.678c0,0-0.704,0.353-0.677,0.518c0.525,3.382,2.829,4.34,8.345,4.34h20.987 c6.384,0,8.486-1.247,8.486-6.087v-3.543C37.819,26.363,35.717,25.118,29.333,25.118"
+        />
+        <path
+          d="M236.725,14.988h-11.551l-0.627,1.193l12.828,9.351c2.43-1.407,5.074-2.833,7.95-4.24"
+        />
+        <path
+          d="M247.075,32.603l11.275,8.222h11.692l0.484-1.089L253.69,27.413 C251.454,29.054,249.245,30.787,247.075,32.603"
+        />
+        <path
+          d="M235.006,40.806h-10.451l-0.883-1.383C230.778,32.562,262.56,3.151,331.644,0 C331.644,0,273.658,1.956,235.006,40.806"
+        />
+      </svg>
+      <div class="search-wrap">
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="7" cy="7" r="5" />
+          <path d="m14 14-3-3" />
+        </svg>
+        <input class="search" placeholder="Search" />
+      </div>
+      <div class="right">
+        <button class="who" type="button">
+          <img class="who-pic" id="who-pic" alt="" />
+          <svg
+            id="who-svg"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          >
+            <circle cx="11" cy="11" r="9" />
+            <circle cx="11" cy="9" r="3" />
+            <path d="M6.2 17c1.4-2.2 8.2-2.2 9.6 0" />
+          </svg>
+          <span id="who-name">Member</span>
+        </button>
+      </div>
+    </header>
+    <div class="app">
+      <aside class="side">
+        <nav class="nav">
+          <a href="home.html">Home</a>
+          <a href="transactions.html">Transactions</a>
+          <a href="withdraw.html">Withdraw</a>
+          <a href="deposit.html">Deposit</a>
+          <a class="on" href="settings.html">Settings</a>
+        </nav>
+      </aside>
+      <main class="main">
+        <div id="list-view">
+          <h1>Settings</h1>
+          <div class="box" id="menu"></div>
+        </div>
+        <div id="page-view" class="panel">
+          <button class="back" type="button" id="back">
+            ← Back to Settings
+          </button>
+          <h1 id="page-title">Setting</h1>
+          <div id="page-body"></div>
+        </div>
+      </main>
+    </div>
+    <script>
+      var WORLD = [
+        ["Afghanistan", "+93"],
+        ["Albania", "+355"],
+        ["Algeria", "+213"],
+        ["Andorra", "+376"],
+        ["Angola", "+244"],
+        ["Antigua and Barbuda", "+1"],
+        ["Argentina", "+54"],
+        ["Armenia", "+374"],
+        ["Australia", "+61"],
+        ["Austria", "+43"],
+        ["Azerbaijan", "+994"],
+        ["Bahamas", "+1"],
+        ["Bahrain", "+973"],
+        ["Bangladesh", "+880"],
+        ["Barbados", "+1"],
+        ["Belarus", "+375"],
+        ["Belgium", "+32"],
+        ["Belize", "+501"],
+        ["Benin", "+229"],
+        ["Bhutan", "+975"],
+        ["Bolivia", "+591"],
+        ["Bosnia and Herzegovina", "+387"],
+        ["Botswana", "+267"],
+        ["Brazil", "+55"],
+        ["Brunei", "+673"],
+        ["Bulgaria", "+359"],
+        ["Burkina Faso", "+226"],
+        ["Burundi", "+257"],
+        ["Cabo Verde", "+238"],
+        ["Cambodia", "+855"],
+        ["Cameroon", "+237"],
+        ["Canada", "+1"],
+        ["Central African Republic", "+236"],
+        ["Chad", "+235"],
+        ["Chile", "+56"],
+        ["China", "+86"],
+        ["Colombia", "+57"],
+        ["Comoros", "+269"],
+        ["Congo", "+242"],
+        ["Costa Rica", "+506"],
+        ["Croatia", "+385"],
+        ["Cuba", "+53"],
+        ["Cyprus", "+357"],
+        ["Czech Republic", "+420"],
+        ["Denmark", "+45"],
+        ["Djibouti", "+253"],
+        ["Dominica", "+1"],
+        ["Dominican Republic", "+1"],
+        ["Ecuador", "+593"],
+        ["Egypt", "+20"],
+        ["El Salvador", "+503"],
+        ["Equatorial Guinea", "+240"],
+        ["Eritrea", "+291"],
+        ["Estonia", "+372"],
+        ["Eswatini", "+268"],
+        ["Ethiopia", "+251"],
+        ["Fiji", "+679"],
+        ["Finland", "+358"],
+        ["France", "+33"],
+        ["Gabon", "+241"],
+        ["Gambia", "+220"],
+        ["Georgia", "+995"],
+        ["Germany", "+49"],
+        ["Ghana", "+233"],
+        ["Greece", "+30"],
+        ["Grenada", "+1"],
+        ["Guatemala", "+502"],
+        ["Guinea", "+224"],
+        ["Guinea-Bissau", "+245"],
+        ["Guyana", "+592"],
+        ["Haiti", "+509"],
+        ["Honduras", "+504"],
+        ["Hungary", "+36"],
+        ["Iceland", "+354"],
+        ["India", "+91"],
+        ["Indonesia", "+62"],
+        ["Iran", "+98"],
+        ["Iraq", "+964"],
+        ["Ireland", "+353"],
+        ["Israel", "+972"],
+        ["Italy", "+39"],
+        ["Ivory Coast", "+225"],
+        ["Jamaica", "+1"],
+        ["Japan", "+81"],
+        ["Jordan", "+962"],
+        ["Kazakhstan", "+7"],
+        ["Kenya", "+254"],
+        ["Kiribati", "+686"],
+        ["Kuwait", "+965"],
+        ["Kyrgyzstan", "+996"],
+        ["Laos", "+856"],
+        ["Latvia", "+371"],
+        ["Lebanon", "+961"],
+        ["Lesotho", "+266"],
+        ["Liberia", "+231"],
+        ["Libya", "+218"],
+        ["Liechtenstein", "+423"],
+        ["Lithuania", "+370"],
+        ["Luxembourg", "+352"],
+        ["Madagascar", "+261"],
+        ["Malawi", "+265"],
+        ["Malaysia", "+60"],
+        ["Maldives", "+960"],
+        ["Mali", "+223"],
+        ["Malta", "+356"],
+        ["Marshall Islands", "+692"],
+        ["Mauritania", "+222"],
+        ["Mauritius", "+230"],
+        ["Mexico", "+52"],
+        ["Micronesia", "+691"],
+        ["Moldova", "+373"],
+        ["Monaco", "+377"],
+        ["Mongolia", "+976"],
+        ["Montenegro", "+382"],
+        ["Morocco", "+212"],
+        ["Mozambique", "+258"],
+        ["Myanmar", "+95"],
+        ["Namibia", "+264"],
+        ["Nauru", "+674"],
+        ["Nepal", "+977"],
+        ["Netherlands", "+31"],
+        ["New Zealand", "+64"],
+        ["Nicaragua", "+505"],
+        ["Niger", "+227"],
+        ["Nigeria", "+234"],
+        ["North Korea", "+850"],
+        ["North Macedonia", "+389"],
+        ["Norway", "+47"],
+        ["Oman", "+968"],
+        ["Pakistan", "+92"],
+        ["Palau", "+680"],
+        ["Palestine", "+970"],
+        ["Panama", "+507"],
+        ["Papua New Guinea", "+675"],
+        ["Paraguay", "+595"],
+        ["Peru", "+51"],
+        ["Philippines", "+63"],
+        ["Poland", "+48"],
+        ["Portugal", "+351"],
+        ["Qatar", "+974"],
+        ["Romania", "+40"],
+        ["Russia", "+7"],
+        ["Rwanda", "+250"],
+        ["Saint Kitts and Nevis", "+1"],
+        ["Saint Lucia", "+1"],
+        ["Saint Vincent and the Grenadines", "+1"],
+        ["Samoa", "+685"],
+        ["San Marino", "+378"],
+        ["Sao Tome and Principe", "+239"],
+        ["Saudi Arabia", "+966"],
+        ["Senegal", "+221"],
+        ["Serbia", "+381"],
+        ["Seychelles", "+248"],
+        ["Sierra Leone", "+232"],
+        ["Singapore", "+65"],
+        ["Slovakia", "+421"],
+        ["Slovenia", "+386"],
+        ["Solomon Islands", "+677"],
+        ["Somalia", "+252"],
+        ["South Africa", "+27"],
+        ["South Korea", "+82"],
+        ["South Sudan", "+211"],
+        ["Spain", "+34"],
+        ["Sri Lanka", "+94"],
+        ["Sudan", "+249"],
+        ["Suriname", "+597"],
+        ["Sweden", "+46"],
+        ["Switzerland", "+41"],
+        ["Syria", "+963"],
+        ["Taiwan", "+886"],
+        ["Tajikistan", "+992"],
+        ["Tanzania", "+255"],
+        ["Thailand", "+66"],
+        ["Timor-Leste", "+670"],
+        ["Togo", "+228"],
+        ["Tonga", "+676"],
+        ["Trinidad and Tobago", "+1"],
+        ["Tunisia", "+216"],
+        ["Turkey", "+90"],
+        ["Turkmenistan", "+993"],
+        ["Tuvalu", "+688"],
+        ["Uganda", "+256"],
+        ["Ukraine", "+380"],
+        ["United Arab Emirates", "+971"],
+        ["United Kingdom", "+44"],
+        ["United States", "+1"],
+        ["Uruguay", "+598"],
+        ["Uzbekistan", "+998"],
+        ["Vanuatu", "+678"],
+        ["Vatican City", "+379"],
+        ["Venezuela", "+58"],
+        ["Vietnam", "+84"],
+        ["Yemen", "+967"],
+        ["Zambia", "+260"],
+        ["Zimbabwe", "+263"],
+      ];
+      function codeOf(name) {
+        for (var i = 0; i < WORLD.length; i++)
+          if (WORLD[i][0] === name) return WORLD[i][1];
+        return "+1";
+      }
+      function get() {
+        try {
+          return JSON.parse(
+            localStorage.getItem("spacex.v1") || '{"users":[],"session":null}',
+          );
+        } catch (e) {
+          return { users: [], session: null };
+        }
+      }
+      function save(d) {
+        localStorage.setItem("spacex.v1", JSON.stringify(d));
+      }
+      function reloadMe() {
+        db = get();
+        for (var i = 0; i < db.users.length; i++)
+          if (
+            String(db.users[i].email || "").toLowerCase() ===
+            String(me.email).toLowerCase()
+          )
+            me = db.users[i];
+      }
+      function twoOn() {
+        return !!(me.twoFAApp || me.twoFAEmail);
+      }
+      function code6() {
+        return String(Math.floor(100000 + Math.random() * 900000));
+      }
+      function secretKey() {
+        var s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",
+          out = "";
+        for (var i = 0; i < 16; i++)
+          out += s.charAt(Math.floor(Math.random() * s.length));
+        return out.match(/.{1,4}/g).join(" ");
+      }
+      var db = get(),
+        me = null;
+      for (var i = 0; i < (db.users || []).length; i++)
+        if (
+          String(db.users[i].email || "").toLowerCase() ===
+          String(db.session || "").toLowerCase()
+        )
+          me = db.users[i];
+      if (!me) window.location.href = "login.html";
+      document.getElementById("who-name").textContent = me.fullName || me.email;
+      function paintIcon() {
+        var pic = document.getElementById("who-pic"),
+          svg = document.getElementById("who-svg");
+        if (me.avatar) {
+          pic.src = me.avatar;
+          pic.style.display = "block";
+          if (svg) svg.style.display = "none";
+        }
+      }
+      paintIcon();
+      function shrinkPic(src, done) {
+        var img = new Image();
+        img.onload = function () {
+          var c = document.createElement("canvas");
+          c.width = 160;
+          c.height = 160;
+          c.getContext("2d").drawImage(img, 0, 0, 160, 160);
+          done(c.toDataURL("image/jpeg", 0.6));
+        };
+        img.src = src;
+      }
+      var groups = [
+        [
+          "ACCOUNT",
+          [
+            ["profile", "Profile Information"],
+            ["email", "Email & Password"],
+            ["2fa", "Two-Factor Authentication"],
+            ["kyc", "Verify KYC"],
+          ],
+        ],
+        [
+          "SECURITY",
+          [
+            ["login", "Login Activity"],
+            ["devices", "Connected Devices"],
+          ],
+        ],
+        [
+          "PRIVACY",
+          [
+            ["share", "Data Sharing"],
+            ["download", "Download My Data"],
+            ["delete", "Delete Account"],
+          ],
+        ],
+        [
+          "SUPPORT",
+          [
+            ["help", "Help Center"],
+            ["live", "Contact Live Support"],
+          ],
+        ],
+      ];
+      var html = "";
+      groups.forEach(function (g) {
+        html += '<div class="sec">' + g[0] + "</div>";
+        g[1].forEach(function (it) {
+          html +=
+            '<button class="item" type="button" data-k="' +
+            it[0] +
+            '">' +
+            it[1] +
+            '<span class="chev">›</span></button>';
+        });
+      });
+      document.getElementById("menu").innerHTML = html;
+
+      function otpHtml(id) {
+        var s = "";
+        for (var i = 0; i < 6; i++)
+          s +=
+            '<input maxlength="1" inputmode="numeric" data-otp="' + id + '" />';
+        return '<div class="otp" id="' + id + '">' + s + "</div>";
+      }
+      function bindOtp(id) {
+        var boxes = document.querySelectorAll("#" + id + " input");
+        boxes.forEach(function (el, i) {
+          el.oninput = function () {
+            this.value = this.value.replace(/\D/g, "").slice(0, 1);
+            if (this.value && boxes[i + 1]) boxes[i + 1].focus();
+          };
+          el.onkeydown = function (e) {
+            if (e.key === "Backspace" && !this.value && boxes[i - 1])
+              boxes[i - 1].focus();
+          };
+        });
+      }
+      function readOtp(id) {
+        var v = "";
+        document.querySelectorAll("#" + id + " input").forEach(function (el) {
+          v += el.value;
+        });
+        return v;
+      }
+
+      function draw2FA(view) {
+        reloadMe();
+        document.getElementById("page-title").textContent =
+          "Two-Factor Authentication";
+        var b = document.getElementById("page-body");
+        if (!view) {
+          var on = twoOn();
+          b.innerHTML =
+            '<p class="lead">Add an extra layer of security to your account.</p>' +
+            '<div class="banner ' +
+            (on ? "on" : "") +
+            '">Two-Factor Authentication is currently ' +
+            (on ? "ON" : "OFF") +
+            ".</div>" +
+            '<div class="h3">Authentication Methods</div>' +
+            '<div class="card2"><div>📱</div><div><b>1. Authenticator App (Recommended)</b><p>Use an app like Google Authenticator or Authy to generate codes.</p>' +
+            (me.twoFAApp
+              ? '<div class="okline">✓ Connected</div>'
+              : '<div class="offline">Not connected</div>') +
+            '</div><button class="ghost" type="button" id="m-app">Manage</button></div>' +
+            '<div class="card2"><div>✉</div><div><b>2. Email Verification</b><p>Receive a one-time code via email when signing in.</p>' +
+            (me.twoFAEmail
+              ? '<div class="okline">✓ Enabled</div>'
+              : '<div class="offline">Not enabled</div>') +
+            '</div><button class="ghost" type="button" id="m-mail">Manage</button></div>' +
+            '<div class="h3">Backup Codes</div>' +
+            '<div class="card2"><div>🔑</div><div><b>Generate backup codes in case you lose access to your device.</b></div>' +
+            '<button class="ghost" type="button" id="m-back">View / Generate Backup Codes</button></div>' +
+            '<div class="banner">We strongly recommend keeping at least one backup method active.</div>';
+          document.getElementById("m-app").onclick = function () {
+            draw2FA("app");
+          };
+          document.getElementById("m-mail").onclick = function () {
+            draw2FA("mail");
+          };
+          document.getElementById("m-back").onclick = function () {
+            draw2FA("codes");
+          };
+          return;
+        }
+        if (view === "app") {
+          if (me.twoFAApp) {
+            b.innerHTML =
+              '<p class="lead">Authenticator App is connected.</p><div class="okline">✓ Connected</div><button class="ghost" type="button" id="off-app">Disconnect</button> <button class="go" type="button" id="back2">Done</button>';
+            document.getElementById("off-app").onclick = function () {
+              reloadMe();
+              me.twoFAApp = false;
+              me.twoFA = twoOn();
+              save(db);
+              draw2FA();
+            };
+            document.getElementById("back2").onclick = function () {
+              draw2FA();
+            };
+            return;
+          }
+          if (!me.twoFASecret) {
+            me.twoFASecret = secretKey();
+            save(db);
+          }
+          b.innerHTML =
+            '<p class="lead">Add SpaceX in Google Authenticator or Authy, then enter the 6-digit code.</p>' +
+            '<label>Secret key</label><div class="secret" id="sec">' +
+            me.twoFASecret +
+            "</div>" +
+            '<button class="ghost" type="button" id="copy-sec">Copy key</button>' +
+            "<label>Enter 6-digit code</label>" +
+            otpHtml("otp-app") +
+            '<p class="err" id="s-err"></p>' +
+            '<button class="go" type="button" id="ok-app">Verify and connect</button>';
+          bindOtp("otp-app");
+          document.getElementById("copy-sec").onclick = function () {
+            navigator.clipboard.writeText(me.twoFASecret.replace(/ /g, ""));
+            this.textContent = "Copied";
+          };
+          document.getElementById("ok-app").onclick = function () {
+            var v = readOtp("otp-app");
+            if (v.length !== 6) {
+              document.getElementById("s-err").textContent =
+                "Enter all 6 digits";
+              return;
+            }
+            reloadMe();
+            me.twoFAApp = true;
+            me.twoFA = true;
+            save(db);
+            draw2FA();
+          };
+          return;
+        }
+        if (view === "mail") {
+          if (me.twoFAEmail && !me.email2faPending) {
+            b.innerHTML =
+              '<p class="lead">Email codes will be sent to <b>' +
+              me.email +
+              '</b>.</p><div class="okline">✓ Enabled</div><button class="ghost" type="button" id="off-mail">Disable</button> <button class="go" type="button" id="back2">Done</button>';
+            document.getElementById("off-mail").onclick = function () {
+              reloadMe();
+              me.twoFAEmail = false;
+              me.twoFA = twoOn();
+              save(db);
+              draw2FA();
+            };
+            document.getElementById("back2").onclick = function () {
+              draw2FA();
+            };
+            return;
+          }
+          b.innerHTML =
+            '<p class="lead">We will send a one-time code to <b>' +
+            me.email +
+            "</b>.</p>" +
+            '<button class="go" type="button" id="send-mail">Send code</button>' +
+            '<div id="mail-step" style="display:none">' +
+            "<label>Enter the 6-digit code</label>" +
+            otpHtml("otp-mail") +
+            '<p class="ok" id="mail-hint"></p><p class="err" id="s-err"></p>' +
+            '<button class="go" type="button" id="ok-mail">Verify email</button></div>';
+          bindOtp("otp-mail");
+          document.getElementById("send-mail").onclick = function () {
+            reloadMe();
+            me.email2faCode = code6();
+            me.email2faPending = true;
+            save(db);
+            document.getElementById("mail-step").style.display = "block";
+            document.getElementById("mail-hint").textContent =
+              "Code sent to " +
+              me.email +
+              ". For this demo, use: " +
+              me.email2faCode;
+          };
+          document.getElementById("ok-mail").onclick = function () {
+            reloadMe();
+            var v = readOtp("otp-mail");
+            if (v !== String(me.email2faCode)) {
+              document.getElementById("s-err").textContent = "Wrong code";
+              return;
+            }
+            me.twoFAEmail = true;
+            me.twoFA = true;
+            me.email2faPending = false;
+            me.email2faCode = "";
+            save(db);
+            draw2FA();
+          };
+          return;
+        }
+        if (view === "codes") {
+          if (!me.backupCodes || !me.backupCodes.length) {
+            b.innerHTML =
+              '<p class="lead">Generate one-time backup codes in case you lose your phone.</p><button class="go" type="button" id="gen">Generate backup codes</button>';
+            document.getElementById("gen").onclick = function () {
+              reloadMe();
+              me.backupCodes = [];
+              for (var i = 0; i < 8; i++)
+                me.backupCodes.push(
+                  code6().slice(0, 4) + "-" + code6().slice(0, 4),
+                );
+              save(db);
+              draw2FA("codes");
+            };
+            return;
+          }
+          var list = '<div class="codes">';
+          me.backupCodes.forEach(function (c) {
+            list += "<span>" + c + "</span>";
+          });
+          list += "</div>";
+          b.innerHTML =
+            '<p class="lead">Store these codes somewhere safe. Each code works once.</p>' +
+            list +
+            '<button class="ghost" type="button" id="copy-c">Copy all</button> <button class="go" type="button" id="gen2">Generate new codes</button>';
+          document.getElementById("copy-c").onclick = function () {
+            navigator.clipboard.writeText(me.backupCodes.join("\n"));
+            this.textContent = "Copied";
+          };
+          document.getElementById("gen2").onclick = function () {
+            reloadMe();
+            me.backupCodes = [];
+            save(db);
+            draw2FA("codes");
+          };
+        }
+      }
+
+      function shrinkKyc(src, done) {
+        var img = new Image();
+        img.onload = function () {
+          var c = document.createElement("canvas");
+          var w = 720,
+            h = Math.max(1, Math.round((img.height * 720) / img.width));
+          c.width = w;
+          c.height = h;
+          c.getContext("2d").drawImage(img, 0, 0, w, h);
+          done(c.toDataURL("image/jpeg", 0.5));
+        };
+        img.src = src;
+      }
+      async function drawKYC() {
+        reloadMe();
+        var token = localStorage.getItem("authToken");
+        if (token) {
+          try {
+            var stateResponse = await fetch("http://localhost:4000/api/kyc/me", {
+              headers: { Authorization: "Bearer " + token },
+            });
+            if (stateResponse.ok) {
+              var statePayload = await stateResponse.json();
+              if (
+                !statePayload.profile &&
+                (!statePayload.documents || statePayload.documents.length === 0)
+              ) {
+                me.kyc = "none";
+                delete me.kycData;
+                save(db);
+              }
+            } else if (stateResponse.status === 404) {
+              me.kyc = "none";
+              delete me.kycData;
+              save(db);
+            }
+          } catch (error) {
+            console.warn("Unable to refresh KYC state", error);
+          }
+        }
+        document.getElementById("page-title").textContent = "Verify KYC";
+        var k = me.kyc || "none";
+        var d = me.kycData || {};
+        var st = k === "verified" ? "st-v" : k === "pending" ? "st-p" : "st-n";
+        var stTxt =
+          k === "verified"
+            ? "Verified"
+            : k === "pending"
+              ? "Pending review"
+              : "Unverified";
+        var lock = k === "pending" || k === "verified";
+        var b = document.getElementById("page-body");
+        b.innerHTML =
+          '<p class="lead">Complete identity verification to unlock full account access.</p>' +
+          '<div class="banner ' +
+          st +
+          '">KYC status: <b>' +
+          stTxt +
+          "</b></div>" +
+          (k === "declined"
+            ? '<p class="err">Admin declined this KYC. Update your details and submit again.</p>'
+            : "") +
+          '<div class="h3">1. PERSONAL DETAILS</div><div class="kbox">' +
+          '<div class="kyc-row"><span>Full Legal Name</span><input id="k-name" placeholder="Enter your full legal name" value="' +
+          (d.legalName || me.fullName || "") +
+          '"></div>' +
+          '<div class="kyc-row"><span>Date of Birth</span><input id="k-dob" type="date" value="' +
+          (d.dob || "") +
+          '"></div>' +
+          '<div class="kyc-row"><span>Nationality</span><select id="k-nat"><option value="">Select your nationality</option></select></div>' +
+          '<div class="kyc-row"><span>Residential Address</span><input id="k-addr" placeholder="Enter your residential address" value="' +
+          (d.address || "") +
+          '"></div>' +
+          '<div class="kyc-row"><span>Phone Number</span><div class="phone"><select id="k-cc"></select><input id="k-phone" placeholder="Enter your phone number" value="' +
+          (d.phone || me.phone || "") +
+          '"></div></div>' +
+          "</div>" +
+          '<div class="h3">2. GOVERNMENT-ISSUED ID</div><p class="lead">Select ID Type</p>' +
+          '<div class="idpick">' +
+          '<button type="button" data-id="license">Driver\'s License</button>' +
+          '<button type="button" data-id="passport">Passport</button>' +
+          '<button type="button" data-id="national">National ID Card</button>' +
+          '<button type="button" data-id="residence">Residence Permit</button>' +
+          "</div>" +
+          '<label>Government ID Number</label><input id="k-id-number" placeholder="Enter your ID number" value="' +
+          (d.idNumber || "") +
+          '">' +
+          '<div class="h3">3. UPLOAD ID IMAGES</div>' +
+          '<div class="drops">' +
+          '<div class="dropz" id="z-front">Front of ID<br><small>PNG, JPG · Max 5MB</small></div>' +
+          '<div class="dropz" id="z-back">Back of ID<br><small>PNG, JPG · Max 5MB</small></div>' +
+          "</div>" +
+          '<input type="file" id="f-front" accept="image/*" style="display:none">' +
+          '<input type="file" id="f-back" accept="image/*" style="display:none">' +
+          '<p class="lead">Make sure all text and photo are clearly visible. Do not crop important details.</p>' +
+          '<div class="rowbtns"><button class="go" type="button" id="k-go">Submit for Verification</button><button class="ghost" type="button" id="k-back">Back to Settings</button></div>' +
+          '<p class="err" id="s-err"></p>' +
+          '<p class="lead">Your documents are encrypted and used only for identity verification.</p>';
+        var natSel = document.getElementById("k-nat");
+        var ccSel = document.getElementById("k-cc");
+        WORLD.forEach(function (c) {
+          var n = document.createElement("option");
+          n.value = c[0];
+          n.textContent = c[0];
+          natSel.appendChild(n);
+          var p = document.createElement("option");
+          p.value = c[1];
+          p.textContent = c[1] + "  " + c[0];
+          ccSel.appendChild(p);
+        });
+        var startNat = d.nationality || me.country || "";
+        if (startNat) natSel.value = startNat;
+        ccSel.value = d.phoneCode || codeOf(startNat) || "+234";
+        natSel.onchange = function () {
+          ccSel.value = codeOf(this.value);
+        };
+        var idType = d.idType || "";
+        var front = d.front || "",
+          back = d.back || "";
+        var frontFile = null,
+          backFile = null;
+        if (front)
+          document.getElementById("z-front").innerHTML =
+            '<img src="' + front + '" alt="Front">';
+        if (back)
+          document.getElementById("z-back").innerHTML =
+            '<img src="' + back + '" alt="Back">';
+        document.querySelectorAll(".idpick button").forEach(function (btn) {
+          if (btn.getAttribute("data-id") === idType) btn.className = "on";
+          btn.onclick = function () {
+            if (lock) return;
+            document.querySelectorAll(".idpick button").forEach(function (x) {
+              x.className = "";
+            });
+            btn.className = "on";
+            idType = btn.getAttribute("data-id");
+          };
+        });
+        function pick(inp, zone, which) {
+          document.getElementById(zone).onclick = function () {
+            if (!lock) document.getElementById(inp).click();
+          };
+          document.getElementById(inp).onchange = function () {
+            var f = this.files && this.files[0];
+            if (!f) return;
+            var r = new FileReader();
+            r.onload = function () {
+              shrinkKyc(r.result, function (small) {
+                if (which === "front") {
+                  front = small;
+                  frontFile = f;
+                } else {
+                  back = small;
+                  backFile = f;
+                }
+                document.getElementById(zone).innerHTML =
+                  '<img src="' + small + '" alt="">';
+              });
+            };
+            r.readAsDataURL(f);
+          };
+        }
+        pick("f-front", "z-front", "front");
+        pick("f-back", "z-back", "back");
+        if (lock) {
+          b.querySelectorAll("input, select").forEach(function (el) {
+            el.disabled = true;
+          });
+          document.getElementById("k-go").textContent =
+            k === "verified" ? "Verified" : "Waiting for admin";
+          document.getElementById("k-go").disabled = true;
+        }
+        document.getElementById("k-back").onclick = function () {
+          document.getElementById("page-view").className = "panel";
+          document.getElementById("list-view").style.display = "block";
+        };
+        document.getElementById("k-go").onclick = async function () {
+          if (lock) return;
+          var err = document.getElementById("s-err");
+          var name = document.getElementById("k-name").value.trim();
+          var dob = document.getElementById("k-dob").value;
+          var nat = document.getElementById("k-nat").value;
+          var addr = document.getElementById("k-addr").value.trim();
+          var idNumber = document.getElementById("k-id-number").value.trim();
+          var phone = document.getElementById("k-phone").value.trim();
+          if (!name || !dob || !nat || !addr || !phone || !idNumber) {
+            err.textContent = "Fill all personal details";
+            return;
+          }
+          if (!idType) {
+            err.textContent = "Select an ID type";
+            return;
+          }
+          if (!front || !back) {
+            err.textContent = "Upload front and back of ID";
+            return;
+          }
+          if (!frontFile || !backFile) {
+            err.textContent = "Please select both document images again";
+            return;
+          }
+          var token = localStorage.getItem("authToken");
+          if (!token) {
+            err.textContent = "Please sign in again before submitting KYC";
+            return;
+          }
+          var serverType =
+            {
+              license: "drivers_license",
+              national: "national_id",
+              residence: "residence_permit",
+            }[idType] || idType;
+          var upload = async function (file) {
+            var form = new FormData();
+            form.append("docType", serverType);
+            form.append("document", file, file.name);
+            var response = await fetch("http://localhost:4000/api/kyc/upload", {
+              method: "POST",
+              headers: { Authorization: "Bearer " + token },
+              body: form,
+            });
+            var payload = await response.json().catch(function () {
+              return {};
+            });
+            if (!response.ok)
+              throw new Error(payload.message || "KYC document rejected");
+            return payload;
+          };
+          var submit = document.getElementById("k-go");
+          submit.disabled = true;
+          submit.textContent = "Checking documents...";
+          try {
+            var profileResponse = await fetch(
+              "http://localhost:4000/api/kyc/profile",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + token,
+                },
+                body: JSON.stringify({
+                  legalName: name,
+                  dob: dob,
+                  nationality: nat,
+                  address: addr,
+                  phoneCode: document.getElementById("k-cc").value,
+                  phone: phone,
+                  idType: serverType,
+                  idNumber: idNumber,
+                }),
+              },
+            );
+            var profilePayload = await profileResponse
+              .json()
+              .catch(function () {
+                return {};
+              });
+            if (!profileResponse.ok) {
+              throw new Error(profilePayload.message || "KYC profile rejected");
+            }
+            await upload(frontFile);
+            await upload(backFile);
+          } catch (uploadError) {
+            submit.disabled = false;
+            submit.textContent = "Submit for Verification";
+            err.textContent = uploadError.message || "KYC document rejected";
+            return;
+          }
+          reloadMe();
+          me.kyc = "pending";
+          me.kycData = {
+            legalName: name,
+            dob: dob,
+            nationality: nat,
+            address: addr,
+            phoneCode: document.getElementById("k-cc").value,
+            phone: phone,
+            idType: idType,
+            idNumber: idNumber,
+            front: front,
+            back: back,
+            at: Date.now(),
+          };
+          save(db);
+          drawKYC();
+        };
+      }
+
+      function openPage(k, title) {
+        document.getElementById("list-view").style.display = "none";
+        document.getElementById("page-view").className = "panel on";
+        document.getElementById("page-title").textContent = title;
+        if (k === "2fa") {
+          draw2FA();
+          return;
+        }
+        if (k === "kyc") {
+          drawKYC();
+          return;
+        }
+        var body = "<p>Ready.</p>";
+        if (k === "profile")
+          body =
+            "<label>Profile picture</label><img class='avatar' id='s-avatar' src='" +
+            (me.avatar || "") +
+            "'><input type='file' id='s-pic' accept='image/*'><label>Full name</label><input id='s-name' value='" +
+            (me.fullName || "") +
+            "'><label>Username</label><input id='s-user' value='" +
+            (me.username || "") +
+            "'><button class='go' type='button' id='s-save'>Save</button><p class='err' id='s-err'></p>";
+        if (k === "email")
+          body =
+            "<label>Email</label><input id='s-email' value='" +
+            (me.email || "") +
+            "'><label>Current password</label><input id='s-old' type='password'><label>New password</label><input id='s-new' type='password'><button class='go' type='button' id='s-save'>Save</button><p class='err' id='s-err'></p>";
+        if (k === "login") body = "<p>This device · Active now</p>";
+        if (k === "devices") body = "<p>This browser · Connected</p>";
+        if (k === "share") body = "<p>Data sharing is off.</p>";
+        if (k === "download")
+          body =
+            "<button class='go' type='button' id='s-save'>Download my data</button>";
+        if (k === "delete")
+          body =
+            "<p class='lead'>Remove submitted verification data from this account. This cannot be undone.</p>" +
+            "<button class='go' type='button' id='delete-kyc'>Delete KYC data</button>" +
+            "<button class='go' type='button' id='delete-401k'>Delete 401(k) data</button>" +
+            "<button class='ghost' type='button' id='s-save'>Sign out</button>" +
+            "<p class='err' id='s-err'></p>";
+        if (k === "help") body = "<p>Use Contact Live Support.</p>";
+        if (k === "live")
+          body =
+            "<label>Message</label><input id='s-msg'><button class='go' type='button' id='s-save'>Save</button><p class='err' id='s-err'></p>";
+        document.getElementById("page-body").innerHTML = body;
+        var pendingAvatar = me.avatar || "";
+        var picIn = document.getElementById("s-pic");
+        if (picIn)
+          picIn.onchange = function () {
+            var f = this.files && this.files[0];
+            if (!f) return;
+            var r = new FileReader();
+            r.onload = function () {
+              shrinkPic(r.result, function (small) {
+                pendingAvatar = small;
+                document.getElementById("s-avatar").src = small;
+              });
+            };
+            r.readAsDataURL(f);
+          };
+        var saveBtn = document.getElementById("s-save");
+        var deleteKycBtn = document.getElementById("delete-kyc");
+        var delete401kBtn = document.getElementById("delete-401k");
+        async function deleteUserData(endpoint, button, message) {
+          if (!window.confirm("Delete this submitted data permanently?")) return;
+          button.disabled = true;
+          var err = document.getElementById("s-err");
+          try {
+            var token = localStorage.getItem("authToken");
+            var response = await fetch("http://localhost:4000" + endpoint, {
+              method: "DELETE",
+              headers: { Authorization: "Bearer " + token },
+            });
+            var payload = await response.json();
+            if (!response.ok) throw new Error(payload.message || "Delete failed.");
+            err.className = "ok";
+            err.textContent = message;
+            reloadMe();
+            if (endpoint === "/api/kyc/me") me.kyc = "none";
+            save(db);
+          } catch (error) {
+            err.className = "err";
+            err.textContent = error.message;
+            button.disabled = false;
+          }
+        }
+        if (deleteKycBtn)
+          deleteKycBtn.onclick = function () {
+            deleteUserData("/api/kyc/me", deleteKycBtn, "KYC data deleted.");
+          };
+        if (delete401kBtn)
+          delete401kBtn.onclick = function () {
+            deleteUserData(
+              "/api/401k/me",
+              delete401kBtn,
+              "401(k) data deleted.",
+            );
+          };
+        if (saveBtn)
+          saveBtn.onclick = function () {
+            reloadMe();
+            var err = document.getElementById("s-err");
+            if (k === "profile") {
+              me.fullName = document.getElementById("s-name").value.trim();
+              me.username = document.getElementById("s-user").value.trim();
+              if (pendingAvatar) me.avatar = pendingAvatar;
+              save(db);
+              paintIcon();
+              document.getElementById("who-name").textContent =
+                me.fullName || me.email;
+              if (err) {
+                err.className = "ok";
+                err.textContent = "Saved";
+              }
+            }
+            if (k === "email") {
+              if (document.getElementById("s-old").value !== me.password) {
+                err.className = "err";
+                err.textContent = "Wrong password";
+                return;
+              }
+              var em = document
+                .getElementById("s-email")
+                .value.trim()
+                .toLowerCase();
+              var np = document.getElementById("s-new").value;
+              if (em) me.email = em;
+              if (np) me.password = np;
+              db.session = me.email;
+              save(db);
+              err.className = "ok";
+              err.textContent = "Saved";
+            }
+            if (k === "download") {
+              var a = document.createElement("a");
+              a.href = URL.createObjectURL(
+                new Blob([JSON.stringify(me, null, 2)]),
+              );
+              a.download = "spacex-data.json";
+              a.click();
+            }
+            if (k === "delete") {
+              db.session = null;
+              save(db);
+              window.location.href = "login.html";
+            }
+            if (k === "live") {
+              err.className = "ok";
+              err.textContent = "Saved";
+            }
+          };
+      }
+      document.querySelectorAll(".item").forEach(function (btn) {
+        btn.onclick = function () {
+          openPage(
+            btn.getAttribute("data-k"),
+            btn.childNodes[0].textContent.trim(),
+          );
+        };
+      });
+      document.getElementById("back").onclick = function () {
+        document.getElementById("page-view").className = "panel";
+        document.getElementById("list-view").style.display = "block";
+      };
+      if (location.hash === "#profile")
+        openPage("profile", "Profile Information");
+    </script>
+  </body>
+</html>

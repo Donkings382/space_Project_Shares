@@ -1,0 +1,2 @@
+prisma:query UPDATE "public"."User" SET "passwordHash" = $1, "updatedAt" = $2 WHERE ("public"."User"."email" = $3 AND 1=1) RETURNING "public"."User"."id", "public"."User"."name", "public"."User"."email", "public"."User"."username", "public"."User"."recoveryContact", "public"."User"."passwordHash", "public"."User"."role"::text, "public"."User"."isActive", "public"."User"."loginAttempts", "public"."User"."lastLoginAt", "public"."User"."createdAt", "public"."User"."updatedAt", "public"."User"."deletedAt"
+admin password reset for admin@yourdomain.com

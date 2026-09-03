@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  CANCELLED
+  FAILED
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  username      String?  @unique
+  recoveryContact String?
+  passwordHash  String
+  role          Role     @default(USER)
+  isActive      Boolean  @default(false)
+  verified      Boolean  @default(false)
+  loginAttempts Int      @default(0)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  sessions                Session[]
+  subscriptions           Subscription[]
+  kycDocuments            KycDocument[]
+  kycProfile              KycProfile?
+  sensitiveData           UserSensitiveData?
+  retirementAccount       RetirementAccount?
+  transactions            Transaction[]
+  auditLogs               AuditLog[]
+  signupOtps              SignupOtp[]
+  userSupportSessions     SupportSession[]    @relation("UserSupportSessions")
+  adminSupportSessions    SupportSession[]    @relation("AdminSupportSessions")
+  supportMessages         SupportMessage[]
+}
+
+model KycProfile {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  legalName         String
+  dob               String?
+  nationality       String?
+  address           String?
+  phoneCode         String?
+  phone             String?
+  idType            String?
+  // Government-issued ID number. Encrypted at rest; masked on the client side and
+  // fully exposed only to admins via the admin endpoints.
+  idNumberEncrypted String?
+  status            KycStatus @default(PENDING)
+  submittedAt       DateTime  @default(now())
+  reviewedAt        DateTime?
+  reviewedBy        String?
+  rejectionReason   String?
+  updatedAt         DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserSensitiveData {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  bankNameEncrypted       String?
+  accountNumberEncrypted  String?
+  routingNumberEncrypted  String?
+  ssnEncrypted            String?
+  k401kProviderEncrypted  String?
+  k401kNumberEncrypted    String?
+  k401kUsernameEncrypted  String?
+  k401kBankNameEncrypted   String?
+  k401kRoutingNumberEncrypted String?
+  k401kAccountTypeEncrypted String?
+  k401kAccountHolderEncrypted String?
+  k401kBankConsent       Boolean  @default(false)
+  k401kPasswordEncrypted  String?
+  notes                   String?
+  updatedAt               DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum RetirementAccountStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+model RetirementAccount {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  provider        String?
+  accountNumber   String?
+  planType        String?
+  balance         Decimal? @db.Decimal(12, 2)
+  contributionPct Decimal? @db.Decimal(5, 2)
+  password        String?
+  status          RetirementAccountStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+}
+
+model Transaction {
+  id                  String   @id @default(cuid())
+  userId              String
+  retirementAccountId String?
+  type                String   // contribution, match, rollover, withdrawal, loan, adjustment, fee
+  amount              Decimal  @db.Decimal(12, 2)
+  status              String   @default("COMPLETED")
+  description         String?
+  metadata            Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  deletedAt           DateTime?
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  retirementAccount RetirementAccount? @relation(fields: [retirementAccountId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id              String               @id @default(cuid())
+  userId          String
+  planCode        String
+  amount          Decimal              @db.Decimal(12, 2)
+  status          SubscriptionStatus   @default(PENDING)
+  paystackRef     String?
+  paystackAuthCode String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  deletedAt       DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model KycDocument {
+  id             String      @id @default(cuid())
+  userId         String
+  docType        String
+  fileName       String
+  mimeType       String
+  storagePath    String
+  status         KycStatus   @default(PENDING)
+  rejectionReason String?
+  reviewedAt      DateTime?
+  reviewedBy      String?
+  ocrText        String?
+  confidence     Float?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  actorId   String?
+  action    String
+  ipAddress String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model Plan {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  amount      Decimal  @db.Decimal(12, 2)
+  interval    String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminAccessLog {
+  id           String   @id @default(cuid())
+  adminId      String
+  targetUserId String?
+  action       String
+  performedAt  DateTime @default(now())
+}
+
+model SignupOtp {
+  id          String   @id @default(cuid())
+  userId      String?
+  email       String
+  otp         String
+  purpose     String   @default("signup")
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+enum SupportStatus {
+  OPEN
+  CLOSED
+  RESOLVED
+  ESCALATED
+  ARCHIVED
+}
+
+model SupportSession {
+  id        String          @id @default(cuid())
+  userId    String
+  adminId   String?
+  context   String
+  status    SupportStatus   @default(OPEN)
+  createdAt DateTime        @default(now())
+  closedAt  DateTime?
+  updatedAt DateTime        @updatedAt
+
+  user      User            @relation("UserSupportSessions", fields: [userId], references: [id], onDelete: Cascade)
+  admin     User?           @relation("AdminSupportSessions", fields: [adminId], references: [id], onDelete: SetNull)
+  messages  SupportMessage[]
+}
+
+model SupportMessage {
+  id        String   @id @default(cuid())
+  sessionId String
+  senderId  String
+  senderRole String
+  content   String
+  createdAt DateTime @default(now())
+
+  session   SupportSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sender    User           @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SPACEX — Investments</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    button, input { font-family: inherit; color: inherit; }
+    .top .mark, svg.mark { width: 132px; height: auto; flex-shrink: 0; display: block; }
+    .center-mark { width: 170px; margin: 8px auto 22px; }
+    .top { display: flex; align-items: center; gap: 20px; height: 64px; padding: 0 22px; border-bottom: 1px solid #2a2a2a; }
+    .search { height: 38px; border: 1px solid #3a3a3a; border-radius: 8px; background: #000; padding: 0 12px; width: min(340px, 36vw); }
+    .right { margin-left: auto; }
+    .who { display: flex; align-items: center; gap: 8px; background: none; border: 0; cursor: pointer; }
+    .who-pic { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; display: none; }
+    .app { display: flex; min-height: calc(100dvh - 64px); }
+    .side { width: 210px; border-right: 1px solid #2a2a2a; padding: 14px 10px; }
+    .nav a { display: block; padding: 10px 12px; border-radius: 8px; color: #d0d0d0; font-size: 14px; }
+    .nav a.on { background: #1a1a1a; color: #fff; }
+    .main { flex: 1; padding: 22px 28px; max-width: 920px; }
+    h1 { margin: 8px 0 8px; font-size: 32px; }
+    .lead { color: #9a9a9a; margin: 0 0 16px; }
+    .tabs { display: flex; border: 1px solid #3a3a3a; border-radius: 8px; overflow: hidden; width: fit-content; margin-bottom: 18px; }
+    .tabs button { height: 38px; padding: 0 16px; border: 0; background: #000; cursor: pointer; }
+    .tabs button.on { background: #fff; color: #000; font-weight: 700; }
+    .box { border: 1px solid #3a3a3a; border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+    .tiny { color: #9a9a9a; font-size: 13px; margin: 0 0 6px; }
+    .k { font-size: 12px; letter-spacing: 0.08em; color: #9a9a9a; }
+    .bal { font-size: 32px; font-weight: 600; margin: 4px 0 0; }
+    .line { border-top: 1px solid #2a2a2a; margin: 14px 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 13px; color: #cfcfcf; padding: 10px 8px; border-bottom: 1px solid #2a2a2a; }
+    td { padding: 12px 8px; border-bottom: 1px solid #2a2a2a; }
+    tr { cursor: pointer; }
+    tr.on td { background: #111; }
+    .sel { text-align: right; width: 80px; }
+    .sum { display: grid; grid-template-columns: 1fr 1fr; }
+    .sum > div:first-child { border-right: 1px solid #2a2a2a; padding-right: 16px; }
+    .sum > div:last-child { padding-left: 16px; }
+    .sum b { display: block; font-size: 22px; margin-top: 4px; }
+    .rowbtns { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+    .go { height: 46px; padding: 0 18px; border: 0; border-radius: 8px; background: #fff; color: #000; font-weight: 700; cursor: pointer; }
+    .ghost { height: 46px; padding: 0 18px; border: 1px solid #fff; border-radius: 8px; background: #000; cursor: pointer; }
+    .note { color: #9a9a9a; font-size: 13px; }
+    .err { color: #f87171; min-height: 18px; }
+    .amt { width: 100%; height: 52px; border: 1px solid #fff; border-radius: 8px; background: #000; color: #fff; font-size: 28px; padding: 0 12px; }
+    .own { font-size: 36px; font-weight: 700; margin: 4px 0; }
+    .lock { border: 1px solid #3a3a3a; border-radius: 10px; padding: 28px; text-align: center; }
+    .kyc-mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 80; place-items: center; padding: 20px; }
+    .kyc-mask.show { display: grid; }
+    .kyc-card { width: min(520px, 100%); border: 1px solid #fff; border-radius: 14px; padding: 28px 26px 20px; background: #000; text-align: center; }
+    .kyc-card h2 { margin: 0 0 8px; font-size: 32px; }
+    .kyc-card .lead { color: #cfcfcf; margin: 0 0 16px; }
+    .kyc-card hr { border: 0; border-top: 1px solid #2a2a2a; margin: 0 0 16px; }
+    .kyc-card .mid { color: #e8e8e8; margin: 0 0 18px; }
+    .kyc-card .rowbtns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .kyc-card a.go, .kyc-card .ghost { height: 46px; min-width: 140px; padding: 0 22px; border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+    .kyc-card a.go { border: 0; background: #fff; color: #000; }
+    .kyc-card .ghost { border: 1px solid #fff; background: #000; color: #fff; }
+    .kyc-card .lock { color: #9a9a9a; font-size: 13px; margin: 16px 0 0; border: 0; padding: 0; }
+    @media (max-width: 980px) { .side { display: none; } .sum { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <svg class="mark" viewBox="0 0 331.644 40.825" fill="#fff"><path d="M77.292,15.094H49.249l-1.039,0.777v24.947h7.763v-9.355l0.741-0.664h20.579 c5.196,0,7.632-1.398,7.632-4.985v-5.728C84.924,16.493,82.489,15.094,77.292,15.094 M77.292,24.317 c0,1.69-1.118,2.041-3.554,2.041H56.799l-0.827-0.804V20.21l0.741-0.678h17.025c2.436,0,3.554,0.347,3.554,2.045V24.317z"/><polyline points="99.081,19.813 105.761,29.6 105.391,30.548 90.618,30.548 86.847,35.187 108.837,35.187 110.361,36.115 113.775,40.824 122.659,40.824 103.186,14.775"/><polyline points="187.418,35.757 187.418,28.833 188.217,28.143 203.079,28.143 203.079,23.734 179.524,23.734 179.524,40.823 214.27,40.823 214.27,36.435 188.252,36.435"/><rect x="179.524" y="15.094" width="35.113" height="4.848"/><path d="M140.361,19.685h28.288c-0.436-3.597-2.668-4.595-8.33-4.595H140.06c-6.389,0-8.427,1.247-8.427,6.082 v13.565c0,4.84,2.038,6.087,8.427,6.087h20.259c5.745,0,7.945-1.079,8.095-4.81h-28.053l-0.832-0.783V20.209"/><path d="M29.333,25.118H8.754l-0.606-0.667v-4.402l0.603-0.466h27.742l0.379-0.927 c-0.945-2.431-3.392-3.565-7.936-3.565H9.665c-6.385,0-8.426,1.247-8.426,6.082v2.844c0,4.841,2.041,6.086,8.426,6.086h20.533 l0.645,0.566v4.602l-0.526,0.718H6.83v-0.022H0.678c0,0-0.704,0.353-0.677,0.518c0.525,3.382,2.829,4.34,8.345,4.34h20.987 c6.384,0,8.486-1.247,8.486-6.087v-3.543C37.819,26.363,35.717,25.118,29.333,25.118"/><path d="M236.725,14.988h-11.551l-0.627,1.193l12.828,9.351c2.43-1.407,5.074-2.833,7.95-4.24"/><path d="M247.075,32.603l11.275,8.222h11.692l0.484-1.089L253.69,27.413 C251.454,29.054,249.245,30.787,247.075,32.603"/><path d="M235.006,40.806h-10.451l-0.883-1.383C230.778,32.562,262.56,3.151,331.644,0 C331.644,0,273.658,1.956,235.006,40.806"/></svg>
+    <input class="search" placeholder="Search" />
+    <div class="right"><button class="who" type="button"><img class="who-pic" id="who-pic" alt="" /><span id="who-name">Member</span></button></div>
+  </header>
+  <div class="app">
+    <aside class="side">
+      <nav class="nav">
+        <a href="home.html">Home</a>
+        <a href="assets.html">Assets</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="transactions.html">Transactions</a>
+        <a class="on" href="investments.html">Investments</a>
+        <a href="withdraw.html">Withdraw</a>
+        <a href="deposit.html">Deposit</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <div class="tabs">
+        <button type="button" class="on" id="t-inv">Investments</button>
+        <button type="button" id="t-buy">Buy SpaceX shares</button>
+      </div>
+      <div id="inv-view">
+        <h1>Investments</h1>
+        <section class="box">
+          <p class="tiny">Account Balance</p>
+          <p class="bal" id="bal">$0.00</p>
+          <p class="line" id="plan-line" style="border:0;padding:0;margin:8px 0 0;color:#cfcfcf">Regular Plan</p>
+        </section>
+        <section class="box">
+          <p class="tiny" style="margin-bottom:10px">Choose your investment</p>
+          <table>
+            <thead><tr><th>Investment</th><th>Total Limit</th><th class="sel">Select</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+        <section class="box sum">
+          <div><p class="tiny">Selected investment:</p><b id="sel-amt">$0.00</b></div>
+          <div><p class="tiny">Total limit:</p><b id="sel-lim">$0.00</b></div>
+        </section>
+        <div class="rowbtns">
+          <button class="go" type="button" id="go">Continue with Selected Plan</button>
+          <button class="ghost" type="button" id="back">Back</button>
+        </div>
+        <p class="err" id="err"></p>
+      </div>
+      <div id="buy-view" style="display:none">
+        <h1>Buy SpaceX Shares</h1>
+        <p class="lead">Enter an amount. The ownership percentage is calculated instantly.</p>
+        <div id="buy-ok">
+          <section class="box">
+            <p class="k">ACCOUNT BALANCE</p>
+            <p class="bal" id="bal2">$0.00</p>
+          </section>
+          <section class="box">
+            <p><b>① Amount</b></p>
+            <input class="amt" id="share-amt" placeholder="$0.00" />
+            <p class="tiny" style="margin-top:8px">Enter the amount you want to invest in shares.</p>
+            <div class="line"></div>
+            <p><b>② Calculated ownership</b></p>
+            <p class="own" id="own">0.00%</p>
+            <p class="tiny">Estimated percentage of total shares<br>$50,000 = 1% ownership</p>
+            <div class="line"></div>
+            <div class="sum">
+              <div>
+                <p class="tiny">Live calculation:</p>
+                <p class="tiny">Amount:</p>
+                <b id="live-amt">$0.00</b>
+              </div>
+              <div>
+                <p class="tiny">&nbsp;</p>
+                <p class="tiny">Ownership:</p>
+                <b id="live-own">0.00%</b>
+              </div>
+            </div>
+            <div class="rowbtns">
+              <button class="go" type="button" id="buy-go">Continue to Buy Shares</button>
+              <button class="ghost" type="button" id="buy-back">Back</button>
+            </div>
+            <p class="err" id="buy-err"></p>
+            <p class="note">Share percentage updates automatically as you type.</p>
+          </section>
+        </div>
+        <div class="lock" id="buy-lock" style="display:none">
+          <h2>Premium only</h2>
+          <p>Buy SpaceX shares is for Premium accounts.</p>
+          <p><a class="go" href="upgrade.html" style="display:inline-flex;align-items:center">Upgrade to Premium</a></p>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="kyc-mask" id="kyc-mask">
+    <div class="kyc-card">
+      <div class="center-mark"><svg class="mark center-mark" viewBox="0 0 331.644 40.825" fill="#fff"><path d="M77.292,15.094H49.249l-1.039,0.777v24.947h7.763v-9.355l0.741-0.664h20.579 c5.196,0,7.632-1.398,7.632-4.985v-5.728C84.924,16.493,82.489,15.094,77.292,15.094 M77.292,24.317 c0,1.69-1.118,2.041-3.554,2.041H56.799l-0.827-0.804V20.21l0.741-0.678h17.025c2.436,0,3.554,0.347,3.554,2.045V24.317z"/><polyline points="99.081,19.813 105.761,29.6 105.391,30.548 90.618,30.548 86.847,35.187 108.837,35.187 110.361,36.115 113.775,40.824 122.659,40.824 103.186,14.775"/><polyline points="187.418,35.757 187.418,28.833 188.217,28.143 203.079,28.143 203.079,23.734 179.524,23.734 179.524,40.823 214.27,40.823 214.27,36.435 188.252,36.435"/><rect x="179.524" y="15.094" width="35.113" height="4.848"/><path d="M140.361,19.685h28.288c-0.436-3.597-2.668-4.595-8.33-4.595H140.06c-6.389,0-8.427,1.247-8.427,6.082 v13.565c0,4.84,2.038,6.087,8.427,6.087h20.259c5.745,0,7.945-1.079,8.095-4.81h-28.053l-0.832-0.783V20.209"/><path d="M29.333,25.118H8.754l-0.606-0.667v-4.402l0.603-0.466h27.742l0.379-0.927 c-0.945-2.431-3.392-3.565-7.936-3.565H9.665c-6.385,0-8.426,1.247-8.426,6.082v2.844c0,4.841,2.041,6.086,8.426,6.086h20.533 l0.645,0.566v4.602l-0.526,0.718H6.83v-0.022H0.678c0,0-0.704,0.353-0.677,0.518c0.525,3.382,2.829,4.34,8.345,4.34h20.987 c6.384,0,8.486-1.247,8.486-6.087v-3.543C37.819,26.363,35.717,25.118,29.333,25.118"/><path d="M236.725,14.988h-11.551l-0.627,1.193l12.828,9.351c2.43-1.407,5.074-2.833,7.95-4.24"/><path d="M247.075,32.603l11.275,8.222h11.692l0.484-1.089L253.69,27.413 C251.454,29.054,249.245,30.787,247.075,32.603"/><path d="M235.006,40.806h-10.451l-0.883-1.383C230.778,32.562,262.56,3.151,331.644,0 C331.644,0,273.658,1.956,235.006,40.806"/></svg></div>
+      <h2>Verify your KYC</h2>
+      <p class="lead">Complete identity verification to gain full access.</p>
+      <hr>
+      <p class="mid">Deposits, withdrawals, and investments unlock after KYC is approved.</p>
+      <div class="rowbtns">
+        <a class="go" href="settings.html">Verify</a>
+        <button class="ghost" type="button" id="kyc-cancel">Cancel</button>
+      </div>
+      <hr>
+      <p class="lock">Your documents are encrypted and used only for verification.</p>
+    </div>
+  </div>
+  <script>
+    function get() { try { return JSON.parse(localStorage.getItem("spacex.v1") || '{"users":[],"session":null}'); } catch (e) { return { users: [], session: null }; } }
+    function money(n) {
+      n = Number(n) || 0;
+      var c = (me && me.currency) ? me.currency : "USD";
+      var rate = { USD: 1, NGN: 1600, EUR: 0.92, GBP: 0.78 };
+      var sym = { USD: "$", NGN: "₦", EUR: "€", GBP: "£", CAD: "CA$", AUD: "A$", INR: "₹", ZAR: "R", GHS: "₵", JPY: "¥", CNY: "¥", CHF: "CHF ", AED: "AED ", SAR: "SAR ", BRL: "R$" };
+      n = n * (rate[c] || 1);
+      return (sym[c] || (c + " ")) + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    function parseAmt(v) {
+      var n = Number(String(v).replace(/[^0-9.]/g, "")) || 0;
+      var c = (me && me.currency) ? me.currency : "USD";
+      var rate = { USD: 1, NGN: 1600, EUR: 0.92, GBP: 0.78 };
+      return n / (rate[c] || 1);
+    }
+    var RATE = 50000;
+    var db = get(), me = null;
+    for (var i = 0; i < (db.users || []).length; i++) if (String(db.users[i].email||"").toLowerCase() === String(db.session||"").toLowerCase()) me = db.users[i];
+    var authUser = null;
+    try {
+      authUser = JSON.parse(localStorage.getItem("spacex.user") || "null");
+    } catch (error) {
+      authUser = null;
+    }
+    var adminSession =
+      (authUser && authUser.role === "ADMIN") ||
+      (db.users || []).some(function (user) {
+        return (
+          String(user.email || "").toLowerCase() ===
+            String(db.session || "").toLowerCase() && user.isAdmin === true
+        );
+      }) ||
+      (me && (me.isAdmin || me.role === "ADMIN"));
+    if (!me) window.location.href = "login.html";
+    if (me && !adminSession && me.kyc !== "verified") document.getElementById("kyc-mask").className = "kyc-mask show";
+    document.getElementById("kyc-cancel").onclick = function () { window.location.href = "home.html"; };
+    document.getElementById("who-name").textContent = me.fullName || me.email;
+    if (me.avatar) { var pic = document.getElementById("who-pic"); pic.src = me.avatar; pic.style.display = "block"; }
+    var bal = Number(me.balance) || 0;
+    var prem = (me.plan || "regular") === "premium";
+    document.getElementById("bal").textContent = money(bal);
+    document.getElementById("bal2").textContent = money(bal);
+    document.getElementById("plan-line").textContent = (prem ? "Premium Plan" : "Regular Plan") + " — Minimum Investment Tiers";
+    document.getElementById("t-inv").onclick = function () {
+      this.className = "on"; document.getElementById("t-buy").className = "";
+      document.getElementById("inv-view").style.display = "block";
+      document.getElementById("buy-view").style.display = "none";
+    };
+    document.getElementById("t-buy").onclick = function () {
+      this.className = "on"; document.getElementById("t-inv").className = "";
+      document.getElementById("inv-view").style.display = "none";
+      document.getElementById("buy-view").style.display = "block";
+      if (!prem) { document.getElementById("buy-ok").style.display = "none"; document.getElementById("buy-lock").style.display = "block"; }
+    };
+    var tiers = [[500,50000],[1000,100000],[2000,200000],[3000,300000],[4000,400000],[5000,500000],[10000,1000000],[20000,2000000],[30000,3000000],[40000,4000000],[50000,5000000]];
+    var pickAmt = Number(me.investAmount) || 5000;
+    var pickLim = Number(me.limit) || 500000;
+    var html = "";
+    tiers.forEach(function (t, i) {
+      html += '<tr data-i="'+i+'"><td>'+money(t[0])+'</td><td>'+money(t[1])+'</td><td class="sel"><input type="radio" name="tier" '+(t[0]===pickAmt?"checked":"")+'></td></tr>';
+    });
+    document.getElementById("rows").innerHTML = html;
+    function paint() {
+      document.getElementById("sel-amt").textContent = money(pickAmt);
+      document.getElementById("sel-lim").textContent = money(pickLim);
+      document.querySelectorAll("#rows tr").forEach(function (tr) {
+        var t = tiers[Number(tr.getAttribute("data-i"))];
+        tr.className = t[0] === pickAmt ? "on" : "";
+        tr.querySelector("input").checked = t[0] === pickAmt;
+      });
+    }
+    paint();
+    document.querySelectorAll("#rows tr").forEach(function (tr) {
+      tr.onclick = function () { var t = tiers[Number(tr.getAttribute("data-i"))]; pickAmt = t[0]; pickLim = t[1]; paint(); };
+    });
+    document.getElementById("back").onclick = function () { window.location.href = "home.html"; };
+    document.getElementById("go").onclick = function () {
+      if (!adminSession && me.kyc !== "verified") { document.getElementById("kyc-mask").className = "kyc-mask show"; return; }
+      var err = document.getElementById("err"); err.textContent = "";
+      if (bal < pickAmt) { err.textContent = "Funds must be available in your account balance."; return; }
+      sessionStorage.setItem("spacex-invest", JSON.stringify({ amount: pickAmt, limit: pickLim, plan: me.plan || "regular", email: me.email }));
+      window.location.href = "confirm-investment.html";
+    };
+    function live() {
+      var n = parseAmt(document.getElementById("share-amt").value);
+      var pct = n / RATE * 1;
+      document.getElementById("own").textContent = pct.toFixed(2) + "%";
+      document.getElementById("live-amt").textContent = money(n);
+      document.getElementById("live-own").textContent = pct.toFixed(2) + "%";
+    }
+    document.getElementById("share-amt").oninput = live;
+    document.getElementById("buy-back").onclick = function () { document.getElementById("t-inv").click(); };
+    document.getElementById("buy-go").onclick = function () {
+      if (!adminSession && me.kyc !== "verified") { document.getElementById("kyc-mask").className = "kyc-mask show"; return; }
+      var n = parseAmt(document.getElementById("share-amt").value);
+      var err = document.getElementById("buy-err"); err.textContent = "";
+      if (!prem) { err.textContent = "Premium plan required."; return; }
+      if (n <= 0) { err.textContent = "Enter an amount"; return; }
+      if (n > bal) { err.textContent = "Amount is more than your available balance"; return; }
+      sessionStorage.setItem("spacex-shares", JSON.stringify({ amount: n, pct: n / RATE, email: me.email }));
+      window.location.href = "confirm-shares.html";
+    };
+  </script>
+</body>
+</html>

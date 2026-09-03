@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SPACEX — Transactions</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; color: inherit; cursor: pointer; }
+    .top { display: flex; align-items: center; gap: 20px; height: 64px; padding: 0 22px; border-bottom: 1px solid #2a2a2a; }
+    .top .mark { width: 132px; display: block; }
+    .right { margin-left: auto; font-size: 14px; }
+    .app { display: flex; min-height: calc(100dvh - 64px); }
+    .side { width: 210px; border-right: 1px solid #2a2a2a; padding: 14px 10px; }
+    .nav a { display: flex; padding: 10px 12px; border-radius: 8px; color: #d0d0d0; font-size: 14px; }
+    .nav a.on { background: #1a1a1a; color: #fff; }
+    .main { flex: 1; min-width: 0; padding: 22px 28px; }
+    h1 { margin: 0 0 18px; font-size: 32px; font-weight: 700; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1px solid #3a3a3a; border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+    .tabs button { height: 44px; border: 0; background: #000; color: #cfcfcf; border-right: 1px solid #3a3a3a; font-size: 14px; }
+    .tabs button:last-child { border-right: 0; }
+    .tabs button.on { background: #141414; color: #fff; font-weight: 600; }
+    .box { border: 1px solid #3a3a3a; border-radius: 8px; overflow: hidden; }
+    .item { display: grid; grid-template-columns: 40px 1fr auto auto; gap: 14px; align-items: center; padding: 16px 18px; border-bottom: 1px solid #2a2a2a; }
+    .item:last-of-type { border-bottom: 0; }
+    .ico { width: 28px; height: 28px; }
+    .name { font-size: 16px; font-weight: 600; }
+    .date { color: #9a9a9a; font-size: 13px; margin-top: 2px; }
+    .pill { min-width: 92px; text-align: center; padding: 6px 12px; border: 1px solid #4a4a4a; border-radius: 8px; font-size: 13px; }
+    .amt { width: 110px; text-align: right; font-size: 16px; }
+    .more { display: block; width: 100%; height: 46px; border: 0; border-top: 1px solid #2a2a2a; background: #000; color: #cfcfcf; }
+    .empty { padding: 28px; color: #9a9a9a; text-align: center; }
+    @media (max-width: 980px) { .side { display: none; } .item { grid-template-columns: 32px 1fr auto; } .amt { grid-column: 3; } }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <svg class="mark" viewBox="0 0 331.644 40.825" fill="#fff"><path d="M77.292,15.094H49.249l-1.039,0.777v24.947h7.763v-9.355l0.741-0.664h20.579 c5.196,0,7.632-1.398,7.632-4.985v-5.728C84.924,16.493,82.489,15.094,77.292,15.094 M77.292,24.317 c0,1.69-1.118,2.041-3.554,2.041H56.799l-0.827-0.804V20.21l0.741-0.678h17.025c2.436,0,3.554,0.347,3.554,2.045V24.317z"/><polyline points="99.081,19.813 105.761,29.6 105.391,30.548 90.618,30.548 86.847,35.187 108.837,35.187 110.361,36.115 113.775,40.824 122.659,40.824 103.186,14.775"/><polyline points="187.418,35.757 187.418,28.833 188.217,28.143 203.079,28.143 203.079,23.734 179.524,23.734 179.524,40.823 214.27,40.823 214.27,36.435 188.252,36.435"/><rect x="179.524" y="15.094" width="35.113" height="4.848"/><path d="M140.361,19.685h28.288c-0.436-3.597-2.668-4.595-8.33-4.595H140.06c-6.389,0-8.427,1.247-8.427,6.082 v13.565c0,4.84,2.038,6.087,8.427,6.087h20.259c5.745,0,7.945-1.079,8.095-4.81h-28.053l-0.832-0.783V20.209"/><path d="M29.333,25.118H8.754l-0.606-0.667v-4.402l0.603-0.466h27.742l0.379-0.927 c-0.945-2.431-3.392-3.565-7.936-3.565H9.665c-6.385,0-8.426,1.247-8.426,6.082v2.844c0,4.841,2.041,6.086,8.426,6.086h20.533 l0.645,0.566v4.602l-0.526,0.718H6.83v-0.022H0.678c0,0-0.704,0.353-0.677,0.518c0.525,3.382,2.829,4.34,8.345,4.34h20.987 c6.384,0,8.486-1.247,8.486-6.087v-3.543C37.819,26.363,35.717,25.118,29.333,25.118"/><path d="M236.725,14.988h-11.551l-0.627,1.193l12.828,9.351c2.43-1.407,5.074-2.833,7.95-4.24"/><path d="M247.075,32.603l11.275,8.222h11.692l0.484-1.089L253.69,27.413 C251.454,29.054,249.245,30.787,247.075,32.603"/><path d="M235.006,40.806h-10.451l-0.883-1.383C230.778,32.562,262.56,3.151,331.644,0 C331.644,0,273.658,1.956,235.006,40.806"/></svg>
+    <div class="right" id="who">Member</div>
+  </header>
+  <div class="app">
+    <aside class="side">
+      <nav class="nav">
+        <a href="home.html">Home</a>
+        <a href="assets.html">Assets</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a class="on" href="transactions.html">Transactions</a>
+        <a href="investments.html">Investments</a>
+        <a href="withdraw.html">Withdraw</a>
+        <a href="link401k.html">Link 401k</a>
+        <a href="settings.html">Settings</a>
+        <a href="profile.html">Profile</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <h1>Transaction History</h1>
+      <div class="tabs">
+        <button class="on" data-tab="all" type="button">All Transactions</button>
+        <button data-tab="pending" type="button">Pending Transactions</button>
+        <button data-tab="done" type="button">Completed Transactions</button>
+      </div>
+      <div class="box">
+        <div id="list"></div>
+        <button class="more" id="more" type="button">Load more ⌄</button>
+      </div>
+    </main>
+  </div>
+  <script>
+    function get() { try { return JSON.parse(localStorage.getItem("spacex.v1") || '{"users":[],"session":null}'); } catch (e) { return { users: [], session: null }; } }
+    function money(n) {
+      n = Number(n) || 0;
+      var c = (me && me.currency) ? me.currency : "USD";
+      var rate = { USD: 1, NGN: 1600, EUR: 0.92, GBP: 0.78 };
+      var sym = { USD: "$", NGN: "₦", EUR: "€", GBP: "£", CAD: "CA$", AUD: "A$", INR: "₹", ZAR: "R", GHS: "₵", JPY: "¥", CNY: "¥", CHF: "CHF ", AED: "AED ", SAR: "SAR ", BRL: "R$" };
+      n = n * (rate[c] || 1);
+      return (sym[c] || (c + " ")) + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    function kindOf(t) {
+      if (t.kind) return t.kind;
+      if (t.type === "bank" || t.type === "wallet" || t.dest || t.status) return "withdrawal";
+      return "deposit";
+    }
+    function labelOf(k) {
+      return { withdrawal: "Withdrawal", deposit: "Deposit", revenue: "Revenue Payment", allocation: "Share Allocation", bonus: "Bonus" }[k] || "Transaction";
+    }
+    function statusOf(t) {
+      var k = kindOf(t);
+      if (t.status === "pending") return k === "deposit" ? "Processing" : "Pending";
+      if (t.status === "declined") return "Failed";
+      return k === "deposit" ? "Successful" : "Completed";
+    }
+    function icon(k) {
+      if (k === "withdrawal") return '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><path d="M12 4v12"/><path d="m7 11 5 5 5-5"/><path d="M5 19h14"/></svg>';
+      if (k === "allocation") return '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4v8h8"/></svg>';
+      if (k === "revenue") return '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 7v10M9 10h4.5a1.5 1.5 0 0 1 0 3H9h4.5a1.5 1.5 0 0 1 0 3H9"/></svg>';
+      return '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><path d="M12 20V8"/><path d="m7 13 5-5 5 5"/><path d="M5 5h14"/></svg>';
+    }
+    var db = get(), me = null;
+    for (var i = 0; i < (db.users || []).length; i++) if (String(db.users[i].email||"").toLowerCase() === String(db.session||"").toLowerCase()) me = db.users[i];
+    if (!me) window.location.href = "login.html";
+    document.getElementById("who").textContent = me.fullName || me.email;
+    var all = (me.transactions || []).concat(me.withdrawals || []);
+    all.sort(function (a, b) { return (b.at || b.id || 0) - (a.at || a.id || 0); });
+    var tab = "all", shown = 6;
+    function filtered() {
+      return all.filter(function (t) {
+        var s = statusOf(t);
+        if (tab === "pending") return s === "Pending" || s === "Processing";
+        if (tab === "done") return s === "Completed" || s === "Successful";
+        return true;
+      });
+    }
+    function draw() {
+      var rows = filtered();
+      var slice = rows.slice(0, shown);
+      if (!slice.length) {
+        document.getElementById("list").innerHTML = "<p class='empty'>No transactions yet.</p>";
+        document.getElementById("more").style.display = "none";
+        return;
+      }
+      document.getElementById("list").innerHTML = slice.map(function (t) {
+        var k = kindOf(t);
+        var st = statusOf(t);
+        var d = new Date(t.at || t.id || Date.now());
+        var ds = d.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        return '<div class="item">' + icon(k) + "<div><div class='name'>" + labelOf(k) + "</div><div class='date'>" + ds + "</div></div><span class='pill'>" + st + "</span><div class='amt'>" + money(t.amount) + "</div></div>";
+      }).join("");
+      document.getElementById("more").style.display = rows.length > shown ? "block" : "none";
+    }
+    document.querySelectorAll(".tabs button").forEach(function (b) {
+      b.onclick = function () {
+        document.querySelectorAll(".tabs button").forEach(function (x) { x.className = ""; });
+        b.className = "on";
+        tab = b.getAttribute("data-tab");
+        shown = 6;
+        draw();
+      };
+    });
+    document.getElementById("more").onclick = function () { shown += 6; draw(); };
+    draw();
+  </script>
+</body>
+</html>

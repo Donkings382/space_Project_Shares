@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPACEX — Confirm Investment</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button,
+      input {
+        font-family: inherit;
+        cursor: pointer;
+      }
+      input {
+        color: inherit;
+      }
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 28px 22px 40px;
+      }
+      .card {
+        border: 1px solid #3a3a3a;
+        border-radius: 12px;
+        padding: 28px 24px 22px;
+      }
+      .logo {
+        width: 150px;
+        display: block;
+        margin: 0 auto 22px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 34px;
+        text-align: center;
+      }
+      .lead,
+      .msg {
+        color: #cfcfcf;
+        margin: 0 0 14px;
+        text-align: center;
+        line-height: 1.5;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 0;
+        border-bottom: 1px solid #2a2a2a;
+      }
+      .row span {
+        color: #cfcfcf;
+      }
+      .note {
+        margin: 18px 0;
+        line-height: 1.5;
+      }
+      .picks {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 16px 0;
+      }
+      .pick {
+        border: 1px solid #3a3a3a;
+        border-radius: 10px;
+        padding: 16px;
+        background: #000;
+        color: #fff;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .pick.on {
+        border-color: #fff;
+      }
+      .dot {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #666;
+        border-radius: 50%;
+      }
+      .pick.on .dot {
+        border-color: #fff;
+        background: radial-gradient(circle, #fff 45%, transparent 48%);
+      }
+      .info {
+        color: #9a9a9a;
+        font-size: 13px;
+        margin: 8px 0 18px;
+      }
+      .paybox {
+        border: 1px solid #3a3a3a;
+        border-radius: 10px;
+        padding: 16px;
+        margin: 0 0 16px;
+      }
+      .paybox label {
+        display: block;
+        font-size: 13px;
+        color: #cfcfcf;
+        margin-bottom: 8px;
+      }
+      .paybox input {
+        width: 100%;
+        height: 46px;
+        border: 1px solid #3a3a3a;
+        border-radius: 8px;
+        background: #000;
+        padding: 0 12px;
+        font-size: 18px;
+        outline: none;
+      }
+      .paybox input:focus {
+        border-color: #fff;
+      }
+      .btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .ghost {
+        height: 48px;
+        border: 1px solid #fff;
+        border-radius: 8px;
+        background: #000;
+        color: #fff;
+      }
+      .go {
+        height: 48px;
+        width: 100%;
+        border: 0;
+        border-radius: 8px;
+        background: #fff;
+        color: #000;
+        font-weight: 700;
+      }
+      .lock {
+        text-align: center;
+        color: #9a9a9a;
+        font-size: 13px;
+        margin-top: 16px;
+      }
+      .err {
+        color: #f87171;
+        min-height: 18px;
+      }
+      .tick {
+        width: 72px;
+        height: 72px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 18px;
+        font-size: 32px;
+      }
+      .left {
+        text-align: left;
+      }
+      @media (max-width: 700px) {
+        .picks,
+        .btns {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <svg class="logo" viewBox="0 0 331.644 40.825" fill="#fff">
+        <path
+          d="M77.292,15.094H49.249l-1.039,0.777v24.947h7.763v-9.355l0.741-0.664h20.579 c5.196,0,7.632-1.398,7.632-4.985v-5.728C84.924,16.493,82.489,15.094,77.292,15.094 M77.292,24.317 c0,1.69-1.118,2.041-3.554,2.041H56.799l-0.827-0.804V20.21l0.741-0.678h17.025c2.436,0,3.554,0.347,3.554,2.045V24.317z"
+        />
+        <polyline
+          points="99.081,19.813 105.761,29.6 105.391,30.548 90.618,30.548 86.847,35.187 108.837,35.187 110.361,36.115 113.775,40.824 122.659,40.824 103.186,14.775"
+        />
+        <polyline
+          points="187.418,35.757 187.418,28.833 188.217,28.143 203.079,28.143 203.079,23.734 179.524,23.734 179.524,40.823 214.27,40.823 214.27,36.435 188.252,36.435"
+        />
+        <rect x="179.524" y="15.094" width="35.113" height="4.848" />
+        <path
+          d="M140.361,19.685h28.288c-0.436-3.597-2.668-4.595-8.33-4.595H140.06c-6.389,0-8.427,1.247-8.427,6.082 v13.565c0,4.84,2.038,6.087,8.427,6.087h20.259c5.745,0,7.945-1.079,8.095-4.81h-28.053l-0.832-0.783V20.209"
+        />
+        <path
+          d="M29.333,25.118H8.754l-0.606-0.667v-4.402l0.603-0.466h27.742l0.379-0.927 c-0.945-2.431-3.392-3.565-7.936-3.565H9.665c-6.385,0-8.426,1.247-8.426,6.082v2.844c0,4.841,2.041,6.086,8.426,6.086h20.533 l0.645,0.566v4.602l-0.526,0.718H6.83v-0.022H0.678c0,0-0.704,0.353-0.677,0.518c0.525,3.382,2.829,4.34,8.345,4.34h20.987 c6.384,0,8.486-1.247,8.486-6.087v-3.543C37.819,26.363,35.717,25.118,29.333,25.118"
+        />
+        <path
+          d="M236.725,14.988h-11.551l-0.627,1.193l12.828,9.351c2.43-1.407,5.074-2.833,7.95-4.24"
+        />
+        <path
+          d="M247.075,32.603l11.275,8.222h11.692l0.484-1.089L253.69,27.413 C251.454,29.054,249.245,30.787,247.075,32.603"
+        />
+        <path
+          d="M235.006,40.806h-10.451l-0.883-1.383C230.778,32.562,262.56,3.151,331.644,0 C331.644,0,273.658,1.956,235.006,40.806"
+        />
+      </svg>
+      <div id="step1">
+        <h1 class="left">Confirm Investment</h1>
+        <p class="lead left">
+          Review your investment details and select a payout schedule.
+        </p>
+        <div class="row">
+          <span>Selected Plan</span><b id="plan">Regular</b>
+        </div>
+        <div class="row">
+          <span>Investment Amount</span><b id="amt">$0.00</b>
+        </div>
+        <div class="row"><span>Total Limit</span><b id="lim">$0.00</b></div>
+        <p class="note">
+          If you confirm this investment, payouts will be issued weekly or every
+          two weeks based on your selected plan schedule.
+        </p>
+        <div class="picks">
+          <button class="pick" type="button" id="w7">
+            <span class="dot"></span> Weekly payout
+          </button>
+          <button class="pick on" type="button" id="w14">
+            <span class="dot"></span> Every two weeks (Bi-weekly)
+          </button>
+        </div>
+        <div class="paybox">
+          <label for="payout-amt"
+            >How much do you want to receive each payroll?</label
+          >
+          <input
+            id="payout-amt"
+            type="number"
+            min="1"
+            step="0.01"
+            placeholder="0.00"
+          />
+        </div>
+        <p class="info">
+          This amount will show on your Home dashboard as revenue. Payouts are
+          credited after each cycle.
+        </p>
+        <p
+          class="ok"
+          style="
+            color: #fbbf24;
+            border: 1px solid #3a2a00;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+          "
+        >
+          💬 To proceed with investment, contact our Live Support team.
+        </p>
+        <button
+          class="go"
+          type="button"
+          id="btn-livesupport"
+          style="background: #fbbf24; color: #000"
+        >
+          📞 Contact Live Support
+        </button>
+        <p class="err" id="err"></p>
+        <div class="btns">
+          <button class="ghost" type="button" id="cancel">Cancel</button>
+          <button class="go" type="button" id="ok">Confirm Investment</button>
+        </div>
+        <p class="lock">This action cannot be reversed once confirmed.</p>
+      </div>
+      <div id="done" class="card" style="display: none">
+        <div class="tick">✓</div>
+        <h1>Investment Confirmed</h1>
+        <p class="msg" id="done-msg"></p>
+        <p class="msg">
+          Payouts will be issued on your selected schedule and credited to your
+          account balance.
+        </p>
+        <div class="row"><span>Plan:</span><b id="d-plan">Regular</b></div>
+        <div class="row"><span>Amount:</span><b id="d-amt">$0.00</b></div>
+        <div class="row">
+          <span>Payout schedule:</span><b id="d-pay">Every two weeks</b>
+        </div>
+        <div class="row"><span>Each payroll:</span><b id="d-rev">$0.00</b></div>
+        <div class="row"><span>Status:</span><b>Active</b></div>
+        <button class="go" type="button" id="home" style="margin-top: 18px">
+          Back to Dashboard
+        </button>
+        <p class="lock">
+          A confirmation has been recorded in your transaction history.
+        </p>
+      </div>
+    </div>
+    <script>
+      function get() {
+        try {
+          return JSON.parse(
+            localStorage.getItem("spacex.v1") || '{"users":[],"session":null}',
+          );
+        } catch (e) {
+          return { users: [], session: null };
+        }
+      }
+      function save(d) {
+        localStorage.setItem("spacex.v1", JSON.stringify(d));
+      }
+      function money(n) {
+        n = Number(n) || 0;
+        var c = me && me.currency ? me.currency : "USD";
+        var rate = { USD: 1, NGN: 1600, EUR: 0.92, GBP: 0.78 };
+        var sym = {
+          USD: "$",
+          NGN: "₦",
+          EUR: "€",
+          GBP: "£",
+          CAD: "CA$",
+          AUD: "A$",
+          INR: "₹",
+          ZAR: "R",
+          GHS: "₵",
+          JPY: "¥",
+          CNY: "¥",
+          CHF: "CHF ",
+          AED: "AED ",
+          SAR: "SAR ",
+          BRL: "R$",
+        };
+        n = n * (rate[c] || 1);
+        return (
+          (sym[c] || c + " ") +
+          n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        );
+      }
+      var pending = null;
+      try {
+        pending = JSON.parse(sessionStorage.getItem("spacex-invest") || "null");
+      } catch (e) {}
+      if (!pending) window.location.href = "investments.html";
+      var db = get(),
+        me = null;
+      for (var i = 0; i < (db.users || []).length; i++)
+        if (
+          String(db.users[i].email || "").toLowerCase() ===
+          String(db.session || "").toLowerCase()
+        )
+          me = db.users[i];
+      if (!me) window.location.href = "login.html";
+      if (me && !(me.isAdmin || me.role === "ADMIN") && me.kyc !== "verified")
+        window.location.href = "investments.html";
+      var planName = pending.plan === "premium" ? "Premium" : "Regular";
+      document.getElementById("plan").textContent = planName;
+      document.getElementById("amt").textContent = money(pending.amount);
+      document.getElementById("lim").textContent = money(pending.limit);
+      var cycle = 14;
+      function paint() {
+        document.getElementById("w7").className =
+          "pick" + (cycle === 7 ? " on" : "");
+        document.getElementById("w14").className =
+          "pick" + (cycle === 14 ? " on" : "");
+      }
+      document.getElementById("w7").onclick = function () {
+        cycle = 7;
+        paint();
+      };
+      document.getElementById("w14").onclick = function () {
+        cycle = 14;
+        paint();
+      };
+      document.getElementById("cancel").onclick = function () {
+        window.location.href = "investments.html";
+      };
+      document.getElementById("home").onclick = function () {
+        window.location.href = "home.html";
+      };
+      document.getElementById("ok").onclick = function () {
+        // PAYMENT API REQUIRED: replace local balance mutation with a server-side ledger/payment confirmation.
+        document.getElementById("err").textContent =
+          "Authentic payments are not configured yet.";
+        return;
+        /*
+      var payAmt = Number(document.getElementById("payout-amt").value);
+      var err = document.getElementById("err");
+      err.textContent = "";
+      if (!payAmt || payAmt <= 0) { err.textContent = "Enter how much you want to receive each payroll"; return; }
+      db = get();
+      for (var i = 0; i < db.users.length; i++) {
+        if (String(db.users[i].email||"").toLowerCase() !== String(me.email).toLowerCase()) continue;
+        var u = db.users[i];
+        if ((Number(u.balance) || 0) < Number(pending.amount)) {
+          err.textContent = "Funds must be available in your account balance.";
+          return;
+        }
+        u.balance = (Number(u.balance) || 0) - Number(pending.amount);
+        u.investAmount = (Number(u.investAmount) || 0) + Number(pending.amount);
+        u.limit = Number(pending.limit);
+        u.payCycle = cycle;
+        u.weeklyRevenue = payAmt;
+        var d = new Date();
+        d.setDate(d.getDate() + cycle);
+        u.nextPayment = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+        u.transactions = u.transactions || [];
+        u.transactions.push({ id: Date.now(), at: Date.now(), amount: Number(pending.amount), kind: "investment", status: "accepted" });
+      }
+      save(db);
+      sessionStorage.removeItem("spacex-invest");
+      document.getElementById("step1").style.display = "none";
+      document.getElementById("done").style.display = "block";
+      document.getElementById("done-msg").textContent = "Your " + planName + " plan investment of " + money(pending.amount) + " has been successfully processed.";
+      document.getElementById("d-plan").textContent = planName;
+      document.getElementById("d-amt").textContent = money(pending.amount);
+      document.getElementById("d-pay").textContent = cycle === 7 ? "Weekly" : "Every two weeks";
+      document.getElementById("d-rev").textContent = money(payAmt);
+      */
+      };
+      document.getElementById("btn-livesupport").onclick = function () {
+        if (window.openLiveChat) window.openLiveChat();
+        else window.__openLiveChatRequested = true;
+      };
+      function loadChatMessages(sessionId) {
+        var token = localStorage.getItem("authToken");
+        fetch(
+          "http://localhost:4000/api/support/sessions/" +
+            sessionId +
+            "/messages",
+          {
+            headers: { Authorization: "Bearer " + token },
+          },
+        )
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (data) {
+            var messages = data.messages || [];
+            var html = "";
+            messages.forEach(function (msg) {
+              var isUser = msg.senderRole === "USER";
+              var bgColor = isUser ? "#1a2e4a" : "#2a3a1a";
+              var align = isUser ? "flex-end" : "flex-start";
+              html +=
+                '<div style="display:flex;justify-content:' +
+                align +
+                ';margin-bottom:8px;"><div style="background:' +
+                bgColor +
+                ';border-radius:8px;padding:8px 12px;max-width:70%;"><div class="muted" style="font-size:10px;margin-bottom:2px;">' +
+                (isUser ? "You" : "Support") +
+                "</div>" +
+                msg.content +
+                "</div></div>";
+            });
+            document.getElementById("chat-messages").innerHTML = html;
+            document.getElementById("chat-messages").scrollTop =
+              document.getElementById("chat-messages").scrollHeight;
+          });
+      }
+    </script>
+    <script>
+      // Load the unified live chat loader used on deposit/upgrade pages
+      (function () {
+        var s = document.createElement("script");
+        s.src = "livechat-loader.js";
+        s.defer = true;
+        document.body.appendChild(s);
+      })();
+    </script>
+  </body>
+</html>

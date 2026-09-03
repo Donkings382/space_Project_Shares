@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SPACEX — Portfolio</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; color: inherit; }
+    .top { display: flex; align-items: center; gap: 20px; height: 64px; padding: 0 22px; border-bottom: 1px solid #2a2a2a; }
+    .top .mark { width: 132px; flex-shrink: 0; display: block; }
+    .search-wrap { position: relative; width: min(340px, 36vw); }
+    .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888; }
+    .search { width: 100%; height: 38px; border: 1px solid #3a3a3a; border-radius: 8px; background: #000; color: #fff; padding: 0 12px 0 36px; font-size: 14px; outline: none; }
+    .right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+    .who { display: flex; align-items: center; gap: 8px; font-size: 14px; background: none; border: 0; }
+    .who-pic { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; display: none; }
+    .split { width: 1px; height: 22px; background: #3a3a3a; }
+    .bell { background: none; border: 0; padding: 4px; }
+    .drop { display: none; position: absolute; right: 0; top: 40px; width: 240px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 8px; z-index: 30; }
+    .wrap { position: relative; }
+    .wrap.open .drop { display: block; }
+    .app { display: flex; min-height: calc(100dvh - 64px); }
+    .side { width: 210px; flex-shrink: 0; border-right: 1px solid #2a2a2a; padding: 14px 10px; }
+    .nav a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: #d0d0d0; font-size: 14px; margin-bottom: 2px; }
+    .nav a.on { background: #1a1a1a; color: #fff; }
+    .nav svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .main { flex: 1; min-width: 0; padding: 22px 24px 40px; }
+    h1 { margin: 0 0 14px; font-size: 34px; }
+    h2 { margin: 0 0 12px; font-size: 20px; }
+    .kpis { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .box { border: 1px solid #3a3a3a; border-radius: 10px; padding: 16px 18px; }
+    .tiny { color: #cfcfcf; margin: 0 0 8px; font-size: 14px; }
+    .kpi { font-size: 32px; font-weight: 700; margin: 0; }
+    .chart { margin-bottom: 14px; }
+    .chart svg { width: 100%; height: 240px; display: block; }
+    .hold { display: grid; grid-template-columns: 1.6fr 0.7fr; gap: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid #2a2a2a; }
+    th { color: #9a9a9a; font-weight: 600; }
+    .share { text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 220px; }
+    .share .big { font-size: 42px; font-weight: 700; margin: 8px 0; }
+    .line { width: 80px; height: 1px; background: #fff; margin: 10px auto; }
+    .muted { color: #9a9a9a; }
+    @media (max-width: 980px) { .side { display: none; } .kpis, .hold { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <svg class="mark" viewBox="0 0 331.644 40.825" fill="#fff"><path d="M77.292,15.094H49.249l-1.039,0.777v24.947h7.763v-9.355l0.741-0.664h20.579 c5.196,0,7.632-1.398,7.632-4.985v-5.728C84.924,16.493,82.489,15.094,77.292,15.094 M77.292,24.317 c0,1.69-1.118,2.041-3.554,2.041H56.799l-0.827-0.804V20.21l0.741-0.678h17.025c2.436,0,3.554,0.347,3.554,2.045V24.317z"/><polyline points="99.081,19.813 105.761,29.6 105.391,30.548 90.618,30.548 86.847,35.187 108.837,35.187 110.361,36.115 113.775,40.824 122.659,40.824 103.186,14.775"/><polyline points="187.418,35.757 187.418,28.833 188.217,28.143 203.079,28.143 203.079,23.734 179.524,23.734 179.524,40.823 214.27,40.823 214.27,36.435 188.252,36.435"/><rect x="179.524" y="15.094" width="35.113" height="4.848"/><path d="M140.361,19.685h28.288c-0.436-3.597-2.668-4.595-8.33-4.595H140.06c-6.389,0-8.427,1.247-8.427,6.082 v13.565c0,4.84,2.038,6.087,8.427,6.087h20.259c5.745,0,7.945-1.079,8.095-4.81h-28.053l-0.832-0.783V20.209"/><path d="M29.333,25.118H8.754l-0.606-0.667v-4.402l0.603-0.466h27.742l0.379-0.927 c-0.945-2.431-3.392-3.565-7.936-3.565H9.665c-6.385,0-8.426,1.247-8.426,6.082v2.844c0,4.841,2.041,6.086,8.426,6.086h20.533 l0.645,0.566v4.602l-0.526,0.718H6.83v-0.022H0.678c0,0-0.704,0.353-0.677,0.518c0.525,3.382,2.829,4.34,8.345,4.34h20.987 c6.384,0,8.486-1.247,8.486-6.087v-3.543C37.819,26.363,35.717,25.118,29.333,25.118"/><path d="M236.725,14.988h-11.551l-0.627,1.193l12.828,9.351c2.43-1.407,5.074-2.833,7.95-4.24"/><path d="M247.075,32.603l11.275,8.222h11.692l0.484-1.089L253.69,27.413 C251.454,29.054,249.245,30.787,247.075,32.603"/><path d="M235.006,40.806h-10.451l-0.883-1.383C230.778,32.562,262.56,3.151,331.644,0 C331.644,0,273.658,1.956,235.006,40.806"/></svg>
+    <div class="search-wrap">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="5"/><path d="M11 11l4 4"/></svg>
+      <input class="search" placeholder="Search" />
+    </div>
+    <div class="right">
+      <div class="wrap" id="user-wrap">
+        <button class="who" type="button" id="user-btn">
+          <img class="who-pic" id="who-pic" alt="" />
+          <svg id="who-svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="9"/><circle cx="11" cy="9" r="3"/><path d="M6.2 17c1.4-2.2 8.2-2.2 9.6 0"/></svg>
+          <span id="who-name">User</span>
+        </button>
+        <div class="drop">
+          <a href="settings.html#profile" style="display:block;padding:8px 10px">Profile</a>
+          <a href="settings.html" style="display:block;padding:8px 10px">Settings</a>
+          <a href="login.html" id="signout" style="display:block;padding:8px 10px">Sign out</a>
+        </div>
+      </div>
+      <span class="split"></span>
+      <div class="wrap" id="bell-wrap">
+        <button class="bell" type="button" id="bell-btn"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M16 14H4l1.6-2V8a4.4 4.4 0 1 1 8.8 0v4L16 14Z"/><path d="M8.5 16.2a2.2 2.2 0 0 0 3 0"/></svg></button>
+        <div class="drop">No new notifications</div>
+      </div>
+    </div>
+  </header>
+  <div class="app">
+    <aside class="side">
+      <nav class="nav">
+        <a href="home.html">Home</a>
+        <a href="assets.html">Assets</a>
+        <a class="on" href="portfolio.html">Portfolio</a>
+        <a href="transactions.html">Transactions</a>
+        <a href="investments.html">Investments</a>
+        <a href="withdraw.html">Withdraw</a>
+        <a href="deposit.html">Deposit</a>
+        <a href="link401k.html">Link 401k</a>
+        <a href="settings.html">Settings</a>
+        <a href="settings.html#profile">Profile</a>
+        <a href="admin.html" id="admin-link" style="display:none">Admin</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <h1>Portfolio</h1>
+      <div class="kpis">
+        <div class="box"><p class="tiny">Total Portfolio Value</p><p class="kpi" id="val">$0.00</p></div>
+        <div class="box" style="text-align:center"><p class="tiny">Total Shares</p><p class="kpi" id="shares">0%</p></div>
+        <div class="box" style="text-align:center"><p class="tiny">Next Payout</p><p class="kpi" id="payout">—</p></div>
+      </div>
+      <div class="box chart">
+        <h2>Portfolio Performance</h2>
+        <svg id="chart" viewBox="0 0 700 240" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="hold">
+        <div class="box" style="padding:0">
+          <h2 style="padding:16px 18px 0">Holdings</h2>
+          <table>
+            <thead><tr><th>Asset</th><th>Allocation</th><th>Value</th><th>Status</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="box share">
+          <h2>Share Allocation</h2>
+          <div class="tiny">Total Shares</div>
+          <div class="big" id="share-big">0%</div>
+          <div class="line"></div>
+          <div class="muted">of total share allocation</div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    function get() { try { return JSON.parse(localStorage.getItem("spacex.v1") || '{"users":[],"session":null}'); } catch (e) { return { users: [], session: null }; } }
+    function money(n) {
+      n = Number(n) || 0;
+      var c = (me && me.currency) ? me.currency : "USD";
+      var rate = { USD: 1, NGN: 1600, EUR: 0.92, GBP: 0.78 };
+      var sym = { USD: "$", NGN: "₦", EUR: "€", GBP: "£", CAD: "CA$", AUD: "A$", INR: "₹", ZAR: "R", GHS: "₵", JPY: "¥", CNY: "¥", CHF: "CHF ", AED: "AED ", SAR: "SAR ", BRL: "R$" };
+      n = n * (rate[c] || 1);
+      return (sym[c] || (c + " ")) + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    function pct(n) { n = Number(n) || 0; return (Math.round(n * 10) / 10) + "%"; }
+    var db = get(), me = null;
+    for (var i = 0; i < (db.users || []).length; i++) if (String(db.users[i].email||"").toLowerCase() === String(db.session||"").toLowerCase()) me = db.users[i];
+    if (!me) window.location.href = "login.html";
+    document.getElementById("who-name").textContent = me.fullName || me.username || me.email;
+    if (me.avatar) { document.getElementById("who-pic").src = me.avatar; document.getElementById("who-pic").style.display = "block"; document.getElementById("who-svg").style.display = "none"; }
+    if (me.isAdmin) document.getElementById("admin-link").style.display = "flex";
+    document.getElementById("user-btn").onclick = function () { document.getElementById("user-wrap").classList.toggle("open"); };
+    document.getElementById("bell-btn").onclick = function () { document.getElementById("bell-wrap").classList.toggle("open"); };
+    document.getElementById("signout").onclick = function (e) { e.preventDefault(); db = get(); db.session = null; localStorage.setItem("spacex.v1", JSON.stringify(db)); window.location.href = "login.html"; };
+    var cash = Number(me.balance) || 0;
+    var inv = Number(me.investAmount) || 0;
+    var k = me.k401 && me.k401.status !== "declined" ? (Number(me.k401.amount) || 0) : 0;
+    var linked = !!(me.k401 && me.k401.status !== "declined");
+    var total = cash + inv + k;
+    var share = Math.max(0, Math.min(100, Number(me.sharePct) || 0));
+    document.getElementById("val").textContent = money(total);
+    document.getElementById("shares").textContent = pct(share);
+    document.getElementById("share-big").textContent = pct(share);
+    document.getElementById("payout").textContent = me.nextPayment || "—";
+    function alloc(part) { return total > 0 ? (part / total) * 100 : 0; }
+    var html = "";
+    html += "<tr><td>SpaceX Investment</td><td>"+pct(alloc(inv))+"</td><td>"+money(inv)+"</td><td>"+(inv>0?"Active":"Inactive")+"</td></tr>";
+    html += "<tr><td>Cash Balance</td><td>"+pct(alloc(cash))+"</td><td>"+money(cash)+"</td><td>Available</td></tr>";
+    html += "<tr><td>401(k) Link</td><td>"+pct(alloc(k))+"</td><td>"+money(k)+"</td><td>"+(linked?"Linked":"Not linked")+"</td></tr>";
+    document.getElementById("rows").innerHTML = html;
+    var end = share;
+    if (total > 0) end = Math.min(100, Math.max(share, 6 + Math.min(72, Math.log10(total + 1) * 18)));
+    var pts = [0, end*0.18, end*0.38, end*0.58, end*0.8, end];
+    var labels = [];
+    var now = new Date();
+    for (var w = 5; w >= 0; w--) {
+      var d = new Date(now.getTime() - w * 7 * 86400000);
+      labels.push(["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()] + " " + d.getDate());
+    }
+    var left = 48, right = 680, top = 18, bot = 190;
+    function x(i) { return left + i * (right - left) / 5; }
+    function y(v) { return bot - (v / 100) * (bot - top); }
+    var grid = "", line = "", dots = "", xl = "", yl = "";
+    [0,25,50,75,100].forEach(function (v) {
+      var yy = y(v);
+      grid += '<line x1="'+left+'" y1="'+yy+'" x2="'+right+'" y2="'+yy+'" stroke="#2a2a2a" stroke-dasharray="3 6"/>';
+      yl += '<text x="'+(left-8)+'" y="'+(yy+4)+'" fill="#9a9a9a" font-size="11" text-anchor="end">'+v+'%</text>';
+    });
+    var path = "";
+    pts.forEach(function (v, i) {
+      var xx = x(i), yy = y(v);
+      path += (i ? " L " : "M ") + xx + " " + yy;
+      dots += '<circle cx="'+xx+'" cy="'+yy+'" r="4.5" fill="#000" stroke="#fff" stroke-width="2"/>';
+      xl += '<text x="'+xx+'" y="218" fill="#9a9a9a" font-size="12" text-anchor="middle">'+labels[i]+'</text>';
+    });
+    document.getElementById("chart").innerHTML = grid + yl + '<line x1="'+left+'" y1="'+top+'" x2="'+left+'" y2="'+bot+'" stroke="#555"/>' + '<path d="'+path+'" fill="none" stroke="#fff" stroke-width="2"/>' + dots + xl;
+  </script>
+</body>
+</html>

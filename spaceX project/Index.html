@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SPACEX</title>
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    html, body { margin: 0; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    .nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 22px; height: 72px; padding: 0 36px; background: rgba(0,0,0,.78); border-bottom: 1px solid #1c1c1c; backdrop-filter: blur(12px); }
+    .nav .mark { width: 132px; height: auto; display: block; }
+    .nav .links { display: flex; gap: 26px; margin-left: auto; font-size: 12px; letter-spacing: .18em; color: #d8d8d8; }
+    .nav .login { font-size: 12px; letter-spacing: .16em; }
+    .nav .cta { height: 36px; padding: 0 16px; border: 1px solid #fff; display: inline-flex; align-items: center; font-size: 12px; letter-spacing: .16em; font-weight: 700; }
+    .hero { position: relative; min-height: 100dvh; overflow: hidden; display: grid; align-items: end; padding: 0 8vw 90px; }
+    .hero video, .hero .poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; animation: drift 28s ease-in-out infinite alternate; }
+    .hero .shade { position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.28) 55%, rgba(0,0,0,.18) 100%), linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.55) 100%); }
+    .hero .copy { position: relative; z-index: 2; max-width: 720px; animation: rise 1.1s ease both; }
+    .hero h1 { margin: 0 0 16px; font-size: clamp(44px, 7.4vw, 92px); line-height: .9; letter-spacing: -.03em; font-weight: 800; }
+    .hero p { margin: 0 0 28px; max-width: 520px; color: #ddd; font-size: 18px; line-height: 1.5; }
+    @keyframes drift { from { transform: scale(1.04); } to { transform: scale(1.14); } }
+    @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-width: 180px; height: 52px; padding: 0 26px; background: #fff; color: #000; font-weight: 800; letter-spacing: .16em; font-size: 13px; }
+    .btn.ghost { background: transparent; color: #fff; border: 1px solid #fff; }
+    .rowbtns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .strip { display: flex; justify-content: center; gap: 22px; flex-wrap: wrap; padding: 16px 20px; border-bottom: 1px solid #222; font-size: 12px; letter-spacing: .2em; color: #bdbdbd; }
+    section { padding: 88px 8vw; border-bottom: 1px solid #1d1d1d; }
+    .k { font-size: 12px; letter-spacing: .22em; color: #9a9a9a; margin: 0 0 12px; }
+    h2 { margin: 0 0 16px; font-size: clamp(32px, 5vw, 56px); line-height: .95; letter-spacing: -.02em; }
+    .split { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
+    .copy { color: #cfcfcf; font-size: 17px; line-height: 1.65; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 48px; }
+    .stats b { display: block; font-size: 26px; margin-bottom: 6px; }
+    .stats span { color: #9a9a9a; font-size: 12px; letter-spacing: .08em; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .card { min-height: 300px; padding: 22px; border: 1px solid #2a2a2a; display: flex; flex-direction: column; justify-content: flex-end; background-size: cover; background-position: center; }
+    .card.a { background-image: linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.82)), url("https://images.unsplash.com/photo-1516849841032-87cece23f254?auto=format&fit=crop&w=1200&q=80"); }
+    .card.b { background-image: linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.86)), url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80"); }
+    .card.c { background-image: linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.88)), url("https://images.unsplash.com/photo-1457364986300-537654334959?auto=format&fit=crop&w=1200&q=80"); }
+    .card h3 { margin: 0 0 6px; letter-spacing: .1em; }
+    .card p { margin: 0; color: #d2d2d2; font-size: 14px; }
+    .list { margin: 0; padding: 0; list-style: none; }
+    .list li { padding: 16px 0; border-top: 1px solid #222; color: #d4d4d4; }
+    .list b { display: block; color: #fff; margin-bottom: 4px; letter-spacing: .06em; }
+    .cta-band { padding: 72px 8vw; text-align: center; }
+    .cta-band p { color: #bdbdbd; margin: 0 0 24px; }
+    .cta-band .btn { min-width: min(920px, 100%); height: 64px; font-size: 16px; }
+    .shot { padding: 0; border-bottom: 0; }
+    .shot .pic { height: 62vh; min-height: 420px; background: #000 center/cover no-repeat; }
+    .shot.tech .pic { background-image: url("https://images.unsplash.com/photo-1516849841032-87cece23f254?auto=format&fit=crop&w=2000&q=80"); }
+    .shot.ai .pic { background-image: url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=2000&q=80"); }
+    .shot .txt { padding: 48px 8vw 70px; max-width: 760px; }
+    .shot h2 { margin: 0 0 16px; font-size: clamp(34px, 6vw, 58px); line-height: .95; }
+    .shot p { margin: 0; color: #cfcfcf; font-size: 18px; line-height: 1.55; max-width: 620px; }
+    footer { padding: 22px 8vw 28px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; color: #8a8a8a; font-size: 12px; letter-spacing: .16em; }
+    @media (max-width: 980px) { .nav .links { display: none; } .split, .cards, .stats { grid-template-columns: 1fr; } .hero, section, .cta-band { padding-left: 22px; padding-right: 22px; } }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <a href="index.html"><svg class="mark" viewBox="0 0 331.644 40.825" fill="#fff"><path d="M77.292,15.094H49.249l-1.039,0.777v24.947h7.763v-9.355l0.741-0.664h20.579 c5.196,0,7.632-1.398,7.632-4.985v-5.728C84.924,16.493,82.489,15.094,77.292,15.094 M77.292,24.317 c0,1.69-1.118,2.041-3.554,2.041H56.799l-0.827-0.804V20.21l0.741-0.678h17.025c2.436,0,3.554,0.347,3.554,2.045V24.317z"/><polyline points="99.081,19.813 105.761,29.6 105.391,30.548 90.618,30.548 86.847,35.187 108.837,35.187 110.361,36.115 113.775,40.824 122.659,40.824 103.186,14.775"/><polyline points="187.418,35.757 187.418,28.833 188.217,28.143 203.079,28.143 203.079,23.734 179.524,23.734 179.524,40.823 214.27,40.823 214.27,36.435 188.252,36.435"/><rect x="179.524" y="15.094" width="35.113" height="4.848"/><path d="M140.361,19.685h28.288c-0.436-3.597-2.668-4.595-8.33-4.595H140.06c-6.389,0-8.427,1.247-8.427,6.082 v13.565c0,4.84,2.038,6.087,8.427,6.087h20.259c5.745,0,7.945-1.079,8.095-4.81h-28.053l-0.832-0.783V20.209"/><path d="M29.333,25.118H8.754l-0.606-0.667v-4.402l0.603-0.466h27.742l0.379-0.927 c-0.945-2.431-3.392-3.565-7.936-3.565H9.665c-6.385,0-8.426,1.247-8.426,6.082v2.844c0,4.841,2.041,6.086,8.426,6.086h20.533 l0.645,0.566v4.602l-0.526,0.718H6.83v-0.022H0.678c0,0-0.704,0.353-0.677,0.518c0.525,3.382,2.829,4.34,8.345,4.34h20.987 c6.384,0,8.486-1.247,8.486-6.087v-3.543C37.819,26.363,35.717,25.118,29.333,25.118"/><path d="M236.725,14.988h-11.551l-0.627,1.193l12.828,9.351c2.43-1.407,5.074-2.833,7.95-4.24"/><path d="M247.075,32.603l11.275,8.222h11.692l0.484-1.089L253.69,27.413 C251.454,29.054,249.245,30.787,247.075,32.603"/><path d="M235.006,40.806h-10.451l-0.883-1.383C230.778,32.562,262.56,3.151,331.644,0 C331.644,0,273.658,1.956,235.006,40.806"/></svg></a>
+    <nav class="links">
+      <a href="#mission">MISSION</a>
+      <a href="#about">ABOUT</a>
+      <a href="#invest">INVEST</a>
+      <a href="#tech">TECH</a>
+      <a href="#ai">ORBITAL AI</a>
+    </nav>
+    <a class="login" href="login.html">LOGIN</a>
+    <a class="cta" href="signup.html">GET STARTED</a>
+  </header>
+
+  <section class="hero">
+    <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?auto=format&fit=crop&w=2000&q=80">
+      <source src="https://cdn.pixabay.com/video/2020/06/13/41939-431406969_large.mp4" type="video/mp4" />
+    </video>
+    <img class="poster" alt="" src="https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?auto=format&fit=crop&w=2000&q=80" style="display:none" />
+    <div class="shade"></div>
+    <div class="copy">
+      <h1>THE FUTURE IS CAPITAL IN MOTION</h1>
+      <p>A private member platform for the space economy. Allocate capital, earn on a weekly cycle, and buy shares on Premium — all from one live dashboard.</p>
+      <div class="rowbtns">
+        <a class="btn" href="signup.html">GET STARTED</a>
+        <a class="btn ghost" href="login.html">MEMBER LOGIN</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="strip"><span>INVEST</span><span>·</span><span>EARN WEEKLY</span><span>·</span><span>BUY SHARES</span><span>·</span><span>LIVE DASHBOARD</span></div>
+
+  <section id="mission">
+    <p class="k">MISSION</p>
+    <div class="split">
+      <h2>BUILD WEALTH ON THE SAME HORIZON AS THE VEHICLES THAT LEAVE EARTH.</h2>
+      <p class="copy">Regular members run weekly income. Premium members can buy share units. KYC unlocks full access.</p>
+    </div>
+    <div class="stats">
+      <div><b>Weekly</b><span>Revenue cycle</span></div>
+      <div><b>Premium</b><span>Share purchase</span></div>
+      <div><b>KYC</b><span>Verified access</span></div>
+      <div><b>Live</b><span>Portfolio view</span></div>
+    </div>
+  </section>
+
+  <section id="about">
+    <p class="k">ABOUT</p>
+    <div class="split">
+      <h2>A MEMBER PLATFORM. NOT A BROCHURE.</h2>
+      <p class="copy">Create an account, verify identity, deposit, then allocate. withdraw instantly anytime.</p>
+    </div>
+  </section>
+
+  <section id="invest">
+    <p class="k">HOW IT WORKS</p>
+    <div class="split">
+      <div>
+        <h2>INVEST. EARN WEEKLY. BUY SHARES.</h2>
+        <p class="copy">Pick Regular or Premium at signup. Fund the account. Confirm an investment and choose weekly or two-week payroll. Premium can buy shares</p>
+      </div>
+      <ul class="list">
+        <li><b>01  CREATE ACCOUNT</b></li>
+        <li><b>02  VERIFY KYC</b></li>
+        <li><b>03  DEPOSIT & ALLOCATE</b></li>
+        <li><b>04 INVEST OR BUY PREMIUM SHARES</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="shares">
+    <p class="k">ALLOCATION TRACKS</p>
+    <h2>THREE WAYS CAPITAL WORKS HERE</h2>
+    <div class="cards" style="margin-top:28px">
+      <article class="card a"><h3>INVEST</h3><p>Choose a tier. Limits and allocation post after confirm.</p></article>
+      <article class="card b"><h3>WEEKLY</h3><p>Payroll amount and next date run live on Home.</p></article>
+      <article class="card c"><h3>SHARES</h3><p>Premium members buy share units with instant math.</p></article>
+    </div>
+  </section>
+
+  <section class="shot tech" id="tech">
+    <div class="pic"></div>
+    <div class="txt">
+      <h2>REVOLUTIONIZING SPACE TECHNOLOGY</h2>
+      <p>Fully reusable vehicles are changing what it costs to reach orbit, the Moon, and Mars. Members on this platform allocate into that long horizon — weekly revenue on Regular, share units on Premium.</p>
+    </div>
+  </section>
+
+  <div class="cta-band">
+    <h2>GET STARTED</h2>
+    <p>Open an account, or sign in if you already have one.</p>
+    <a class="btn" href="signup.html">GET STARTED</a>
+  </div>
+
+  <section class="shot ai" id="ai">
+    <div class="pic"></div>
+    <div class="txt">
+      <h2>DEVELOPING ORBITAL AI COMPUTE</h2>
+      <p>Orbital compute is the next layer of the space economy. This is the last chapter on the page — then create an account and enter the member dashboard.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>SPACEX MEMBER PLATFORM</span>
+    <span><a href="login.html">LOGIN</a> · <a href="signup.html">CREATE ACCOUNT</a></span>
+  </footer>
+  <script>
+    var v = document.querySelector(".hero video");
+    var p = document.querySelector(".hero .poster");
+    if (v) {
+      v.addEventListener("error", function () { if (p) { p.style.display = "block"; v.style.display = "none"; } });
+      v.play().catch(function () { if (p) p.style.display = "block"; });
+    }
+  </script>
+</body>
+</html>

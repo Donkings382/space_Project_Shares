@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPACEX — Confirm Upgrade</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        color: inherit;
+      }
+      .wrap {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 40px 22px;
+      }
+      .card {
+        border: 1px solid #3a3a3a;
+        border-radius: 12px;
+        padding: 24px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 28px;
+      }
+      .line {
+        border-top: 1px solid #2a2a2a;
+        margin: 14px 0;
+      }
+      p {
+        color: #cfcfcf;
+        line-height: 1.5;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #2a2a2a;
+      }
+      .btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .ghost {
+        height: 48px;
+        border: 1px solid #fff;
+        border-radius: 8px;
+        background: #000;
+      }
+      .go {
+        height: 48px;
+        border: 0;
+        border-radius: 8px;
+        background: #fff;
+        color: #000;
+        font-weight: 700;
+        width: 100%;
+      }
+      .lock {
+        text-align: center;
+        color: #9a9a9a;
+        font-size: 13px;
+        margin-top: 14px;
+      }
+      .tick {
+        width: 72px;
+        height: 72px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        margin: 8px auto 16px;
+        font-size: 32px;
+      }
+      .center {
+        text-align: center;
+      }
+      .logo {
+        text-align: center;
+        letter-spacing: 0.2em;
+        font-weight: 800;
+        margin-bottom: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div id="step1" class="card">
+        <h1>Confirm Premium Upgrade</h1>
+        <div class="line"></div>
+        <p>You are about to switch from Regular to Premium.</p>
+        <p>
+          Premium includes company share access, higher profits, full wealth
+          dashboard, and priority support.
+        </p>
+        <div class="line"></div>
+        <div class="row"><span>Current plan:</span><b>Regular</b></div>
+        <div class="row"><span>New plan:</span><b>Premium</b></div>
+        <div class="row"><span>Price:</span><b>Free</b></div>
+        <div class="row">
+          <span>Status after upgrade:</span><b>Pending admin approval</b>
+        </div>
+        <div class="btns">
+          <button class="ghost" type="button" id="cancel">Cancel</button>
+          <!-- PAYMENT API REQUIRED: only enable after Paystack charge.success is verified server-side. -->
+          <button class="go" type="button" id="ok">
+            Payment integration required
+          </button>
+        </div>
+        <p class="lock">You can change plans later from Settings.</p>
+      </div>
+      <div id="step2" class="card center" style="display: none">
+        <div class="logo">SPACEX</div>
+        <div class="tick">✓</div>
+        <h1>Upgrade request sent</h1>
+        <p>
+          Your Premium upgrade is waiting for admin approval.<br />Your Regular
+          plan stays active until it is approved.
+        </p>
+        <div class="line"></div>
+        <p
+          style="
+            text-align: left;
+            color: #9a9a9a;
+            letter-spacing: 0.08em;
+            font-size: 12px;
+          "
+        >
+          SUMMARY
+        </p>
+        <div class="row"><span>Plan:</span><b>Regular</b></div>
+        <div class="row"><span>Status:</span><b>Pending approval</b></div>
+        <div class="row"><span>Price:</span><b>Free</b></div>
+        <button class="go" type="button" id="done" style="margin-top: 16px">
+          Done
+        </button>
+        <p class="lock">
+          Admin will approve or decline this from the Plans tab.
+        </p>
+      </div>
+    </div>
+    <script>
+      function get() {
+        try {
+          return JSON.parse(
+            localStorage.getItem("spacex.v1") || '{"users":[],"session":null}',
+          );
+        } catch (e) {
+          return { users: [], session: null };
+        }
+      }
+      var db = get(),
+        me = null;
+      for (var i = 0; i < (db.users || []).length; i++)
+        if (
+          String(db.users[i].email || "").toLowerCase() ===
+          String(db.session || "").toLowerCase()
+        )
+          me = db.users[i];
+      if (!me) window.location.href = "login.html";
+      document.getElementById("cancel").onclick = function () {
+        window.location.href = "upgrade.html";
+      };
+      document.getElementById("done").onclick = function () {
+        window.location.href = "home.html";
+      };
+      document.getElementById("ok").onclick = function () {
+        alert("Authentic payments are not configured yet.");
+        return;
+        /*
+      db = get();
+      for (var i = 0; i < db.users.length; i++) {
+        if (String(db.users[i].email||"").toLowerCase() !== String(me.email).toLowerCase()) continue;
+        db.users[i].planUpgrade = "pending";
+      }
+      localStorage.setItem("spacex.v1", JSON.stringify(db));
+      document.getElementById("step1").style.display = "none";
+      document.getElementById("step2").style.display = "block";
+      */
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,52 @@
+prisma:query SELECT "public"."User"."id", "public"."User"."email", "public"."User"."username", "public"."User"."role"::text, "public"."User"."isActive" FROM "public"."User" WHERE 1=1 OFFSET $1
+[
+  {
+    "id": "cmtjcm0xq0000myyb16891fcb",
+    "email": "testuser@example.com",
+    "username": null,
+    "role": "USER",
+    "isActive": true
+  },
+  {
+    "id": "cmtkma5ju0000ig3blxzvzidu",
+    "email": "donkings.izeiyamu@gmail.com",
+    "username": "testuser123",
+    "role": "USER",
+    "isActive": true
+  },
+  {
+    "id": "cmtkn4g4f0002fczl0od9uqy2",
+    "email": "donkings582@gmail.com",
+    "username": "admintester",
+    "role": "USER",
+    "isActive": true
+  },
+  {
+    "id": "cmtkpfm8i0005q08i9ktwn29b",
+    "email": "test.user.1788390335@example.com",
+    "username": "tuser_1788390335",
+    "role": "USER",
+    "isActive": true
+  },
+  {
+    "id": "cmtkpfkhv0000q08imczr6sk3",
+    "email": "test.admin.1788390335@example.com",
+    "username": "tadmin_1788390335",
+    "role": "USER",
+    "isActive": true
+  },
+  {
+    "id": "cmtkphewz000gq08icin75b2i",
+    "email": "test.user.1788390422@example.com",
+    "username": "tuser_1788390422",
+    "role": "USER",
+    "isActive": true
+  },
+  {
+    "id": "cmtjza2i00005uo4d8c7n2f2q",
+    "email": "admin@yourdomain.com",
+    "username": null,
+    "role": "ADMIN",
+    "isActive": true
+  }
+]

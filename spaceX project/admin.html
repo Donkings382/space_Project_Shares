@@ -1,0 +1,2976 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPACEX — Admin</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button,
+      input,
+      select {
+        font-family: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      .top .mark,
+      svg.mark {
+        width: 132px;
+        height: auto;
+        flex-shrink: 0;
+        display: block;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        height: 64px;
+        padding: 0 22px;
+        border-bottom: 1px solid #2a2a2a;
+      }
+      .right {
+        margin-left: auto;
+        font-size: 14px;
+      }
+      .app {
+        display: flex;
+        min-height: calc(100dvh - 64px);
+      }
+      .side {
+        width: 210px;
+        border-right: 1px solid #2a2a2a;
+        padding: 14px 10px;
+      }
+      .nav a,
+      .nav button {
+        display: flex;
+        width: 100%;
+        text-align: left;
+        padding: 10px 12px;
+        border-radius: 8px;
+        color: #d0d0d0;
+        font-size: 14px;
+        background: none;
+        border: 0;
+        margin-bottom: 2px;
+      }
+      .nav a.on,
+      .nav button.on {
+        background: #1a1a1a;
+        color: #fff;
+      }
+      .main {
+        flex: 1;
+        min-width: 0;
+        padding: 20px;
+      }
+      h1 {
+        margin: 0 0 16px;
+        font-size: 26px;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .panel {
+        border: 1px solid #2e2e2e;
+        border-radius: 12px;
+        padding: 16px;
+        background: #000;
+      }
+      .tiny {
+        color: #9a9a9a;
+        font-size: 12px;
+        margin: 0 0 4px;
+      }
+      .kpi {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 1.1fr;
+        gap: 14px;
+      }
+      .user {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid #2a2a2a;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        cursor: pointer;
+      }
+      .user.on,
+      .user:hover {
+        border-color: #fff;
+      }
+      .muted {
+        color: #8a8a8a;
+        font-size: 12px;
+      }
+      .pill {
+        display: inline-flex;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .on-p {
+        background: #fff;
+        color: #000;
+      }
+      .off-p {
+        background: #3a1515;
+        color: #f87171;
+      }
+      .wait {
+        background: #3a2a00;
+        color: #fbbf24;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: #9a9a9a;
+        margin: 10px 0 4px;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid #333;
+        border-radius: 8px;
+        background: #0a0a0a;
+        color: #fff;
+        padding: 0 10px;
+        font-family: inherit;
+      }
+      input,
+      select {
+        height: 40px;
+      }
+      textarea {
+        min-height: 72px;
+        padding: 8px 10px;
+        resize: vertical;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .btns button,
+      .act {
+        height: 36px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid #333;
+        background: #111;
+        color: #fff;
+      }
+      .primary {
+        background: #fff !important;
+        color: #000 !important;
+        border: 0 !important;
+        font-weight: 700;
+      }
+      .danger {
+        border-color: #7f1d1d !important;
+        color: #f87171 !important;
+      }
+      .find {
+        width: 100%;
+        margin-bottom: 12px;
+      }
+      .gate {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+      .card {
+        width: min(400px, 100%);
+        border: 1px solid #333;
+        border-radius: 20px;
+        padding: 32px 24px;
+      }
+      .card h1 {
+        text-align: center;
+      }
+      .card p {
+        text-align: center;
+        color: #9a9a9a;
+      }
+      .err {
+        color: #f87171;
+        font-size: 13px;
+        min-height: 18px;
+      }
+      .go {
+        width: 100%;
+        height: 48px;
+        margin-top: 16px;
+        border: 0;
+        border-radius: 12px;
+        background: #fff;
+        color: #000;
+        font-weight: 700;
+      }
+      .tx {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 0.7fr 0.8fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid #2a2a2a;
+        border-radius: 10px;
+        margin-bottom: 8px;
+      }
+      .support-tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #2a2a2a;
+        padding-bottom: 8px;
+      }
+      .support-tab {
+        padding: 6px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        background: transparent;
+        border: 1px solid transparent;
+        color: #8a8a8a;
+      }
+      .support-tab.on {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #333;
+      }
+      .chat-bubble {
+        max-width: 75%;
+        padding: 10px 14px;
+        border-radius: 14px;
+        margin-bottom: 12px;
+        font-size: 14px;
+        line-height: 1.4;
+        position: relative;
+      }
+      .chat-bubble.user {
+        background: #1a1a2e;
+        color: #e2e8f0;
+        align-self: flex-start;
+        border-bottom-left-radius: 2px;
+      }
+      .chat-bubble.admin {
+        background: #065f46;
+        color: #fff;
+        align-self: flex-end;
+        border-bottom-right-radius: 2px;
+        box-shadow: 0 4px 12px rgba(6, 95, 70, 0.2);
+      }
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 2000;
+        display: none;
+        place-items: center;
+        padding: 20px;
+      }
+      .modal {
+        background: #000;
+        border: 1px solid #333;
+        border-radius: 20px;
+        padding: 24px;
+        width: min(450px, 100%);
+      }
+      .badge {
+        background: #ef4444;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 99px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+        margin-left: auto;
+        box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
+      }
+      .nav button {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      @media (max-width: 980px) {
+        .side {
+          display: block;
+          width: 100%;
+          border-right: 0;
+          border-bottom: 1px solid #2a2a2a;
+        }
+        .nav {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 4px;
+        }
+        .nav a,
+        .nav button {
+          margin-bottom: 0;
+        }
+        .stats,
+        .layout,
+        .row,
+        .tx {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gate" class="gate">
+      <div class="card">
+        <h1>Admin login</h1>
+        <p>
+          Use the same email and password as your SpaceX account. First account
+          is admin.
+        </p>
+        <form id="admin-login-form">
+          <label for="a-email">Email</label>
+          <input id="a-email" type="email" placeholder="Admin email" required />
+          <label for="a-pass">Password</label>
+          <input id="a-pass" type="password" placeholder="Password" required />
+          <div class="err" id="a-err"></div>
+          <button class="go" type="submit" id="a-go">Enter admin</button>
+        </form>
+        <p style="margin-top: 16px">
+          <a href="login.html">Back to member login</a>
+        </p>
+      </div>
+    </div>
+    <div id="desk" style="display: none">
+      <header class="top">
+        <svg class="mark" viewBox="0 0 331.644 40.825" fill="#fff">
+          <path
+            d="M77.292,15.094H49.249l-1.039,0.777v24.947h7.763v-9.355l0.741-0.664h20.579 c5.196,0,7.632-1.398,7.632-4.985v-5.728C84.924,16.493,82.489,15.094,77.292,15.094 M77.292,24.317 c0,1.69-1.118,2.041-3.554,2.041H56.799l-0.827-0.804V20.21l0.741-0.678h17.025c2.436,0,3.554,0.347,3.554,2.045V24.317z"
+          />
+          <polyline
+            points="99.081,19.813 105.761,29.6 105.391,30.548 90.618,30.548 86.847,35.187 108.837,35.187 110.361,36.115 113.775,40.824 122.659,40.824 103.186,14.775"
+          />
+          <polyline
+            points="187.418,35.757 187.418,28.833 188.217,28.143 203.079,28.143 203.079,23.734 179.524,23.734 179.524,40.823 214.27,40.823 214.27,36.435 188.252,36.435"
+          />
+          <rect x="179.524" y="15.094" width="35.113" height="4.848" />
+          <path
+            d="M140.361,19.685h28.288c-0.436-3.597-2.668-4.595-8.33-4.595H140.06c-6.389,0-8.427,1.247-8.427,6.082 v13.565c0,4.84,2.038,6.087,8.427,6.087h20.259c5.745,0,7.945-1.079,8.095-4.81h-28.053l-0.832-0.783V20.209"
+          />
+          <path
+            d="M29.333,25.118H8.754l-0.606-0.667v-4.402l0.603-0.466h27.742l0.379-0.927 c-0.945-2.431-3.392-3.565-7.936-3.565H9.665c-6.385,0-8.426,1.247-8.426,6.082v2.844c0,4.841,2.041,6.086,8.426,6.086h20.533 l0.645,0.566v4.602l-0.526,0.718H6.83v-0.022H0.678c0,0-0.704,0.353-0.677,0.518c0.525,3.382,2.829,4.34,8.345,4.34h20.987 c6.384,0,8.486-1.247,8.486-6.087v-3.543C37.819,26.363,35.717,25.118,29.333,25.118"
+          />
+          <path
+            d="M236.725,14.988h-11.551l-0.627,1.193l12.828,9.351c2.43-1.407,5.074-2.833,7.95-4.24"
+          />
+          <path
+            d="M247.075,32.603l11.275,8.222h11.692l0.484-1.089L253.69,27.413 C251.454,29.054,249.245,30.787,247.075,32.603"
+          />
+          <path
+            d="M235.006,40.806h-10.451l-0.883-1.383C230.778,32.562,262.56,3.151,331.644,0 C331.644,0,273.658,1.956,235.006,40.806"
+          />
+        </svg>
+        <div class="right" id="who">Admin</div>
+      </header>
+      <div class="app">
+        <aside class="side">
+          <nav class="nav">
+            <a href="home.html">Home</a>
+            <button type="button" class="on" id="nav-users">Users</button>
+            <button type="button" id="nav-signin">Signin information</button>
+            <button type="button" id="nav-tx">Transactions</button>
+            <button type="button" id="nav-kyc">KYC Information</button>
+            <button type="button" id="nav-k401">401(k)</button>
+            <button type="button" id="nav-plans">Plans</button>
+            <button type="button" id="nav-support">
+              Live Support <span class="badge" id="badge-support"></span>
+            </button>
+            <button type="button" id="nav-pay">Pay details</button>
+            <a href="login.html" id="signout">Sign out</a>
+          </nav>
+        </aside>
+        <main class="main" id="view-users">
+          <h1>Admin control</h1>
+          <div class="stats">
+            <div class="panel">
+              <p class="tiny">Users</p>
+              <p class="kpi" id="s-users">0</p>
+            </div>
+            <div class="panel">
+              <p class="tiny">Active</p>
+              <p class="kpi" id="s-active">0</p>
+            </div>
+            <div class="panel">
+              <p class="tiny">Inactive</p>
+              <p class="kpi" id="s-in">0</p>
+            </div>
+            <div class="panel">
+              <p class="tiny">Total balances</p>
+              <p class="kpi" id="s-money">$0.00</p>
+            </div>
+          </div>
+          <div class="layout">
+            <div>
+              <input
+                class="find"
+                id="find"
+                placeholder="Filter by name or email"
+              />
+              <div id="list"></div>
+            </div>
+            <div class="panel" id="edit"><p class="tiny">Select a user</p></div>
+          </div>
+        </main>
+        <main class="main" id="view-signin" style="display: none">
+          <h1>Signin information</h1>
+          <p class="tiny">
+            Select a user from Users, then open this tab. Passwords are never
+            displayed in plaintext.
+          </p>
+          <div class="panel" id="signin-info">
+            <p class="muted">No user selected.</p>
+          </div>
+        </main>
+        <main class="main" id="view-tx" style="display: none">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 16px;
+            "
+          >
+            <h1 style="margin: 0">Transactions</h1>
+            <button
+              id="bulk-delete-tx"
+              class="act danger"
+              style="display: none; height: 32px"
+            >
+              Delete Selected (<span id="bulk-count">0</span>)
+            </button>
+          </div>
+          <p class="tiny" style="margin-bottom: 12px">
+            Manage all 401k transactions. Use checkboxes for bulk actions.
+          </p>
+          <div id="tx-list"></div>
+        </main>
+        <main class="main" id="view-kyc" style="display: none">
+          <h1>KYC Information</h1>
+          <p class="tiny">
+            Review submitted identity information and uploaded documents.
+          </p>
+          <div id="kyc-list"></div>
+        </main>
+        <main class="main" id="view-pay" style="display: none">
+          <h1>Pay details (private)</h1>
+          <p class="tiny" style="margin-bottom: 12px">
+            This is what users see on the deposit instructions page. Edit any
+            method, then Save.
+          </p>
+          <div class="panel" id="pay-edit"></div>
+        </main>
+        <main class="main" id="view-k401" style="display: none">
+          <h1>401(k) links</h1>
+          <p class="tiny" style="margin-bottom: 12px">
+            Review 401(k), identity, banking, and uploaded document information.
+          </p>
+          <div id="k401-list"></div>
+        </main>
+        <main class="main" id="view-plans" style="display: none">
+          <h1>Plan upgrades</h1>
+          <p class="tiny" style="margin-bottom: 12px">
+            When a user upgrades from Home, it waits here. Approve to make them
+            Premium. Decline keeps Regular.
+          </p>
+          <div id="plan-list"></div>
+        </main>
+        <main class="main" id="view-support" style="display: none">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 16px;
+            "
+          >
+            <h1 style="margin: 0">Live Support</h1>
+            <div id="support-status" style="font-size: 12px; color: #8a8a8a">
+              Connecting...
+            </div>
+          </div>
+          <p class="tiny" style="margin-bottom: 12px">
+            Chat with users about plan subscriptions. Approve subscriptions
+            directly in the chat.
+          </p>
+          <div class="layout">
+            <div>
+              <div id="support-list"></div>
+            </div>
+            <div class="panel" id="support-chat">
+              <p class="tiny">Select a support session</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div id="balance-modal" class="modal-overlay">
+      <div class="modal">
+        <h2 id="bm-title">Manage Balance</h2>
+        <p class="tiny" id="bm-user-info"></p>
+        <label>Transaction Type</label>
+        <select id="bm-type">
+          <option value="deposit">Deposit (Add funds)</option>
+          <option value="withdraw">Withdraw (Remove funds)</option>
+        </select>
+        <label>Amount ($)</label>
+        <input
+          id="bm-amount"
+          type="number"
+          step="0.01"
+          min="0.01"
+          placeholder="0.00"
+        />
+        <label>Reason</label>
+        <select id="bm-reason">
+          <option value="Adjustment">Adjustment</option>
+          <option value="Correction">Correction</option>
+          <option value="Compensation">Compensation</option>
+          <option value="Penalty">Penalty</option>
+          <option value="Fraud remediation">Fraud remediation</option>
+          <option value="Manual override">Manual override</option>
+        </select>
+        <label>Internal Note</label>
+        <textarea id="bm-note" placeholder="Detailed explanation..."></textarea>
+        <div
+          style="
+            margin-top: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+          "
+        >
+          <input
+            id="bm-confirm"
+            type="checkbox"
+            style="width: 18px; height: 18px; margin-top: 2px"
+          />
+          <label for="bm-confirm" style="margin: 0; cursor: pointer"
+            >I confirm this action does not require user consent.</label
+          >
+        </div>
+        <div class="btns">
+          <button class="primary" id="bm-submit">Execute Transaction</button>
+          <button id="bm-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="delete-modal" class="modal-overlay">
+      <div class="modal">
+        <h2 id="dm-title" style="color: #f87171">Confirm Deletion</h2>
+        <div
+          id="dm-content"
+          style="margin-bottom: 20px; line-height: 1.5"
+        ></div>
+        <p
+          class="tiny"
+          style="color: #f87171; font-weight: 700; margin-bottom: 12px"
+        >
+          This action is irreversible. All related data will be soft-deleted.
+        </p>
+        <div id="dm-verify-area">
+          <label>Type "DELETE" to confirm</label>
+          <input
+            id="dm-verify"
+            type="text"
+            placeholder="DELETE"
+            style="border-color: #7f1d1d"
+          />
+        </div>
+        <div class="btns" style="margin-top: 20px">
+          <button
+            class="primary danger"
+            id="dm-submit"
+            style="background: #7f1d1d !important; color: #fff !important"
+          >
+            Permanently Delete
+          </button>
+          <button id="dm-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script>
+      function get() {
+        try {
+          return JSON.parse(
+            localStorage.getItem("spacex.v1") || '{"users":[],"session":null}',
+          );
+        } catch (e) {
+          return { users: [], session: null };
+        }
+      }
+      function save(d) {
+        localStorage.setItem("spacex.v1", JSON.stringify(d));
+      }
+      function money(n) {
+        n = Number(n) || 0;
+        return "$" + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+      function pushNote(x, title, text) {
+        x.notes = x.notes || [];
+        x.notes.unshift({
+          id: Date.now(),
+          at: Date.now(),
+          title: title,
+          text: text || "",
+          read: false,
+        });
+        if (x.notes.length > 40) x.notes = x.notes.slice(0, 40);
+      }
+
+      function openDeleteModal(options) {
+        var modal = document.getElementById("delete-modal");
+        var title = document.getElementById("dm-title");
+        var content = document.getElementById("dm-content");
+        var verifyInput = document.getElementById("dm-verify");
+        var submitBtn = document.getElementById("dm-submit");
+        var cancelBtn = document.getElementById("dm-cancel");
+
+        title.textContent = options.title || "Confirm Deletion";
+        content.innerHTML = options.content || "Are you sure?";
+        verifyInput.value = "";
+        submitBtn.disabled = options.verify ? true : false;
+        submitBtn.textContent = options.submitText || "Permanently Delete";
+
+        if (options.verify) {
+          verifyInput.oninput = function () {
+            submitBtn.disabled = verifyInput.value !== "DELETE";
+          };
+        } else {
+          verifyInput.oninput = null;
+        }
+
+        modal.style.display = "grid";
+
+        submitBtn.onclick = function () {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Deleting...";
+          options
+            .onConfirm()
+            .then(function () {
+              modal.style.display = "none";
+            })
+            .catch(function (err) {
+              alert(err.message);
+              submitBtn.disabled = false;
+              submitBtn.textContent =
+                options.submitText || "Permanently Delete";
+            });
+        };
+
+        cancelBtn.onclick = function () {
+          modal.style.display = "none";
+        };
+      }
+
+      var db = get(),
+        me = null,
+        selected = null;
+      var socket = null;
+      var unreadSessions = new Set();
+      var sessionUnreadCounts = {};
+
+      function updateNavBadge() {
+        var total = unreadSessions.size;
+        var b = document.getElementById("badge-support");
+        if (total > 0) {
+          b.textContent = total;
+          b.style.display = "inline-flex";
+        } else {
+          b.style.display = "none";
+        }
+      }
+
+      function initSocket() {
+        if (!adminToken) return;
+        if (socket) return;
+        socket = io(API_BASE, { auth: { token: adminToken } });
+
+        socket.on("connect", function () {
+          console.log("Socket connected");
+          document.getElementById("support-status").textContent = "Connected";
+          document.getElementById("support-status").style.color = "#16a34a";
+        });
+
+        socket.on("disconnect", function () {
+          console.log("Socket disconnected");
+          document.getElementById("support-status").textContent = "Offline";
+          document.getElementById("support-status").style.color = "#ef4444";
+        });
+
+        socket.on("support:session:new", function (payload) {
+          unreadSessions.add(payload.session.id);
+          updateNavBadge();
+          if (
+            document.getElementById("view-support").style.display === "block"
+          ) {
+            drawLiveSupport();
+          }
+        });
+
+        socket.on("support:session:message", function (payload) {
+          var sid = payload.sessionId;
+          if (currentSupportSession === sid) {
+            if (activeSupportTab === "chat") {
+              drawSupportMessages(sid);
+            } else {
+              drawSupportChat(sid);
+            }
+          } else {
+            unreadSessions.add(sid);
+            sessionUnreadCounts[sid] = (sessionUnreadCounts[sid] || 0) + 1;
+            updateNavBadge();
+            if (
+              document.getElementById("view-support").style.display === "block"
+            ) {
+              drawLiveSupport();
+            }
+          }
+        });
+
+        socket.on("support:unread", function (payload) {
+          var sid = payload.sessionId;
+          var count = payload.unread;
+          if (count === 0) {
+            unreadSessions.delete(sid);
+            delete sessionUnreadCounts[sid];
+          } else {
+            unreadSessions.add(sid);
+            sessionUnreadCounts[sid] = count;
+          }
+          updateNavBadge();
+          if (
+            document.getElementById("view-support").style.display === "block"
+          ) {
+            drawLiveSupport();
+          }
+        });
+
+        socket.on("support:session:closed", function (payload) {
+          unreadSessions.delete(payload.sessionId);
+          updateNavBadge();
+          if (
+            document.getElementById("view-support").style.display === "block"
+          ) {
+            drawLiveSupport();
+          }
+        });
+      }
+
+      for (var i = 0; i < (db.users || []).length; i++)
+        if (
+          String(db.users[i].email || "").toLowerCase() ===
+          String(db.session || "").toLowerCase()
+        )
+          me = db.users[i];
+      var adminToken = localStorage.getItem("authToken");
+      var API_BASE = "http://localhost:4000";
+      function escapeHtml(value) {
+        return String(value == null ? "" : value).replace(
+          /[&<>'"]/g,
+          function (character) {
+            return {
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              "'": "&#39;",
+              '"': "&quot;",
+            }[character];
+          },
+        );
+      }
+      async function adminApi(path, options) {
+        var response = await fetch(
+          API_BASE + path,
+          Object.assign({}, options || {}, {
+            headers: Object.assign(
+              { Authorization: "Bearer " + adminToken },
+              (options && options.headers) || {},
+            ),
+          }),
+        );
+        var payload = await response.json().catch(function () {
+          return {};
+        });
+        if (!response.ok)
+          throw new Error(payload.message || "Admin request failed.");
+        return payload;
+      }
+      function showDesk() {
+        document.getElementById("gate").style.display = "none";
+        document.getElementById("desk").style.display = "block";
+        document.getElementById("who").textContent = me.fullName || "Admin";
+        initSocket();
+        adminApi("/api/admin/dashboard")
+          .then(function (data) {
+            document.getElementById("s-users").textContent = data.totalUsers;
+            document.getElementById("s-in").textContent = data.pendingKyc;
+          })
+          .catch(function (error) {
+            console.warn(error);
+          });
+        drawUsers();
+        drawTx();
+      }
+      async function verifyAdminSession() {
+        if (!adminToken) return;
+        try {
+          var response = await fetch(
+            "http://localhost:4000/api/admin/dashboard",
+            {
+              headers: { Authorization: "Bearer " + adminToken },
+            },
+          );
+          if (response.ok) showDesk();
+        } catch (error) {
+          console.warn("Unable to verify admin session", error);
+        }
+      }
+      verifyAdminSession();
+      document.getElementById("admin-login-form").onsubmit = function (e) {
+        e.preventDefault();
+        document.getElementById("a-err").textContent =
+          "Sign in through the main login page with an admin account.";
+      };
+      function setNav(on) {
+        [
+          "users",
+          "signin",
+          "tx",
+          "kyc",
+          "pay",
+          "k401",
+          "plans",
+          "support",
+        ].forEach(function (n) {
+          var btn = document.getElementById("nav-" + n);
+          var view = document.getElementById("view-" + n);
+          if (btn) btn.className = n === on ? "on" : "";
+          if (view) view.style.display = n === on ? "block" : "none";
+        });
+        if (on === "support") {
+          // Ideally clear nav badge when entering support tab if no unread messages
+          // but we'll leave it to be cleared when individual sessions are opened
+          // as per requirements.
+        }
+      }
+      document.getElementById("nav-users").onclick = function () {
+        setNav("users");
+      };
+      document.getElementById("nav-signin").onclick = function () {
+        setNav("signin");
+        var panel = document.getElementById("signin-info");
+        if (!selected || !selected.id) {
+          panel.innerHTML =
+            "<p class='muted'>Select a user from Users first.</p>";
+          return;
+        }
+        panel.innerHTML = "<p class='muted'>Loading...</p>";
+        adminApi(
+          "/api/admin/users/" +
+            encodeURIComponent(selected.id) +
+            "/signin-information",
+        )
+          .then(function (payload) {
+            var info = payload.signinInformation;
+            panel.innerHTML =
+              "<p><b>Name:</b> " +
+              escapeHtml(info.name) +
+              "</p>" +
+              "<p><b>Username:</b> " +
+              escapeHtml(info.username) +
+              "</p>" +
+              "<p><b>Email:</b> " +
+              escapeHtml(info.email) +
+              "</p>" +
+              "<p><b>Recovery contact:</b> " +
+              escapeHtml(info.recoveryContact) +
+              "</p>" +
+              "<p><b>Created:</b> " +
+              escapeHtml(info.createdAt) +
+              "</p>" +
+              "<p><b>Verification:</b> " +
+              (info.isActive ? "Verified/active" : "Pending or suspended") +
+              "</p>" +
+              "<p><b>Login attempts since success:</b> " +
+              escapeHtml(info.loginAttempts) +
+              "</p>" +
+              "<p><b>Last login:</b> " +
+              escapeHtml(info.lastLoginAt || "Never") +
+              "</p>" +
+              "<p><b>Password hash:</b> <code>" +
+              escapeHtml(info.passwordHash) +
+              "</code></p>" +
+              "<p class='muted'>Plaintext passwords are intentionally unavailable.</p>";
+          })
+          .catch(function (error) {
+            panel.innerHTML =
+              "<p class='muted'>" + escapeHtml(error.message) + "</p>";
+          });
+      };
+      document.getElementById("nav-tx").onclick = function () {
+        setNav("tx");
+        drawTx();
+      };
+      document.getElementById("nav-kyc").onclick = function () {
+        setNav("kyc");
+        drawKyc();
+      };
+      document.getElementById("nav-pay").onclick = function () {
+        setNav("pay");
+        drawPay();
+      };
+      document.getElementById("nav-k401").onclick = function () {
+        setNav("k401");
+        drawK401();
+      };
+      document.getElementById("nav-plans").onclick = function () {
+        setNav("plans");
+        drawPlans();
+      };
+      document.getElementById("nav-support").onclick = function () {
+        setNav("support");
+        drawLiveSupport();
+      };
+      var currentSupportSession = null;
+      var supportPollInterval = null;
+
+      var currentTakeoverUserId = null;
+      function openBalanceModal(uid, name, email) {
+        currentTakeoverUserId = uid;
+        document.getElementById("bm-user-info").textContent =
+          "Target: " + name + " (" + email + ")";
+        document.getElementById("bm-amount").value = "";
+        document.getElementById("bm-note").value = "";
+        document.getElementById("bm-confirm").checked = false;
+        document.getElementById("balance-modal").style.display = "grid";
+      }
+
+      document.getElementById("bm-cancel").onclick = function () {
+        document.getElementById("balance-modal").style.display = "none";
+        currentTakeoverUserId = null;
+      };
+
+      document.getElementById("bm-submit").onclick = async function () {
+        var uid = currentTakeoverUserId;
+        var type = document.getElementById("bm-type").value;
+        var amount = parseFloat(document.getElementById("bm-amount").value);
+        var reason = document.getElementById("bm-reason").value;
+        var note = document.getElementById("bm-note").value.trim();
+        var confirmed = document.getElementById("bm-confirm").checked;
+
+        if (!uid || isNaN(amount) || amount <= 0 || !note || !confirmed) {
+          alert("Please fill all fields and confirm the action.");
+          return;
+        }
+
+        var btn = document.getElementById("bm-submit");
+        btn.disabled = true;
+        btn.textContent = "Processing...";
+
+        try {
+          var path = "/api/admin/users/" + uid + "/balance/" + type;
+          var res = await adminApi(path, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount, reason, note }),
+          });
+          alert(res.message + ". New balance: " + money(res.newBalance));
+          document.getElementById("balance-modal").style.display = "none";
+          drawUsers();
+        } catch (err) {
+          alert(err.message);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Execute Transaction";
+        }
+      };
+
+      function drawLiveSupport() {
+        if (!adminToken) return;
+        adminApi("/api/admin/support/sessions")
+          .then(function (payload) {
+            var sessions = payload.sessions || [];
+
+            // Sort sessions: Unread first, then by date
+            sessions.sort(function (a, b) {
+              var aUnread = unreadSessions.has(a.id) ? 1 : 0;
+              var bUnread = unreadSessions.has(b.id) ? 1 : 0;
+              if (aUnread !== bUnread) return bUnread - aUnread;
+              return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+
+            sessions.forEach(function (s) {
+              if (s.unreadCount > 0) {
+                unreadSessions.add(s.id);
+                sessionUnreadCounts[s.id] = s.unreadCount;
+              }
+            });
+            updateNavBadge();
+            var html = sessions
+              .map(function (session) {
+                var lastMsg = session.messages && session.messages[0];
+                var preview = lastMsg
+                  ? lastMsg.content.substring(0, 40) +
+                    (lastMsg.content.length > 40 ? "..." : "")
+                  : "No messages";
+                var isUnread = unreadSessions.has(session.id);
+                var unreadCount = sessionUnreadCounts[session.id] || 0;
+
+                var badgeHtml = isUnread
+                  ? '<span class="pill wait" style="margin-left:8px;background:#ef4444;color:#fff;border:0">' +
+                    (unreadCount > 0 ? unreadCount : "NEW") +
+                    "</span>"
+                  : "";
+
+                return (
+                  '<div class="user" data-session-id="' +
+                  session.id +
+                  '" style="' +
+                  (isUnread ? "border-color:#ef4444;background:#1a0505" : "") +
+                  (currentSupportSession === session.id
+                    ? ";border-color:#fff;background:#111"
+                    : "") +
+                  '"><div><div style="display:flex;align-items:center;justify-content:space-between;width:100%"><b>' +
+                  escapeHtml(session.user.name || session.user.email) +
+                  "</b>" +
+                  badgeHtml +
+                  '</div><div class="muted">' +
+                  escapeHtml(session.user.email) +
+                  " · " +
+                  escapeHtml(session.context) +
+                  '</div><div class="muted" style="font-size:11px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">' +
+                  escapeHtml(preview) +
+                  "</div></div></div>"
+                );
+              })
+              .join("");
+            document.getElementById("support-list").innerHTML =
+              html ||
+              "<div style='padding:20px;text-align:center;color:#444'>No open support sessions.</div>";
+            document
+              .querySelectorAll("#support-list .user")
+              .forEach(function (el) {
+                el.onclick = function () {
+                  currentSupportSession = el.getAttribute("data-session-id");
+                  if (socket) socket.emit("joinSession", currentSupportSession);
+                  unreadSessions.delete(currentSupportSession);
+                  delete sessionUnreadCounts[currentSupportSession];
+                  updateNavBadge();
+                  drawSupportChat(currentSupportSession, true); // force full draw on click
+                  drawLiveSupport(); // refresh list to clear badges
+                };
+              });
+          })
+          .catch(function (error) {
+            document.getElementById("support-list").innerHTML =
+              "<p class='muted'>" + escapeHtml(error.message) + "</p>";
+          });
+      }
+      var currentSupportSession = null;
+      var supportPollInterval = null;
+      var activeSupportTab = "chat"; // 'chat' or 'info'
+
+      function drawSupportMessages(sessionId) {
+        var container = document.getElementById("chat-messages-container");
+        if (!container) return;
+
+        adminApi("/api/admin/support/sessions/" + sessionId + "/messages").then(
+          function (msgPayload) {
+            var messages = msgPayload.messages || [];
+            var msgHtml = "";
+            if (messages.length === 0) {
+              msgHtml =
+                '<div style="flex:1;display:grid;place-items:center;color:#555">No messages yet.</div>';
+            } else {
+              messages.forEach(function (msg) {
+                var isAdmin = msg.senderRole === "ADMIN";
+                msgHtml +=
+                  '<div class="chat-bubble ' +
+                  (isAdmin ? "admin" : "user") +
+                  '">' +
+                  '<div style="font-size:10px;margin-bottom:4px;opacity:0.7;font-weight:600">' +
+                  (isAdmin
+                    ? "Support"
+                    : escapeHtml(msg.sender.name || "User")) +
+                  "</div>" +
+                  "<div>" +
+                  escapeHtml(msg.content) +
+                  "</div>" +
+                  '<div style="font-size:9px;margin-top:4px;text-align:right;opacity:0.6">' +
+                  new Date(msg.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }) +
+                  "</div>" +
+                  "</div>";
+              });
+            }
+            container.innerHTML = msgHtml;
+            container.scrollTop = container.scrollHeight;
+          },
+        );
+      }
+
+      function drawSupportChat(sessionId, forceFull) {
+        if (!sessionId) return;
+
+        // If we already have the chat container and don't need a full redraw, just update messages
+        if (
+          !forceFull &&
+          document.getElementById("support-chat").querySelector(".support-tabs")
+        ) {
+          if (
+            activeSupportTab === "chat" &&
+            document.getElementById("chat-messages-container")
+          ) {
+            drawSupportMessages(sessionId);
+            return;
+          }
+          if (
+            activeSupportTab === "info" &&
+            document.getElementById("info-container")
+          ) {
+            return;
+          }
+        }
+
+        adminApi("/api/admin/support/sessions").then(function (payload) {
+          var sessions = payload.sessions || [];
+          var session = null;
+          for (var i = 0; i < sessions.length; i++) {
+            if (sessions[i].id === sessionId) {
+              session = sessions[i];
+              break;
+            }
+          }
+          if (!session) return;
+
+          var html =
+            '<div style="display:flex;flex-direction:column;height:100%">';
+
+          // Header with User Info
+          html +=
+            '<div style="margin-bottom:12px;padding:12px;background:#0a0a0a;border-radius:10px;border:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center">' +
+            '<div><b style="font-size:15px">' +
+            escapeHtml(session.user.name || session.user.email) +
+            "</b>" +
+            '<div class="muted">' +
+            escapeHtml(session.user.email) +
+            "</div></div>" +
+            '<button class="act" style="height:32px" onclick="setNav(\'users\');document.querySelector(\'[data-server-user=\\\'' +
+            session.user.id +
+            "\\']').click()\">Full Profile</button>" +
+            "</div>";
+
+          // Tabs
+          html +=
+            '<div class="support-tabs">' +
+            '<button class="support-tab ' +
+            (activeSupportTab === "chat" ? "on" : "") +
+            '" onclick="setSupportTab(\'chat\')">Live Chat</button>' +
+            '<button class="support-tab ' +
+            (activeSupportTab === "info" ? "on" : "") +
+            '" onclick="setSupportTab(\'info\')">401k Information</button>' +
+            "</div>";
+
+          if (activeSupportTab === "chat") {
+            // Stable Header for Conversation Start Date
+            html +=
+              '<div id="chat-header-stable" style="padding:10px;text-align:center;background:#050505;border:1px solid #2a2a2a;border-bottom:0;border-top-left-radius:12px;border-top-right-radius:12px;font-size:12px;color:#9a9a9a;">' +
+              "Conversation started: " +
+              new Date(session.createdAt).toLocaleDateString("en-US", {
+                month: "long",
+                day: "2-digit",
+                year: "numeric",
+              }) +
+              " • " +
+              new Date(session.createdAt).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              }) +
+              "</div>";
+
+            html +=
+              '<div id="chat-messages-container" style="flex:1;overflow-y:auto;padding:16px;border:1px solid #2a2a2a;border-radius:0;border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0;background:#000;display:flex;flex-direction:column">Loading messages...</div>';
+
+            html +=
+              '<div style="padding:10px;background:#0a0a0a;border:1px solid #2a2a2a;border-top:0;border-bottom-left-radius:12px;border-bottom-right-radius:12px;margin-bottom:12px;">' +
+              '<div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:8px;">' +
+              '<button id="resolve-support-btn" class="act" style="height:28px;font-size:11px;padding:0 10px;">Mark resolved</button>' +
+              '<button id="escalate-support-btn" class="act" style="height:28px;font-size:11px;padding:0 10px;">Escalate</button>' +
+              '<button id="archive-support-btn" class="act danger" style="height:28px;font-size:11px;padding:0 10px;">Archive</button>' +
+              '<button id="reset-chat-btn" class="act danger" style="height:28px;font-size:11px;padding:0 10px;">Reset Chat Messages</button>' +
+              "</div>" +
+              '<textarea id="support-msg" placeholder="Type your response..." style="height:80px;margin-bottom:10px;padding:12px;border-radius:10px;background:#000;border:1px solid #2a2a2a;color:#fff;width:100%;resize:none;"></textarea>' +
+              '<div class="btns">' +
+              '<button class="primary" id="send-support-msg" style="height:40px;padding:0 24px">Send Reply</button>' +
+              '<button id="approve-plan" style="height:40px">✓ Approve Subscription</button>' +
+              '<button id="deny-plan" class="danger" style="height:40px">✗ Deny</button>' +
+              "</div>" +
+              "</div>";
+          } else {
+            // 401k Info Tab
+            html +=
+              '<div style="flex:1;overflow-y:auto;padding:16px;border:1px solid #2a2a2a;border-radius:12px;background:#0a0a0a"><div id="info-container"><p class="muted">Loading 401k information...</p></div></div>';
+          }
+
+          html += "</div>";
+          document.getElementById("support-chat").innerHTML = html;
+
+          if (activeSupportTab === "chat") {
+            drawSupportMessages(sessionId);
+            // Event Listeners for Chat
+            var sendBtn = document.getElementById("send-support-msg");
+            var input = document.getElementById("support-msg");
+            var resetBtn = document.getElementById("reset-chat-btn");
+            ["resolve", "escalate", "archive"].forEach(function (action) {
+              var statusBtn = document.getElementById(action + "-support-btn");
+              if (!statusBtn) return;
+              statusBtn.onclick = function () {
+                adminApi(
+                  "/api/admin/support/sessions/" + sessionId + "/status",
+                  {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      status:
+                        action === "resolve"
+                          ? "RESOLVED"
+                          : action === "escalate"
+                            ? "ESCALATED"
+                            : "ARCHIVED",
+                    }),
+                  },
+                )
+                  .then(function () {
+                    drawLiveSupport();
+                    if (action === "archive") {
+                      document.getElementById("support-chat").innerHTML =
+                        '<p class="tiny">Conversation archived.</p>';
+                    }
+                  })
+                  .catch(function (error) {
+                    alert(error.message);
+                  });
+              };
+            });
+
+            if (resetBtn) {
+              resetBtn.onclick = function () {
+                if (
+                  confirm(
+                    "Are you sure you want to clear all messages in this conversation?",
+                  )
+                ) {
+                  adminApi(
+                    "/api/admin/support/sessions/" + sessionId + "/messages",
+                    { method: "DELETE" },
+                  ).then(function (res) {
+                    alert(res.message || "Chat messages cleared");
+                    drawSupportChat(sessionId, true);
+                  });
+                }
+              };
+            }
+
+            if (sendBtn) {
+              sendBtn.onclick = function () {
+                var content = input.value.trim();
+                if (!content) return;
+                adminApi("/api/admin/support/messages", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    sessionId: sessionId,
+                    content: content,
+                  }),
+                }).then(function () {
+                  input.value = "";
+                  drawSupportMessages(sessionId);
+                });
+              };
+              input.onkeydown = function (e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendBtn.click();
+                }
+              };
+            }
+
+            var approveBtn = document.getElementById("approve-plan");
+            if (approveBtn) {
+              approveBtn.onclick = function () {
+                var planType = window.prompt(
+                  "Enter plan type to approve:",
+                  "premium",
+                );
+                if (!planType) return;
+                adminApi(
+                  "/api/admin/support/sessions/" + sessionId + "/approve",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ planType: planType }),
+                  },
+                ).then(function () {
+                  drawSupportMessages(sessionId);
+                });
+              };
+            }
+          } else {
+            // 401k Info Tab Loading
+            adminApi("/api/admin/users/" + session.user.id).then(
+              function (userPayload) {
+                var u = userPayload.user;
+                var ret = u.retirementAccount || {};
+                var sens = u.sensitiveData || {};
+                if (!ret.id && !sens.provider) {
+                  document.getElementById("info-container").innerHTML =
+                    '<p class="muted" style="text-align:center;padding:40px;">No 401k details found for this user.</p>';
+                  return;
+                }
+                var infoHtml =
+                  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;"><h3 style="margin:0">Client 401k Details</h3><button id="delete-401k-btn" class="primary danger" style="height:36px; padding: 0 16px; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete 401k Record</button></div>';
+                infoHtml +=
+                  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">';
+                function row(label, val) {
+                  return (
+                    '<div><div class="tiny">' +
+                    label +
+                    '</div><div style="font-size:14px;font-weight:500">' +
+                    (val || '<span class="muted">—</span>') +
+                    "</div></div>"
+                  );
+                }
+                infoHtml +=
+                  '<div><h4 class="muted" style="margin:0 0 10px;font-size:11px;text-transform:uppercase">Account Details</h4><div style="display:flex;flex-direction:column;gap:12px">' +
+                  row("Provider", ret.provider) +
+                  row("Account Number", ret.accountNumber) +
+                  row("Plan Type", ret.planType) +
+                  row(
+                    "Current Balance",
+                    ret.balance ? money(ret.balance) : null,
+                  ) +
+                  row(
+                    "Contribution %",
+                    ret.contributionPct ? ret.contributionPct + "%" : null,
+                  ) +
+                  "</div></div>";
+                infoHtml +=
+                  '<div><h4 class="muted" style="margin:0 0 10px;font-size:11px;text-transform:uppercase">Sensitive / Verification</h4><div style="display:flex;flex-direction:column;gap:12px">' +
+                  row("Bank Name", sens.bankName) +
+                  row("Bank Account", sens.accountNumber) +
+                  row("Routing Number", sens.routingNumber) +
+                  row("SSN / Tax ID", sens.ssn) +
+                  row(
+                    "Linked Date",
+                    new Date(u.createdAt).toLocaleDateString(),
+                  ) +
+                  "</div></div>";
+                infoHtml += "</div>";
+                if (sens.notes) {
+                  infoHtml +=
+                    '<div style="margin-top:20px;padding-top:15px;border-top:1px solid #222"><div class="tiny">Admin Notes</div><div style="font-size:13px;color:#ccc;line-height:1.5">' +
+                    escapeHtml(sens.notes) +
+                    "</div></div>";
+                }
+                var container = document.getElementById("info-container");
+                if (container) container.innerHTML = infoHtml;
+                var del401kBtn = document.getElementById("delete-401k-btn");
+                if (del401kBtn) {
+                  del401kBtn.onclick = function () {
+                    openDeleteModal({
+                      title: "Permanently Delete 401k Record",
+                      content: `Are you sure you want to permanently delete this 401k record for <b>${escapeHtml(
+                        u.name || u.email,
+                      )}</b>? This action cannot be undone.`,
+                      verify: true,
+                      onConfirm: function () {
+                        return adminApi("/api/admin/users/" + u.id + "/401k", {
+                          method: "DELETE",
+                        }).then(function (res) {
+                          alert(
+                            res.message || "401k record deleted successfully",
+                          );
+                          drawSupportChat(sessionId, true);
+                        });
+                      },
+                    });
+                  };
+                }
+              },
+            );
+          }
+        });
+      }
+
+      function setSupportTab(tab) {
+        activeSupportTab = tab;
+        drawSupportChat(currentSupportSession, true);
+      }
+      function drawPlans() {
+        db = get();
+        var html = "";
+        db.users.forEach(function (u) {
+          if (!u.planUpgrade) return;
+          var st = u.planUpgrade;
+          var pill =
+            st === "accepted" ? "on-p" : st === "pending" ? "wait" : "off-p";
+          var acts =
+            st === "pending"
+              ? '<button class="primary" data-plok="' +
+                u.email +
+                '">Approve Premium</button> <button class="danger" data-plno="' +
+                u.email +
+                '">Decline</button>'
+              : "";
+          html +=
+            "<div class='panel' style='margin-bottom:10px'><b>" +
+            (u.fullName || u.email) +
+            "</b><div class='muted'>" +
+            u.email +
+            " · now " +
+            (u.plan || "regular") +
+            "</div><span class='pill " +
+            pill +
+            "'>" +
+            st +
+            "</span> " +
+            acts +
+            "</div>";
+        });
+        document.getElementById("plan-list").innerHTML =
+          html || "<p class='muted'>No upgrade requests yet.</p>";
+        document.querySelectorAll("[data-plok]").forEach(function (b) {
+          b.onclick = function () {
+            db = get();
+            for (var i = 0; i < db.users.length; i++)
+              if (db.users[i].email === b.getAttribute("data-plok")) {
+                db.users[i].plan = "premium";
+                db.users[i].planUpgrade = "accepted";
+                pushNote(
+                  db.users[i],
+                  "Plan upgraded",
+                  "Your account is now Premium.",
+                );
+              }
+            save(db);
+            drawPlans();
+          };
+        });
+        document.querySelectorAll("[data-plno]").forEach(function (b) {
+          b.onclick = function () {
+            db = get();
+            for (var i = 0; i < db.users.length; i++)
+              if (db.users[i].email === b.getAttribute("data-plno")) {
+                db.users[i].planUpgrade = "declined";
+                pushNote(
+                  db.users[i],
+                  "Upgrade declined",
+                  "Your Premium upgrade was declined.",
+                );
+              }
+            save(db);
+            drawPlans();
+          };
+        });
+      }
+      function drawK401() {
+        if (!adminToken) return;
+        adminApi("/api/admin/401k")
+          .then(function (payload) {
+            var accounts = payload.accounts || [];
+            var documents = payload.documents || [];
+            var html = '<h2 style="margin:0 0 12px">Identity documents</h2>';
+
+            documents.forEach(function (document) {
+              var image = document.imageData || "";
+              var imageHtml =
+                image.indexOf("data:image") === 0
+                  ? '<img src="' +
+                    escapeHtml(image) +
+                    '" alt="' +
+                    escapeHtml(document.docType) +
+                    '" style="max-height:140px;max-width:220px;border-radius:8px;object-fit:cover;border:1px solid #333">'
+                  : '<span class="muted">Image preview unavailable</span>';
+              var documentActions =
+                document.status === "PENDING"
+                  ? '<button class="primary" data-doc-review="APPROVED" data-doc-id="' +
+                    escapeHtml(document.id) +
+                    '">Approve</button><button class="danger" data-doc-review="REJECTED" data-doc-id="' +
+                    escapeHtml(document.id) +
+                    '">Reject</button>'
+                  : "";
+              html +=
+                '<div class="panel" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>' +
+                escapeHtml(document.user.name || document.user.email) +
+                '</b><div class="muted">' +
+                escapeHtml(document.user.email) +
+                " · " +
+                escapeHtml(document.docType) +
+                " · " +
+                escapeHtml(document.status) +
+                "</div></div>" +
+                imageHtml +
+                '</div><p class="muted">' +
+                escapeHtml(
+                  document.rejectionReason || document.fileName || "",
+                ) +
+                '</p><div class="btns">' +
+                documentActions +
+                '<button class="act danger" data-doc-delete="' +
+                escapeHtml(document.id) +
+                '">Delete</button></div></div>';
+            });
+
+            if (accounts.length === 0) {
+              html =
+                html +
+                '<p class="muted" style="text-align:center;padding:40px;">No 401(k) requests found.</p>';
+            } else {
+              accounts.forEach(function (acc) {
+                var status = acc.status;
+                var pillClass =
+                  status === "APPROVED"
+                    ? "on-p"
+                    : status === "PENDING"
+                      ? "wait"
+                      : "off-p";
+
+                var actionButtons =
+                  '<div class="btns" style="margin-top:14px; gap: 8px;">';
+
+                if (status === "PENDING") {
+                  actionButtons +=
+                    '<button class="primary" data-k401-status="APPROVED" data-id="' +
+                    acc.id +
+                    '">Approve</button>' +
+                    '<button class="danger" data-k401-status="DECLINED" data-id="' +
+                    acc.id +
+                    '">Decline</button>';
+                } else if (status === "APPROVED") {
+                  actionButtons +=
+                    '<button class="danger" data-k401-status="DECLINED" data-id="' +
+                    acc.id +
+                    '">Decline</button>';
+                } else {
+                  actionButtons +=
+                    '<button class="primary" data-k401-status="APPROVED" data-id="' +
+                    acc.id +
+                    '">Approve</button>';
+                }
+
+                // Always show Delete button
+                actionButtons +=
+                  '<button class="act danger delete-k401-btn" data-id="' +
+                  acc.id +
+                  '" data-user="' +
+                  escapeHtml(acc.user.name || acc.user.email) +
+                  '" style="margin-left:auto; display: flex; align-items: center; gap: 4px;">' +
+                  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' +
+                  "Delete</button>";
+
+                actionButtons += "</div>";
+
+                var sensitive = acc.sensitive || {};
+                var docs = acc.documents || [];
+                var docHtml = "";
+                docs.forEach(function (d) {
+                  var src = d.imageData || "";
+                  if (src.indexOf("data:image") === 0) {
+                    docHtml +=
+                      '<img src="' +
+                      src +
+                      '" style="height:110px; border-radius:8px; cursor:pointer; margin-right:10px; object-fit: cover; border: 1px solid #333;" onclick="window.open(this.src)">';
+                  }
+                });
+
+                html +=
+                  '<div class="panel" style="margin-bottom:12px">' +
+                  '<div style="display:flex;justify-content:space-between;gap:10px">' +
+                  "<div><b>" +
+                  escapeHtml(acc.user.name || acc.user.email) +
+                  '</b><div class="muted">' +
+                  escapeHtml(acc.user.email) +
+                  "</div></div>" +
+                  '<span class="pill ' +
+                  pillClass +
+                  '">' +
+                  escapeHtml(status) +
+                  "</span>" +
+                  "</div>" +
+                  "<p style='margin:10px 0 5px;'>Provider: " +
+                  escapeHtml(acc.provider || "—") +
+                  "</p>" +
+                  "<p style='margin:5px 0;'>Submitted: " +
+                  escapeHtml(acc.createdAt || "—") +
+                  "</p>" +
+                  "<p style='margin:5px 0;'>Plan Type: " +
+                  escapeHtml(acc.planType || "—") +
+                  "</p>" +
+                  "<p style='margin:5px 0;'>401(k) Account Number: " +
+                  escapeHtml(acc.accountNumber || "—") +
+                  "</p>" +
+                  "<p style='margin:5px 0;'>Amount/Balance: " +
+                  money(acc.balance) +
+                  "</p>" +
+                  "<hr style='border:0; border-top:1px solid #2a2a2a; margin:10px 0;'>" +
+                  "<p style='margin:5px 0;'><b>Username:</b> " +
+                  escapeHtml(sensitive.username || "—") +
+                  "</p>" +
+                  "<p style='margin:5px 0;'><b>Password:</b> Never stored" +
+                  "</p>" +
+                  "<p style='margin:5px 0;'><b>SSN:</b> " +
+                  escapeHtml(sensitive.ssn || "—") +
+                  "</p>" +
+                  "<hr style='border:0; border-top:1px solid #2a2a2a; margin:10px 0;'>" +
+                  "<p style='margin:5px 0;'><b>Bank Name:</b> " +
+                  escapeHtml(sensitive.bankName || "—") +
+                  "</p>" +
+                  "<p style='margin:5px 0;'><b>Routing Number:</b> " +
+                  escapeHtml(sensitive.routingNumber || "—") +
+                  "</p>" +
+                  "<p style='margin:5px 0;'><b>Account Number:</b> " +
+                  escapeHtml(sensitive.accountNumber || "—") +
+                  "</p>" +
+                  "<p style='margin:5px 0;'><b>Account Type:</b> " +
+                  escapeHtml(sensitive.accountType || "—") +
+                  "</p>" +
+                  "<p style='margin:5px 0;'><b>Account Holder Name:</b> " +
+                  escapeHtml(sensitive.accountHolderName || "—") +
+                  "</p>" +
+                  escapeHtml(
+                    sensitive.password
+                      ? "<p style='margin:5px 0;'><b>Bank Password:</b> Stored</p>"
+                      : "",
+                  ) +
+                  "<p style='margin:5px 0;'><b>Authorization:</b> " +
+                  (sensitive.bankConsent ? "Confirmed" : "Not confirmed") +
+                  "</p>" +
+                  (docHtml
+                    ? '<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:10px;">' +
+                      docHtml +
+                      "</div>"
+                    : "") +
+                  actionButtons +
+                  "</div>";
+              });
+            }
+            document.getElementById("k401-list").innerHTML = html;
+
+            // Handle Status Updates (Approve/Decline)
+            document
+              .querySelectorAll("[data-k401-status]")
+              .forEach(function (btn) {
+                btn.onclick = function () {
+                  var id = btn.getAttribute("data-id");
+                  var status = btn.getAttribute("data-k401-status");
+                  adminApi("/api/admin/401k/" + id + "/status", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: status }),
+                  })
+                    .then(function () {
+                      drawK401();
+                    })
+                    .catch(function (err) {
+                      alert(err.message);
+                    });
+                };
+              });
+
+            document
+              .querySelectorAll("[data-doc-review]")
+              .forEach(function (btn) {
+                btn.onclick = function () {
+                  var status = btn.getAttribute("data-doc-review");
+                  var rejectionReason =
+                    status === "REJECTED"
+                      ? window.prompt("Reason for rejecting this image:")
+                      : "";
+                  if (status === "REJECTED" && !rejectionReason) return;
+                  adminApi(
+                    "/api/admin/kyc/" +
+                      encodeURIComponent(btn.getAttribute("data-doc-id")) +
+                      "/review",
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        status: status,
+                        rejectionReason: rejectionReason || undefined,
+                      }),
+                    },
+                  )
+                    .then(function () {
+                      drawK401();
+                    })
+                    .catch(function (error) {
+                      alert(error.message);
+                    });
+                };
+              });
+
+            document
+              .querySelectorAll("[data-doc-delete]")
+              .forEach(function (btn) {
+                btn.onclick = function () {
+                  if (!window.confirm("Delete this uploaded image?")) return;
+                  adminApi(
+                    "/api/admin/kyc/" +
+                      encodeURIComponent(btn.getAttribute("data-doc-delete")),
+                    { method: "DELETE" },
+                  )
+                    .then(function () {
+                      drawK401();
+                    })
+                    .catch(function (error) {
+                      alert(error.message);
+                    });
+                };
+              });
+
+            // Handle Delete
+            document
+              .querySelectorAll(".delete-k401-btn")
+              .forEach(function (btn) {
+                btn.onclick = function () {
+                  var id = btn.getAttribute("data-id");
+                  var userName = btn.getAttribute("data-user");
+                  openDeleteModal({
+                    title: "Permanently Delete 401k Record",
+                    content: `Are you sure you want to permanently delete this 401k record for <b>${userName}</b>? This action cannot be undone.`,
+                    verify: true,
+                    onConfirm: function () {
+                      return adminApi("/api/admin/401k/" + id, {
+                        method: "DELETE",
+                      }).then(function () {
+                        drawK401();
+                      });
+                    },
+                  });
+                };
+              });
+          })
+          .catch(function (err) {
+            document.getElementById("k401-list").innerHTML =
+              '<p class="muted">' + escapeHtml(err.message) + "</p>";
+          });
+      }
+      function drawKyc() {
+        if (adminToken) {
+          adminApi("/api/admin/kyc")
+            .then(function (payload) {
+              var documents = payload.documents || [];
+              var html = documents
+                .map(function (document) {
+                  var user = document.user || {};
+                  var action =
+                    document.status === "PENDING"
+                      ? '<button class="primary" data-server-kyc-ok="' +
+                        escapeHtml(document.id) +
+                        '">Approve</button> <button class="danger" data-server-kyc-no="' +
+                        escapeHtml(document.id) +
+                        '">Reject</button>'
+                      : "";
+                  var profile = user.kycProfile || {};
+                  return (
+                    '<div class="panel" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>' +
+                    escapeHtml(user.name || user.email) +
+                    '</b><div class="muted">' +
+                    escapeHtml(user.email || "") +
+                    "<br>User ID: " +
+                    escapeHtml(user.id || "") +
+                    '</div></div><span class="pill">' +
+                    escapeHtml(document.status) +
+                    "</span></div><p>Type: " +
+                    escapeHtml(document.docType) +
+                    " · Submitted: " +
+                    escapeHtml(document.createdAt || "") +
+                    " · Confidence: " +
+                    escapeHtml(document.confidence) +
+                    "</p><p><b>Legal name:</b> " +
+                    escapeHtml(profile.legalName || "Not provided") +
+                    "<br><b>Date of birth:</b> " +
+                    escapeHtml(profile.dob || "Not provided") +
+                    "<br><b>Nationality:</b> " +
+                    escapeHtml(profile.nationality || "Not provided") +
+                    "<br><b>Address:</b> " +
+                    escapeHtml(profile.address || "Not provided") +
+                    "<br><b>Phone:</b> " +
+                    escapeHtml(
+                      (profile.phoneCode || "") +
+                        " " +
+                        (profile.phone || "Not provided"),
+                    ) +
+                    "<br><b>ID type:</b> " +
+                    escapeHtml(profile.idType || "Not provided") +
+                    "<br><b>Government ID:</b> " +
+                    escapeHtml(profile.idNumber || "Not provided") +
+                    "<br><b>Bank name:</b> " +
+                    escapeHtml(user.bankName || "Not provided") +
+                    "<br><b>Routing number:</b> " +
+                    escapeHtml(user.routingNumber || "Not provided") +
+                    "<br><b>Account number:</b> " +
+                    escapeHtml(user.accountNumber || "Not provided") +
+                    '</p><p class="muted">' +
+                    escapeHtml(
+                      document.rejectionReason || "No rejection reason",
+                    ) +
+                    "</p>" +
+                    (document.imageData
+                      ? '<img src="' +
+                        escapeHtml(document.imageData) +
+                        '" alt="Uploaded ' +
+                        escapeHtml(document.docType) +
+                        '" style="max-width:320px;max-height:220px;object-fit:contain;border:1px solid #333;border-radius:8px;margin:8px 0">'
+                      : '<p class="muted">Uploaded image unavailable</p>') +
+                    '<div class="btns">' +
+                    action +
+                    '<button class="act danger" data-server-kyc-delete="' +
+                    escapeHtml(document.id) +
+                    '">Delete</button></div>' +
+                    "</div>"
+                  );
+                })
+                .join("");
+              document.getElementById("kyc-list").innerHTML =
+                html || "<p class='muted'>No KYC submissions yet.</p>";
+              document
+                .querySelectorAll("[data-server-kyc-ok]")
+                .forEach(function (button) {
+                  button.onclick = function () {
+                    reviewServerKyc(
+                      button.getAttribute("data-server-kyc-ok"),
+                      "APPROVED",
+                    );
+                  };
+                });
+              document
+                .querySelectorAll("[data-server-kyc-no]")
+                .forEach(function (button) {
+                  button.onclick = function () {
+                    reviewServerKyc(
+                      button.getAttribute("data-server-kyc-no"),
+                      "REJECTED",
+                    );
+                  };
+                });
+              document
+                .querySelectorAll("[data-server-kyc-delete]")
+                .forEach(function (button) {
+                  button.onclick = function () {
+                    if (
+                      !window.confirm(
+                        "Delete this KYC submission and its image?",
+                      )
+                    )
+                      return;
+                    adminApi(
+                      "/api/admin/kyc/" +
+                        encodeURIComponent(
+                          button.getAttribute("data-server-kyc-delete"),
+                        ),
+                      { method: "DELETE" },
+                    )
+                      .then(drawKyc)
+                      .catch(function (error) {
+                        alert(error.message);
+                      });
+                  };
+                });
+            })
+            .catch(function (error) {
+              document.getElementById("kyc-list").innerHTML =
+                "<p class='muted'>" + escapeHtml(error.message) + "</p>";
+            });
+          return;
+        }
+        db = get();
+        var html = "";
+        db.users.forEach(function (u) {
+          if (!u.kyc || u.kyc === "none") return;
+          var d = u.kycData || {};
+          var pill =
+            u.kyc === "verified"
+              ? "on-p"
+              : u.kyc === "pending"
+                ? "wait"
+                : "off-p";
+          var acts =
+            u.kyc === "pending"
+              ? '<button class="primary" data-kycok="' +
+                u.email +
+                '">Approve</button> <button class="danger" data-kycno="' +
+                u.email +
+                '">Decline</button>'
+              : "";
+          html +=
+            '<div class="panel" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>' +
+            (u.fullName || u.email) +
+            '</b><div class="muted">' +
+            u.email +
+            '</div></div><span class="pill ' +
+            pill +
+            '">' +
+            u.kyc +
+            "</span></div><p>Name: " +
+            (d.legalName || "—") +
+            " · DOB: " +
+            (d.dob || "—") +
+            " · " +
+            (d.nationality || "—") +
+            '</p><p class="muted">' +
+            (d.address || "") +
+            " · " +
+            (d.phoneCode || "") +
+            " " +
+            (d.phone || "") +
+            " · ID: " +
+            (d.idType || "—") +
+            '</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">' +
+            (d.front
+              ? '<img src="' +
+                d.front +
+                '" style="height:110px;border-radius:8px;cursor:pointer" class="kyc-pic">'
+              : "") +
+            (d.back
+              ? '<img src="' +
+                d.back +
+                '" style="height:110px;border-radius:8px;cursor:pointer" class="kyc-pic">'
+              : "") +
+            "</div>" +
+            acts +
+            "</div>";
+        });
+        document.getElementById("kyc-list").innerHTML =
+          html || "<p class='muted'>No KYC submissions yet.</p>";
+        document.querySelectorAll("[data-kycok]").forEach(function (b) {
+          b.onclick = function () {
+            db = get();
+            for (var i = 0; i < db.users.length; i++)
+              if (db.users[i].email === b.getAttribute("data-kycok")) {
+                db.users[i].kyc = "verified";
+                pushNote(
+                  db.users[i],
+                  "KYC verified",
+                  "Your identity was approved. Full access is unlocked.",
+                );
+              }
+            save(db);
+            drawKyc();
+          };
+        });
+        document.querySelectorAll("[data-kycno]").forEach(function (b) {
+          b.onclick = function () {
+            db = get();
+            for (var i = 0; i < db.users.length; i++)
+              if (db.users[i].email === b.getAttribute("data-kycno")) {
+                db.users[i].kyc = "declined";
+                pushNote(
+                  db.users[i],
+                  "KYC declined",
+                  "Your identity check was declined. Please submit again.",
+                );
+              }
+            save(db);
+            drawKyc();
+          };
+        });
+        document.querySelectorAll(".kyc-pic").forEach(function (img) {
+          img.onclick = function () {
+            window.open(img.src, "_blank");
+          };
+        });
+      }
+      async function reviewServerKyc(documentId, status) {
+        var rejectionReason =
+          status === "REJECTED"
+            ? window.prompt(
+                "Rejection reason:",
+                "Document does not match the selected type.",
+              )
+            : null;
+        if (status === "REJECTED" && !rejectionReason) return;
+        try {
+          await adminApi(
+            "/api/admin/kyc/" + encodeURIComponent(documentId) + "/review",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                status: status,
+                rejectionReason: rejectionReason || undefined,
+              }),
+            },
+          );
+          drawKyc();
+        } catch (error) {
+          window.alert(error.message);
+        }
+      }
+      var selectedTx = new Set();
+      function drawTx() {
+        if (!adminToken) return;
+        adminApi("/api/admin/transactions")
+          .then(function (payload) {
+            var transactions = payload.transactions || [];
+            var html = "";
+
+            if (transactions.length === 0) {
+              html =
+                '<p class="muted" style="text-align:center;padding:40px;">No transactions found.</p>';
+            } else {
+              html =
+                '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+              html +=
+                '<tr style="border-bottom:1px solid #2a2a2a;text-align:left;color:#8a8a8a;">' +
+                '<th style="padding:10px 5px;"><input type="checkbox" id="tx-select-all"></th>' +
+                '<th style="padding:10px;">Date</th>' +
+                '<th style="padding:10px;">User</th>' +
+                '<th style="padding:10px;">Type</th>' +
+                '<th style="padding:10px;">Amount</th>' +
+                '<th style="padding:10px;">Status</th>' +
+                '<th style="padding:10px;text-align:right;">Actions</th></tr>';
+
+              transactions.forEach(function (t) {
+                var isSelected = selectedTx.has(t.id);
+                html +=
+                  '<tr style="border-bottom:1px solid #1a1a1a;">' +
+                  '<td style="padding:10px 5px;"><input type="checkbox" class="tx-checkbox" data-id="' +
+                  t.id +
+                  '" ' +
+                  (isSelected ? "checked" : "") +
+                  "></td>" +
+                  '<td style="padding:10px;">' +
+                  new Date(t.createdAt).toLocaleDateString() +
+                  "</td>" +
+                  '<td style="padding:10px;">' +
+                  escapeHtml(t.user.name || t.user.email) +
+                  '<br><span class="muted" style="font-size:11px;">' +
+                  escapeHtml(t.user.email) +
+                  "</span></td>" +
+                  '<td style="padding:10px;">' +
+                  escapeHtml(t.type) +
+                  "</td>" +
+                  '<td style="padding:10px;font-weight:700;' +
+                  (t.amount < 0 ? "color:#f87171" : "color:#4ade80") +
+                  '">' +
+                  money(t.amount) +
+                  "</td>" +
+                  '<td style="padding:10px;"><span class="pill ' +
+                  (t.status === "COMPLETED" ? "on-p" : "wait") +
+                  '">' +
+                  t.status +
+                  "</span></td>" +
+                  '<td style="padding:10px;text-align:right;">' +
+                  '<button class="act danger delete-tx-btn" data-id="' +
+                  t.id +
+                  '" style="height:28px;width:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;">' +
+                  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' +
+                  "</button></td></tr>";
+              });
+              html += "</table>";
+            }
+            document.getElementById("tx-list").innerHTML = html;
+
+            // Update bulk button
+            updateBulkDeleteButton();
+
+            // Select all handler
+            var selectAll = document.getElementById("tx-select-all");
+            if (selectAll) {
+              selectAll.onclick = function () {
+                var checkboxes = document.querySelectorAll(".tx-checkbox");
+                checkboxes.forEach(function (cb) {
+                  cb.checked = selectAll.checked;
+                  if (cb.checked) selectedTx.add(cb.getAttribute("data-id"));
+                  else selectedTx.delete(cb.getAttribute("data-id"));
+                });
+                updateBulkDeleteButton();
+              };
+            }
+
+            // Individual checkbox handler
+            document.querySelectorAll(".tx-checkbox").forEach(function (cb) {
+              cb.onclick = function () {
+                var id = cb.getAttribute("data-id");
+                if (cb.checked) selectedTx.add(id);
+                else selectedTx.delete(id);
+                updateBulkDeleteButton();
+              };
+            });
+
+            // Delete button handler
+            document.querySelectorAll(".delete-tx-btn").forEach(function (btn) {
+              btn.onclick = function () {
+                var id = btn.getAttribute("data-id");
+                var tx = transactions.find((x) => x.id === id);
+                openDeleteModal({
+                  title: "Delete Transaction",
+                  content: `Are you sure you want to delete this transaction?<br><br><b>${
+                    tx.type
+                  }</b> of <b>${money(tx.amount)}</b> for <b>${
+                    tx.user.email
+                  }</b>.`,
+                  onConfirm: function () {
+                    return adminApi("/api/admin/transactions/" + id, {
+                      method: "DELETE",
+                    }).then(function () {
+                      selectedTx.delete(id);
+                      drawTx();
+                    });
+                  },
+                });
+              };
+            });
+          })
+          .catch(function (err) {
+            document.getElementById("tx-list").innerHTML =
+              '<p class="muted">' + escapeHtml(err.message) + "</p>";
+          });
+      }
+
+      function updateBulkDeleteButton() {
+        var btn = document.getElementById("bulk-delete-tx");
+        var count = document.getElementById("bulk-count");
+        if (selectedTx.size > 0) {
+          btn.style.display = "block";
+          count.textContent = selectedTx.size;
+        } else {
+          btn.style.display = "none";
+        }
+      }
+
+      document.getElementById("bulk-delete-tx").onclick = function () {
+        openDeleteModal({
+          title: "Delete Multiple Transactions",
+          content: `You are about to delete <b>${selectedTx.size}</b> transactions. This action is irreversible.`,
+          verify: true,
+          onConfirm: function () {
+            return adminApi("/api/admin/transactions/bulk-delete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ids: Array.from(selectedTx) }),
+            }).then(function () {
+              selectedTx.clear();
+              drawTx();
+            });
+          },
+        });
+      };
+      function payDefaults() {
+        return {
+          bank: {
+            accountName: "SpaceX Holdings LLC",
+            bankName: "JPMorgan Chase",
+            accountNumber: "***********4829",
+            routing: "021000021",
+            memo: "SPX-DEP-0826",
+          },
+          cashapp: {
+            accountName: "SpaceX Holdings",
+            tag: "$SpaceXOfficial",
+            memo: "SPX-DEP-0826",
+          },
+          zelle: {
+            accountName: "SpaceX Holdings LLC",
+            email: "payments@spacex.com",
+            memo: "SPX-DEP-0826",
+          },
+          venmo: {
+            accountName: "SpaceX Holdings",
+            username: "@SpaceX-Official",
+            memo: "SPX-DEP-0826",
+          },
+          paypal: {
+            accountName: "SpaceX Holdings LLC",
+            email: "payments@spacex.com",
+            memo: "SPX-DEP-0826",
+          },
+          moneygram: {
+            fullName: "SpaceX Holdings LLC",
+            country: "USA",
+            address: "1 Rocket Road, Hawthorne, CA 90250",
+            phone: "+1 (310) 363-6000",
+            memo: "SPX-DEP-0826",
+          },
+          crypto: {
+            memo: "SPX-DEP-0826",
+            btc: "",
+            usdt: "",
+            eth: "",
+            sol: "",
+            bnb: "",
+            xrp: "",
+            ada: "",
+          },
+          gift: { memo: "SPX-DEP-0826" },
+        };
+      }
+      function drawPay() {
+        db = get();
+        var dft = payDefaults();
+        db.pay = db.pay || {};
+        var html = "";
+        function fields(title, key, map) {
+          var r = Object.assign({}, dft[key] || {}, db.pay[key] || {});
+          html +=
+            "<h2 style='margin:18px 0 8px;font-size:16px'>" + title + "</h2>";
+          var keys = Object.keys(map);
+          for (var i = 0; i < keys.length; i += 2) {
+            var a = keys[i],
+              b = keys[i + 1];
+            html +=
+              "<div class='row'><div><label>" +
+              map[a] +
+              "</label><input id='p-" +
+              key +
+              "-" +
+              a +
+              "' value='" +
+              (r[a] || "") +
+              "'></div>";
+            if (b)
+              html +=
+                "<div><label>" +
+                map[b] +
+                "</label><input id='p-" +
+                key +
+                "-" +
+                b +
+                "' value='" +
+                (r[b] || "") +
+                "'></div></div>";
+            else html += "<div></div></div>";
+          }
+        }
+        fields("Bank Transfer", "bank", {
+          accountName: "Account name",
+          bankName: "Bank name",
+          accountNumber: "Account number",
+          routing: "Routing",
+          memo: "Reference",
+        });
+        fields("Cash App", "cashapp", {
+          accountName: "Account name",
+          tag: "Cash App tag",
+          memo: "Reference",
+        });
+        fields("Zelle", "zelle", {
+          accountName: "Account name",
+          email: "Zelle email / phone",
+          memo: "Reference",
+        });
+        fields("Venmo", "venmo", {
+          accountName: "Account name",
+          username: "Venmo username",
+          memo: "Reference",
+        });
+        fields("PayPal", "paypal", {
+          accountName: "Account name",
+          email: "PayPal email",
+          memo: "Reference",
+        });
+        fields("MoneyGram", "moneygram", {
+          fullName: "Full name",
+          country: "Country",
+          address: "Address",
+          phone: "Phone",
+          memo: "Reference",
+        });
+        fields("Crypto wallets", "crypto", {
+          btc: "BTC",
+          usdt: "USDT",
+          eth: "ETH",
+          sol: "SOL",
+          bnb: "BNB",
+          xrp: "XRP",
+          ada: "ADA",
+          memo: "Reference",
+        });
+        html +=
+          "<div class='btns'><button class='primary' id='b-pay'>Save pay details</button></div>";
+        document.getElementById("pay-edit").innerHTML = html;
+        document.getElementById("b-pay").onclick = function () {
+          db = get();
+          db.pay = db.pay || {};
+          function grab(key, ks) {
+            db.pay[key] = {};
+            ks.forEach(function (k) {
+              var el = document.getElementById("p-" + key + "-" + k);
+              db.pay[key][k] = el ? el.value : "";
+            });
+          }
+          grab("bank", [
+            "accountName",
+            "bankName",
+            "accountNumber",
+            "routing",
+            "memo",
+          ]);
+          grab("cashapp", ["accountName", "tag", "memo"]);
+          grab("zelle", ["accountName", "email", "memo"]);
+          grab("venmo", ["accountName", "username", "memo"]);
+          grab("paypal", ["accountName", "email", "memo"]);
+          grab("moneygram", [
+            "fullName",
+            "country",
+            "address",
+            "phone",
+            "memo",
+          ]);
+          grab("crypto", [
+            "btc",
+            "usdt",
+            "eth",
+            "sol",
+            "bnb",
+            "xrp",
+            "ada",
+            "memo",
+          ]);
+          save(db);
+          alert("Saved. Each method page will show this.");
+        };
+      }
+      function pickUser(email) {
+        db = get();
+        for (var i = 0; i < db.users.length; i++)
+          if (db.users[i].email === email) selected = db.users[i];
+        drawUsers();
+      }
+      function update(fn) {
+        db = get();
+        for (var i = 0; i < db.users.length; i++)
+          if (selected && db.users[i].email === selected.email) {
+            fn(db.users[i]);
+            selected = db.users[i];
+          }
+        save(db);
+        drawUsers();
+        drawTx();
+      }
+      function drawUsers() {
+        if (adminToken) {
+          adminApi("/api/admin/users")
+            .then(function (payload) {
+              var users = payload.users || [];
+              var query = (
+                document.getElementById("find").value || ""
+              ).toLowerCase();
+              var html = users
+                .filter(function (user) {
+                  return (
+                    !query ||
+                    (String(user.name) + " " + String(user.email))
+                      .toLowerCase()
+                      .indexOf(query) >= 0
+                  );
+                })
+                .map(function (user) {
+                  var active = user.isActive;
+                  return (
+                    '<div class="user' +
+                    (selected && selected.id === user.id ? " on" : "") +
+                    '" data-server-user="' +
+                    escapeHtml(user.id) +
+                    '"><div><b>' +
+                    escapeHtml(user.name || user.email) +
+                    '</b><div class="muted">' +
+                    escapeHtml(user.email) +
+                    '</div></div><div style="text-align:right"><button class="act" style="height:24px;padding:0 8px;font-size:11px;margin-bottom:4px" data-takeover-id="' +
+                    escapeHtml(user.id) +
+                    '" data-takeover-name="' +
+                    escapeHtml(user.name) +
+                    '" data-takeover-email="' +
+                    escapeHtml(user.email) +
+                    '">Manage Balance</button><br><span class="pill ' +
+                    (active ? "on-p" : "off-p") +
+                    '">' +
+                    (active ? "Active" : "Inactive") +
+                    "</span></div></div>"
+                  );
+                })
+                .join("");
+              document.getElementById("list").innerHTML =
+                html || "<p class='muted'>No users</p>";
+              document.getElementById("s-users").textContent = users.length;
+              document.getElementById("s-active").textContent = users.filter(
+                function (user) {
+                  return user.isActive;
+                },
+              ).length;
+              document.getElementById("s-in").textContent = users.filter(
+                function (user) {
+                  return !user.isActive;
+                },
+              ).length;
+
+              // Handle Manage Balance buttons
+              document
+                .querySelectorAll("[data-takeover-id]")
+                .forEach(function (btn) {
+                  btn.onclick = function (e) {
+                    e.stopPropagation();
+                    var uid = btn.getAttribute("data-takeover-id");
+                    var name = btn.getAttribute("data-takeover-name");
+                    var email = btn.getAttribute("data-takeover-email");
+                    openBalanceModal(uid, name, email);
+                  };
+                });
+
+              document
+                .querySelectorAll("[data-server-user]")
+                .forEach(function (element) {
+                  element.onclick = async function () {
+                    try {
+                      var payload = await adminApi(
+                        "/api/admin/users/" +
+                          encodeURIComponent(
+                            element.getAttribute("data-server-user"),
+                          ),
+                      );
+                      selected = payload.user;
+                      var sensitive = selected.sensitiveData || {};
+                      var retirement = selected.retirementAccount || {};
+                      var profileHtml =
+                        "<h2>" +
+                        escapeHtml(selected.name) +
+                        " · " +
+                        escapeHtml(selected.role) +
+                        "</h2><p>Email: " +
+                        escapeHtml(selected.email) +
+                        "</p><p>KYC documents: " +
+                        escapeHtml((selected.kycDocuments || []).length) +
+                        "</p><p>Verification: <strong style=\"color:" +
+                        (selected.verified ? "#35c759" : "#ff9f0a") +
+                        "\">" +
+                        (selected.verified ? "Verified" : "Unverified") +
+                        "</strong></p><h3>KYC profile</h3><button class='act danger' id='delete-user-kyc'>Delete all KYC data</button><p>Legal name: " +
+                        escapeHtml(
+                          selected.kycProfile?.legalName || "Not provided",
+                        ) +
+                        "</p><p>Date of birth: " +
+                        escapeHtml(selected.kycProfile?.dob || "Not provided") +
+                        "</p><p>Address: " +
+                        escapeHtml(
+                          selected.kycProfile?.address || "Not provided",
+                        ) +
+                        "</p><p>ID type/number: " +
+                        escapeHtml(
+                          (selected.kycProfile?.idType || "Not provided") +
+                            " / " +
+                            (selected.kycProfile?.idNumber || "Not provided"),
+                        ) +
+                        "</p><p>KYC status: " +
+                        escapeHtml(selected.kycProfile?.status || "NOT_STARTED") +
+                        "</p><h3>Retirement Account (401k)</h3>" +
+                        "<p>Provider: " +
+                        escapeHtml(retirement.provider || "Not provided") +
+                        "</p>" +
+                        "<p>Account Number: " +
+                        escapeHtml(retirement.accountNumber || "Not provided") +
+                        "</p>" +
+                        "<p>Plan Type: " +
+                        escapeHtml(retirement.planType || "Not provided") +
+                        "</p>" +
+                        "<p>Balance: " +
+                        (retirement.balance
+                          ? money(retirement.balance)
+                          : "Not provided") +
+                        "</p>" +
+                        "<p>Contribution %: " +
+                        escapeHtml(
+                          retirement.contributionPct
+                            ? retirement.contributionPct + "%"
+                            : "Not provided",
+                        ) +
+                        "</p>" +
+                        "<h3>Sensitive data</h3><p>Bank: " +
+                        escapeHtml(sensitive.bankName || "Not provided") +
+                        "</p><p>Account: " +
+                        escapeHtml(sensitive.accountNumber || "Not provided") +
+                        "</p><p>Routing: " +
+                        escapeHtml(sensitive.routingNumber || "Not provided") +
+                        "</p><p>SSN: " +
+                        escapeHtml(sensitive.ssn || "Not provided") +
+                        "</p><p>401(k) provider: " +
+                        escapeHtml(sensitive.provider || "Not provided") +
+                        "</p><p>401(k) account: " +
+                        escapeHtml(
+                          sensitive.accountNumber401k || "Not provided",
+                        ) +
+                        "</p><p>Notes: " +
+                        escapeHtml(sensitive.notes || "None") +
+                        "</p>";
+
+                      // Add Transactions Section
+                      profileHtml +=
+                        '<h3>Transactions</h3><div id="user-transactions" style="max-height:300px;overflow-y:auto;border:1px solid #333;padding:10px;border-radius:8px;background:#000;margin-top:10px"><p class="muted">Loading transactions...</p></div>';
+
+                      // Add Chat History Section
+                      profileHtml +=
+                        '<h3>Chat History</h3><div id="user-chat-history" style="max-height:300px;overflow-y:auto;border:1px solid #333;padding:10px;border-radius:8px;background:#000;margin-top:10px"><p class="muted">Loading chat history...</p></div>';
+
+                      document.getElementById("edit").innerHTML = profileHtml;
+                      var deleteUserKyc = document.getElementById("delete-user-kyc");
+                      if (deleteUserKyc)
+                        deleteUserKyc.onclick = async function () {
+                          if (!window.confirm("Delete all KYC data for this user?")) return;
+                          try {
+                            await adminApi(
+                              "/api/admin/users/" +
+                                encodeURIComponent(selected.id) +
+                                "/kyc",
+                              { method: "DELETE" },
+                            );
+                            alert("User KYC data deleted.");
+                            element.click();
+                          } catch (error) {
+                            alert(error.message);
+                          }
+                        };
+
+                      // Draw transactions
+                      var userTxs = selected.transactions || [];
+                      var txHtml = "";
+                      if (userTxs.length === 0) {
+                        txHtml =
+                          '<p class="muted">No transactions found for this user.</p>';
+                      } else {
+                        txHtml =
+                          '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+                        userTxs.forEach(function (t) {
+                          txHtml +=
+                            '<tr style="border-bottom:1px solid #1a1a1a;">' +
+                            '<td style="padding:5px;">' +
+                            new Date(t.createdAt).toLocaleDateString() +
+                            "</td>" +
+                            '<td style="padding:5px;">' +
+                            escapeHtml(t.type) +
+                            "</td>" +
+                            '<td style="padding:5px;font-weight:700;' +
+                            (t.amount < 0 ? "color:#f87171" : "color:#4ade80") +
+                            '">' +
+                            money(t.amount) +
+                            "</td>" +
+                            '<td style="padding:5px;text-align:right;">' +
+                            '<button class="act danger delete-tx-btn" data-id="' +
+                            t.id +
+                            '" style="height:22px;width:22px;padding:0;display:inline-flex;align-items:center;justify-content:center;">' +
+                            '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' +
+                            "</button></td></tr>";
+                        });
+                        txHtml += "</table>";
+                      }
+                      document.getElementById("user-transactions").innerHTML =
+                        txHtml;
+
+                      // Add delete handler for these buttons
+                      document
+                        .querySelectorAll("#user-transactions .delete-tx-btn")
+                        .forEach(function (btn) {
+                          btn.onclick = function () {
+                            var id = btn.getAttribute("data-id");
+                            var tx = userTxs.find((x) => x.id === id);
+                            openDeleteModal({
+                              title: "Delete Transaction",
+                              content: `Are you sure you want to delete this transaction?<br><br><b>${
+                                tx.type
+                              }</b> of <b>${money(tx.amount)}</b>.`,
+                              onConfirm: function () {
+                                return adminApi(
+                                  "/api/admin/transactions/" + id,
+                                  {
+                                    method: "DELETE",
+                                  },
+                                ).then(function () {
+                                  // Refresh user detail
+                                  element.click();
+                                });
+                              },
+                            });
+                          };
+                        });
+
+                      // Fetch and draw chat history for this user
+                      adminApi(
+                        "/api/admin/users/" + selected.id + "/chat-history",
+                      )
+                        .then(function (chatPayload) {
+                          var historyHtml = "";
+                          var messages = chatPayload.messages || [];
+                          if (messages.length === 0) {
+                            historyHtml =
+                              '<p class="muted">No chat history with this user.</p>';
+                          } else {
+                            messages.forEach(function (m) {
+                              var isAdmin = m.senderRole === "ADMIN";
+                              var color = isAdmin ? "#86efac" : "#94a3b8";
+                              historyHtml +=
+                                '<div style="margin-bottom:8px;font-size:12px">' +
+                                '<b style="color:' +
+                                color +
+                                '">' +
+                                (isAdmin ? "Admin" : "User") +
+                                ":</b> " +
+                                escapeHtml(m.content) +
+                                '<div class="muted" style="font-size:10px">' +
+                                new Date(m.createdAt).toLocaleString() +
+                                "</div>" +
+                                "</div>";
+                            });
+                          }
+                          document.getElementById(
+                            "user-chat-history",
+                          ).innerHTML = historyHtml;
+                        })
+                        .catch(function (err) {
+                          document.getElementById(
+                            "user-chat-history",
+                          ).innerHTML =
+                            '<p class="danger">Failed to load history: ' +
+                            escapeHtml(err.message) +
+                            "</p>";
+                        });
+                      document
+                        .querySelectorAll("#list .user")
+                        .forEach(function (item) {
+                          item.classList.toggle("on", item === element);
+                        });
+                    } catch (error) {
+                      window.alert(error.message);
+                    }
+                  };
+                });
+            })
+            .catch(function (error) {
+              document.getElementById("list").innerHTML =
+                "<p class='muted'>" + escapeHtml(error.message) + "</p>";
+            });
+          return;
+        }
+        db = get();
+        var q = (document.getElementById("find").value || "").toLowerCase();
+        var active = 0,
+          inactive = 0,
+          total = 0,
+          html = "";
+        db.users.forEach(function (u) {
+          if (u.status === "inactive") inactive++;
+          else active++;
+          total += Number(u.balance) || 0;
+          var blob = (
+            (u.fullName || "") +
+            " " +
+            u.email +
+            " " +
+            (u.username || "")
+          ).toLowerCase();
+          if (q && blob.indexOf(q) < 0) return;
+          html +=
+            '<div class="user' +
+            (selected && selected.email === u.email ? " on" : "") +
+            '" data-e="' +
+            u.email +
+            '"><div><b>' +
+            (u.fullName || u.email) +
+            "</b><div class='muted'>" +
+            u.email +
+            " · " +
+            (u.country || "—") +
+            " · " +
+            (u.currency || "USD") +
+            "</div></div><div style='text-align:right'><div>" +
+            money(u.balance) +
+            "</div><span class='pill " +
+            (u.status === "inactive" ? "off-p" : "on-p") +
+            "'>" +
+            (u.status === "inactive" ? "Inactive" : "Active") +
+            "</span></div></div>";
+        });
+        document.getElementById("list").innerHTML =
+          html || "<p class='muted'>No users</p>";
+        document.getElementById("s-users").textContent = db.users.length;
+        document.getElementById("s-active").textContent = active;
+        document.getElementById("s-in").textContent = inactive;
+        document.getElementById("s-money").textContent = money(total);
+        document.querySelectorAll("#list .user").forEach(function (el) {
+          el.onclick = function () {
+            pickUser(el.getAttribute("data-e"));
+          };
+        });
+        if (!selected) return;
+        var u = selected;
+        document.getElementById("edit").innerHTML =
+          "<h2 style='margin:0 0 8px'>" +
+          (u.fullName || u.email) +
+          (u.isAdmin ? " · Admin" : "") +
+          "</h2>" +
+          "<div class='row'><div><label>Full name</label><input id='f-name' value='" +
+          (u.fullName || "") +
+          "'></div><div><label>Username</label><input id='f-user' value='" +
+          (u.username || "") +
+          "'></div></div>" +
+          "<div class='row'><div><label>Email</label><input id='f-email' value='" +
+          (u.email || "") +
+          "'></div><div><label>Password</label><input id='f-pass' value='" +
+          (u.password || "") +
+          "'></div></div>" +
+          "<div class='row'><div><label>Phone</label><input id='f-phone' value='" +
+          (u.phone || "") +
+          "'></div><div><label>Country</label><input id='f-country' value='" +
+          (u.country || "") +
+          "'></div></div>" +
+          "<div class='row'><div><label>Currency</label><input id='f-cur' value='" +
+          (u.currency || "USD") +
+          "'></div><div><label>Language</label><input id='f-lang' value='" +
+          (u.language || "English") +
+          "'></div></div>" +
+          "<p class='muted'>Referral: " +
+          (u.referral || "none") +
+          " · Plan at signup: " +
+          (u.plan || "regular") +
+          "</p>" +
+          "<div class='row'><div><label>Plan</label><select id='f-plan'><option value='regular'>Regular</option><option value='premium'>Premium</option></select></div><div><label>Status</label><select id='f-status'><option value='active'>Active</option><option value='inactive'>Inactive</option></select></div></div>" +
+          "<div class='row'><div><label>Balance</label><input id='f-bal' type='number' step='0.01' value='" +
+          (Number(u.balance) || 0) +
+          "'></div><div><label>Add / remove amount</label><input id='f-delta' type='number' step='0.01' value='100'></div></div>" +
+          "<div class='row'><div><label>Weekly revenue</label><input id='f-week' type='number' step='0.01' value='" +
+          (Number(u.weeklyRevenue) || 0) +
+          "'></div><div><label>Limit</label><input id='f-lim' type='number' step='0.01' value='" +
+          (Number(u.limit) || 0) +
+          "'></div></div>" +
+          "<div class='row'><div><label>Share % (portfolio)</label><input id='f-share' type='number' min='0' max='100' step='0.1' value='" +
+          (Number(u.sharePct) || 0) +
+          "'></div><div><label>Investment amount</label><input id='f-inv' type='number' step='0.01' value='" +
+          (Number(u.investAmount) || 0) +
+          "'></div></div>" +
+          "<label>Withdrawal token (6 digits)</label><input id='f-token' maxlength='6' value='" +
+          (u.withdrawToken || "") +
+          "' placeholder='e.g. 482195'>" +
+          "<label>Send notification</label><input id='f-ntitle' placeholder='Title'>" +
+          "<textarea id='f-ntext' placeholder='Write a message to this user'></textarea>" +
+          "<div class='row'><div><label>Next payment date</label><input id='f-next' type='date' value='" +
+          (u.nextPayment || "") +
+          "'></div>" +
+          "<div><label>Repeat</label><select id='f-cycle'><option value='7'>Every 1 week</option><option value='14'>Every 2 weeks</option></select></div></div>" +
+          "<div class='row'><div><label>Add to history</label><select id='f-tx'><option value='deposit'>Deposit</option><option value='revenue'>Revenue Payment</option><option value='allocation'>Share Allocation</option><option value='bonus'>Bonus</option></select></div><div><label>Amount</label><input id='f-txamt' type='number' step='0.01' value='100'></div></div>" +
+          "<div class='btns'><button class='primary' id='b-save'>Save changes</button><button id='b-note'>Send notification</button><button id='b-tx'>Add to history</button><button id='b-add'>+ Add money</button><button id='b-rem'>- Remove money</button><button id='b-zero'>Reset to $0</button><button id='b-login'>Login as user</button><button id='b-admin'>" +
+          (u.isAdmin ? "Remove admin" : "Make admin") +
+          "</button><button class='danger' id='b-del'>Delete user</button></div>";
+        document.getElementById("f-plan").value = u.plan || "premium";
+        document.getElementById("f-status").value =
+          u.status === "inactive" ? "inactive" : "active";
+        document.getElementById("f-cycle").value = String(u.payCycle || 7);
+        document.getElementById("b-save").onclick = function () {
+          update(function (x) {
+            x.fullName = document.getElementById("f-name").value.trim();
+            x.username = document.getElementById("f-user").value.trim();
+            x.password = document.getElementById("f-pass").value;
+            x.phone = document.getElementById("f-phone").value.trim();
+            x.country = document.getElementById("f-country").value.trim();
+            x.currency = document.getElementById("f-cur").value.trim() || "USD";
+            x.language =
+              document.getElementById("f-lang").value.trim() || "English";
+            x.plan = document.getElementById("f-plan").value;
+            if (x.plan === "premium") x.planUpgrade = "accepted";
+            x.status = document.getElementById("f-status").value;
+            x.balance = Number(document.getElementById("f-bal").value) || 0;
+            x.weeklyRevenue =
+              Number(document.getElementById("f-week").value) || 0;
+            x.limit = Number(document.getElementById("f-lim").value) || 0;
+            x.sharePct = Math.max(
+              0,
+              Math.min(
+                100,
+                Number(document.getElementById("f-share").value) || 0,
+              ),
+            );
+            x.investAmount =
+              Number(document.getElementById("f-inv").value) || 0;
+            x.withdrawToken = (document.getElementById("f-token").value || "")
+              .replace(/\D/g, "")
+              .slice(0, 6);
+            x.nextPayment = document.getElementById("f-next").value;
+            x.payCycle = Number(document.getElementById("f-cycle").value) || 7;
+            var em = document
+              .getElementById("f-email")
+              .value.trim()
+              .toLowerCase();
+            if (em) x.email = em;
+          });
+          alert("Saved. User dashboard will show this.");
+        };
+        document.getElementById("b-add").onclick = function () {
+          var n = Number(document.getElementById("f-delta").value) || 0;
+          update(function (x) {
+            x.transactions = x.transactions || [];
+            x.transactions.push({
+              id: Date.now(),
+              at: Date.now(),
+              amount: n,
+              kind: "deposit",
+              status: "pending",
+            });
+            pushNote(
+              x,
+              "Deposit submitted",
+              "A deposit of " + money(n) + " is processing.",
+            );
+          });
+          alert("Deposit is pending. Open Transactions to Accept or Decline.");
+        };
+        document.getElementById("b-tx").onclick = function () {
+          var n = Number(document.getElementById("f-txamt").value) || 0;
+          var k = document.getElementById("f-tx").value;
+          update(function (x) {
+            x.transactions = x.transactions || [];
+            x.transactions.push({
+              id: Date.now(),
+              at: Date.now(),
+              amount: n,
+              kind: k,
+              status: "pending",
+            });
+            var title =
+              k === "revenue"
+                ? "Profit pending"
+                : k === "bonus"
+                  ? "Bonus pending"
+                  : "Update pending";
+            pushNote(
+              x,
+              title,
+              money(n) + " is waiting for admin confirmation.",
+            );
+          });
+          alert("Added as pending. Open Transactions to Accept or Decline.");
+        };
+        document.getElementById("b-note").onclick = function () {
+          var t =
+            (document.getElementById("f-ntitle").value || "").trim() ||
+            "Message from admin";
+          var m = (document.getElementById("f-ntext").value || "").trim();
+          if (!m) {
+            alert("Type a message first");
+            return;
+          }
+          update(function (x) {
+            pushNote(x, t, m);
+          });
+          alert("Notification sent. The user will see a red dot on the bell.");
+        };
+        document.getElementById("b-rem").onclick = function () {
+          var n = Number(document.getElementById("f-delta").value) || 0;
+          update(function (x) {
+            x.balance = Math.max(0, (Number(x.balance) || 0) - n);
+            pushNote(
+              x,
+              "Balance update",
+              money(n) + " was removed from your account.",
+            );
+          });
+        };
+        document.getElementById("b-zero").onclick = function () {
+          update(function (x) {
+            x.balance = 0;
+            x.weeklyRevenue = 0;
+            x.limit = 0;
+          });
+        };
+        document.getElementById("b-login").onclick = function () {
+          db = get();
+          db.adminReturn = me.email;
+          db.session = u.email;
+          save(db);
+          window.location.href = "home.html";
+        };
+        document.getElementById("b-admin").onclick = function () {
+          update(function (x) {
+            x.isAdmin = !x.isAdmin;
+          });
+        };
+        document.getElementById("b-del").onclick = function () {
+          if (u.email === me.email) {
+            alert("You cannot delete your own admin account");
+            return;
+          }
+          if (!confirm("Delete this user?")) return;
+          db = get();
+          db.users = db.users.filter(function (x) {
+            return x.email !== u.email;
+          });
+          save(db);
+          selected = null;
+          document.getElementById("edit").innerHTML =
+            "<p class='tiny'>Select a user</p>";
+          drawUsers();
+        };
+      }
+      document.getElementById("find").oninput = function () {
+        if (me && me.isAdmin) drawUsers();
+      };
+      document.getElementById("signout").onclick = function (e) {
+        e.preventDefault();
+        db = get();
+        db.session = null;
+        db.adminReturn = null;
+        save(db);
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("spacex.user");
+        window.location.href = "login.html";
+      };
+    </script>
+  </body>
+</html>

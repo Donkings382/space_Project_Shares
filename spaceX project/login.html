@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SPACEX</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #000;
+        color: #fff;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      body {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+      }
+      .wrap {
+        width: min(430px, 100%);
+        padding: 48px 28px 40px;
+      }
+      .mark {
+        width: 240px;
+        height: auto;
+        display: block;
+        margin: 0 auto 8px;
+      }
+      .welcome {
+        text-align: center;
+        margin: 18px 0 0;
+        font-size: 20px;
+        font-weight: 400;
+        letter-spacing: 0.01em;
+      }
+      .tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin: 48px 0 28px;
+        position: relative;
+      }
+      .tabs:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        background: #3a3a3a;
+      }
+      .tabs a,
+      .tabs span {
+        text-align: center;
+        padding: 0 0 14px;
+        font-size: 17px;
+        color: #fff;
+        text-decoration: none;
+        position: relative;
+        z-index: 1;
+      }
+      .tabs .on:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 2px;
+        background: #fff;
+      }
+      label {
+        display: block;
+        font-size: 16px;
+        margin: 0 0 10px;
+        font-weight: 400;
+      }
+      .field {
+        position: relative;
+        margin-bottom: 22px;
+      }
+      .field svg.left {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #fff;
+      }
+      .field input {
+        width: 100%;
+        height: 52px;
+        border-radius: 14px;
+        border: 1px solid #5a5a5a;
+        background: #000;
+        color: #fff;
+        padding: 0 48px 0 48px;
+        font-size: 16px;
+        outline: none;
+      }
+      .field input::placeholder {
+        color: #8a8a8a;
+      }
+      .field input:focus {
+        border-color: #fff;
+      }
+      .eye {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 36px;
+        height: 36px;
+        border: 0;
+        background: none;
+        color: #fff;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+      }
+      .forgot {
+        text-align: right;
+        margin: -6px 0 28px;
+        font-size: 16px;
+      }
+      .forgot a {
+        color: #fff;
+        text-decoration: none;
+      }
+      .continue {
+        width: 100%;
+        height: 52px;
+        border: 0;
+        border-radius: 14px;
+        background: #fff;
+        color: #000;
+        font-size: 17px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .continue:hover {
+        filter: brightness(0.94);
+      }
+      .err {
+        color: #f87171;
+        font-size: 13px;
+        min-height: 18px;
+        margin: 8px 0 0;
+        text-align: center;
+      }
+      .or {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 28px 0 22px;
+        color: #9a9a9a;
+        font-size: 15px;
+      }
+      .or:before,
+      .or:after {
+        content: "";
+        height: 1px;
+        flex: 1;
+        background: #3a3a3a;
+      }
+      .social {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+      }
+      .social button {
+        width: 88px;
+        height: 48px;
+        border-radius: 12px;
+        border: 1px solid #3a3a3a;
+        background: #0a0a0a;
+        color: #fff;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+      }
+      .otp {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin: 16px 0 8px;
+      }
+      .otp input {
+        width: 44px;
+        height: 52px;
+        text-align: center;
+        font-size: 22px;
+        border: 1px solid #5a5a5a;
+        border-radius: 10px;
+        background: #000;
+        color: #fff;
+      }
+      .hint {
+        color: #9a9a9a;
+        font-size: 13px;
+        text-align: center;
+      }
+      #step2 {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <svg
+        class="mark"
+        viewBox="0 0 331.644 40.825"
+        fill="#fff"
+        aria-label="SpaceX"
+      >
+        <path
+          d="M77.292,15.094H49.249l-1.039,0.777v24.947h7.763v-9.355l0.741-0.664h20.579 c5.196,0,7.632-1.398,7.632-4.985v-5.728C84.924,16.493,82.489,15.094,77.292,15.094 M77.292,24.317 c0,1.69-1.118,2.041-3.554,2.041H56.799l-0.827-0.804V20.21l0.741-0.678h17.025c2.436,0,3.554,0.347,3.554,2.045V24.317z"
+        />
+        <polyline
+          points="99.081,19.813 105.761,29.6 105.391,30.548 90.618,30.548 86.847,35.187 108.837,35.187 110.361,36.115 113.775,40.824 122.659,40.824 103.186,14.775"
+        />
+        <polyline
+          points="187.418,35.757 187.418,28.833 188.217,28.143 203.079,28.143 203.079,23.734 179.524,23.734 179.524,40.823 214.27,40.823 214.27,36.435 188.252,36.435"
+        />
+        <rect x="179.524" y="15.094" width="35.113" height="4.848" />
+        <path
+          d="M140.361,19.685h28.288c-0.436-3.597-2.668-4.595-8.33-4.595H140.06c-6.389,0-8.427,1.247-8.427,6.082 v13.565c0,4.84,2.038,6.087,8.427,6.087h20.259c5.745,0,7.945-1.079,8.095-4.81h-28.053l-0.832-0.783V20.209"
+        />
+        <path
+          d="M29.333,25.118H8.754l-0.606-0.667v-4.402l0.603-0.466h27.742l0.379-0.927 c-0.945-2.431-3.392-3.565-7.936-3.565H9.665c-6.385,0-8.426,1.247-8.426,6.082v2.844c0,4.841,2.041,6.086,8.426,6.086h20.533 l0.645,0.566v4.602l-0.526,0.718H6.83v-0.022H0.678c0,0-0.704,0.353-0.677,0.518c0.525,3.382,2.829,4.34,8.345,4.34h20.987 c6.384,0,8.486-1.247,8.486-6.087v-3.543C37.819,26.363,35.717,25.118,29.333,25.118"
+        />
+        <path
+          d="M236.725,14.988h-11.551l-0.627,1.193l12.828,9.351c2.43-1.407,5.074-2.833,7.95-4.24"
+        />
+        <path
+          d="M247.075,32.603l11.275,8.222h11.692l0.484-1.089L253.69,27.413 C251.454,29.054,249.245,30.787,247.075,32.603"
+        />
+        <path
+          d="M235.006,40.806h-10.451l-0.883-1.383C230.778,32.562,262.56,3.151,331.644,0 C331.644,0,273.658,1.956,235.006,40.806"
+        />
+      </svg>
+
+      <p class="welcome">Welcome back to SpaceX.</p>
+
+      <div class="tabs">
+        <span class="on">Sign in</span>
+        <a href="signup.html">Create account</a>
+      </div>
+
+      <form id="login-form">
+        <label for="email">Username or email</label>
+        <div class="field">
+          <svg
+            class="left"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          >
+            <rect x="2.5" y="4.5" width="15" height="11" rx="2" />
+            <path d="m4 6 6 4.5L16 6" />
+          </svg>
+          <input
+            id="email"
+            name="email"
+            type="text"
+            placeholder="Enter username or email"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <label for="password">Password</label>
+        <div class="field">
+          <svg
+            class="left"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          >
+            <rect x="4" y="9" width="12" height="8.5" rx="2" />
+            <path d="M7 9V6.5a3 3 0 0 1 6 0V9" />
+          </svg>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+          <button
+            class="eye"
+            type="button"
+            id="toggle"
+            aria-label="Show password"
+          >
+            <svg
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+            >
+              <path d="M2 10s3.5-6 8-6 8 6 8 6-3.5 6-8 6-8-6-8-6Z" />
+              <circle cx="10" cy="10" r="2.2" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="forgot"><a href="forgot.html">Forgot password?</a></div>
+        <button class="continue" type="button" id="go">Continue</button>
+        <div class="err" id="err"></div>
+      </form>
+
+      <div id="step2">
+        <p class="welcome">Two-factor authentication</p>
+        <p class="hint" id="two-hint">Enter the 6-digit code</p>
+        <div class="otp" id="otp">
+          <input maxlength="1" inputmode="numeric" />
+          <input maxlength="1" inputmode="numeric" />
+          <input maxlength="1" inputmode="numeric" />
+          <input maxlength="1" inputmode="numeric" />
+          <input maxlength="1" inputmode="numeric" />
+          <input maxlength="1" inputmode="numeric" />
+        </div>
+        <button class="continue" type="button" id="go2">Verify</button>
+        <div class="err" id="err2"></div>
+      </div>
+
+      <div class="or">or continue with</div>
+      <div class="social">
+        <button type="button" id="google" aria-label="Continue with Google">
+          <span style="font-size: 22px; font-weight: 700">G</span>
+        </button>
+        <button type="button" id="apple" aria-label="Continue with Apple">
+          <svg width="18" height="22" viewBox="0 0 24 24" fill="#fff">
+            <path
+              d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("toggle").onclick = function () {
+        var p = document.getElementById("password");
+        p.type = p.type === "password" ? "text" : "password";
+      };
+      var pendingUser = null;
+      var boxes = document.querySelectorAll("#otp input");
+      boxes.forEach(function (el, i) {
+        el.oninput = function () {
+          this.value = this.value.replace(/\D/g, "").slice(0, 1);
+          if (this.value && boxes[i + 1]) boxes[i + 1].focus();
+        };
+        el.onkeydown = function (e) {
+          if (e.key === "Backspace" && !this.value && boxes[i - 1])
+            boxes[i - 1].focus();
+        };
+      });
+      function finishLogin(user) {
+        var db = JSON.parse(
+          localStorage.getItem("spacex.v1") || '{"users":[]}',
+        );
+        db.session = String(user.email).toLowerCase();
+        localStorage.setItem("spacex.v1", JSON.stringify(db));
+        window.location.replace("home.html");
+      }
+      function doLogin(e) {
+        if (e) e.preventDefault();
+        var identifier = document.getElementById("email").value.trim().toLowerCase();
+        var password = document.getElementById("password").value;
+        var err = document.getElementById("err");
+        err.textContent = "";
+        if (!identifier || !password) {
+          err.textContent = "Enter username/email and password";
+          return false;
+        }
+        var db = { users: [], session: null };
+        try {
+          db = JSON.parse(
+            localStorage.getItem("spacex.v1") || '{"users":[],"session":null}',
+          );
+        } catch (x) {}
+        db.users = db.users || [];
+        var user = null;
+        for (var i = 0; i < db.users.length; i++) {
+          if (
+            String(db.users[i].email || "").toLowerCase() === email &&
+            String(db.users[i].password) === password
+          )
+            user = db.users[i];
+        }
+        if (!user) {
+          err.textContent = "Wrong email or password. Create an account first.";
+          return false;
+        }
+        user.email = email;
+        if (user.twoFAApp || user.twoFAEmail || user.twoFA) {
+          pendingUser = user;
+          document.getElementById("login-form").style.display = "none";
+          document.getElementById("step2").style.display = "block";
+          var hint = "Enter the 6-digit authenticator code";
+          if (user.twoFAEmail && !user.twoFAApp) {
+            user.email2faCode = String(
+              Math.floor(100000 + Math.random() * 900000),
+            );
+            for (var j = 0; j < db.users.length; j++)
+              if (String(db.users[j].email || "").toLowerCase() === email)
+                db.users[j].email2faCode = user.email2faCode;
+            localStorage.setItem("spacex.v1", JSON.stringify(db));
+            hint =
+              "Code sent to " +
+              email +
+              ". For this demo, use: " +
+              user.email2faCode;
+          }
+          document.getElementById("two-hint").textContent = hint;
+          boxes[0].focus();
+          return false;
+        }
+        db.session = email;
+        localStorage.setItem("spacex.v1", JSON.stringify(db));
+        window.location.replace("home.html");
+        return false;
+      }
+      document.getElementById("go2").onclick = function () {
+        var v = "";
+        boxes.forEach(function (el) {
+          v += el.value;
+        });
+        var err2 = document.getElementById("err2");
+        err2.textContent = "";
+        if (!pendingUser) return;
+        if (v.length !== 6) {
+          err2.textContent = "Enter all 6 digits";
+          return;
+        }
+        if (
+          pendingUser.twoFAEmail &&
+          !pendingUser.twoFAApp &&
+          v !== String(pendingUser.email2faCode)
+        ) {
+          err2.textContent = "Wrong code";
+          return;
+        }
+        finishLogin(pendingUser);
+      };
+      const API_BASE = "http://localhost:4000";
+
+      async function api(path, options = {}) {
+        const response = await fetch(`${API_BASE}${path}`, {
+          headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {}),
+          },
+          ...options,
+        });
+
+        const text = await response.text();
+        let payload = null;
+        try {
+          payload = text ? JSON.parse(text) : null;
+        } catch (error) {
+          payload = { message: text || "Request failed." };
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            payload && payload.message ? payload.message : "Request failed.",
+          );
+        }
+
+        return payload;
+      }
+
+      document.getElementById("login-form").onsubmit = async function (e) {
+        e.preventDefault();
+        var identifier = document.getElementById("email").value.trim();
+        var password = document.getElementById("password").value;
+        var err = document.getElementById("err");
+        err.textContent = "";
+
+        if (!identifier || !password) {
+          err.textContent = "Enter username/email and password";
+          return false;
+        }
+
+        try {
+          const data = await api("/api/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ identifier: identifier, password: password }),
+          });
+
+          localStorage.setItem("authToken", data.token);
+          localStorage.setItem("spacex.user", JSON.stringify(data.user || {}));
+
+          var legacy = { users: [], session: null };
+          try {
+            legacy = JSON.parse(
+              localStorage.getItem("spacex.v1") ||
+                '{"users":[],"session":null}',
+            );
+          } catch (x) {}
+          legacy.session = data.user && data.user.email ? data.user.email : identifier;
+          legacy.users = legacy.users || [];
+          var existingIndex = -1;
+          for (var i = 0; i < legacy.users.length; i++) {
+            if (String(legacy.users[i].email || "").toLowerCase() ===
+              String(data.user && data.user.email ? data.user.email : identifier).toLowerCase()) {
+              existingIndex = i;
+              break;
+            }
+          }
+          if (existingIndex === -1) {
+            legacy.users.push({
+              email: data.user && data.user.email ? data.user.email : identifier,
+              fullName: data.user && data.user.name ? data.user.name : "",
+              username: "",
+              password: "",
+              plan: "regular",
+              isAdmin: data.user && data.user.role === "ADMIN",
+              balance: 0,
+            });
+          } else {
+            legacy.users[existingIndex].fullName =
+              data.user && data.user.name
+                ? data.user.name
+                : legacy.users[existingIndex].fullName || "";
+            legacy.users[existingIndex].isAdmin =
+              data.user && data.user.role === "ADMIN";
+          }
+          localStorage.setItem("spacex.v1", JSON.stringify(legacy));
+
+          window.location.replace(
+            data.user && data.user.role === "ADMIN"
+              ? "admin.html"
+              : "home.html",
+          );
+        } catch (error) {
+          err.textContent = error.message || "Wrong email or password.";
+        }
+
+        return false;
+      };
+
+      document.getElementById("go").onclick = function (e) {
+        document
+          .getElementById("login-form")
+          .dispatchEvent(new Event("submit", { cancelable: true }));
+        e.preventDefault();
+      };
+
+      function soon() {
+        alert(
+          "Google and Apple sign-in will be added when the site is live on your domain.",
+        );
+      }
+      document.getElementById("google").onclick = soon;
+      document.getElementById("apple").onclick = soon;
+    </script>
+  </body>
+</html>
