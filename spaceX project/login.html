@@ -377,7 +377,10 @@
       }
       function doLogin(e) {
         if (e) e.preventDefault();
-        var identifier = document.getElementById("email").value.trim().toLowerCase();
+        var identifier = document
+          .getElementById("email")
+          .value.trim()
+          .toLowerCase();
         var password = document.getElementById("password").value;
         var err = document.getElementById("err");
         err.textContent = "";
@@ -455,7 +458,7 @@
         }
         finishLogin(pendingUser);
       };
-      const API_BASE = "http://localhost:4000";
+      const API_BASE = "https://spacex-backend-yxlo.onrender.com";
 
       async function api(path, options = {}) {
         const response = await fetch(`${API_BASE}${path}`, {
@@ -498,7 +501,10 @@
         try {
           const data = await api("/api/auth/login", {
             method: "POST",
-            body: JSON.stringify({ identifier: identifier, password: password }),
+            body: JSON.stringify({
+              identifier: identifier,
+              password: password,
+            }),
           });
 
           localStorage.setItem("authToken", data.token);
@@ -511,19 +517,25 @@
                 '{"users":[],"session":null}',
             );
           } catch (x) {}
-          legacy.session = data.user && data.user.email ? data.user.email : identifier;
+          legacy.session =
+            data.user && data.user.email ? data.user.email : identifier;
           legacy.users = legacy.users || [];
           var existingIndex = -1;
           for (var i = 0; i < legacy.users.length; i++) {
-            if (String(legacy.users[i].email || "").toLowerCase() ===
-              String(data.user && data.user.email ? data.user.email : identifier).toLowerCase()) {
+            if (
+              String(legacy.users[i].email || "").toLowerCase() ===
+              String(
+                data.user && data.user.email ? data.user.email : identifier,
+              ).toLowerCase()
+            ) {
               existingIndex = i;
               break;
             }
           }
           if (existingIndex === -1) {
             legacy.users.push({
-              email: data.user && data.user.email ? data.user.email : identifier,
+              email:
+                data.user && data.user.email ? data.user.email : identifier,
               fullName: data.user && data.user.name ? data.user.name : "",
               username: "",
               password: "",

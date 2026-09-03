@@ -89,8 +89,8 @@
       var badge = document.getElementById("badge");
       var statusLine = document.getElementById("status-line");
 
-      var API_BASE = "http://localhost:4000";
-      var SOCKET_URL = "http://localhost:4000";
+      var API_BASE = "https://spacex-backend-yxlo.onrender.com";
+      var SOCKET_URL = "https://spacex-backend-yxlo.onrender.com";
       var token = localStorage.getItem("authToken");
 
       var socket = null;

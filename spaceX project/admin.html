@@ -812,7 +812,7 @@
         )
           me = db.users[i];
       var adminToken = localStorage.getItem("authToken");
-      var API_BASE = "http://localhost:4000";
+      var API_BASE = "https://spacex-backend-yxlo.onrender.com";
       function escapeHtml(value) {
         return String(value == null ? "" : value).replace(
           /[&<>'"]/g,
@@ -864,7 +864,7 @@
         if (!adminToken) return;
         try {
           var response = await fetch(
-            "http://localhost:4000/api/admin/dashboard",
+            "https://spacex-backend-yxlo.onrender.com/api/admin/dashboard",
             {
               headers: { Authorization: "Bearer " + adminToken },
             },
@@ -2492,9 +2492,9 @@
                         escapeHtml(selected.email) +
                         "</p><p>KYC documents: " +
                         escapeHtml((selected.kycDocuments || []).length) +
-                        "</p><p>Verification: <strong style=\"color:" +
+                        '</p><p>Verification: <strong style="color:' +
                         (selected.verified ? "#35c759" : "#ff9f0a") +
-                        "\">" +
+                        '">' +
                         (selected.verified ? "Verified" : "Unverified") +
                         "</strong></p><h3>KYC profile</h3><button class='act danger' id='delete-user-kyc'>Delete all KYC data</button><p>Legal name: " +
                         escapeHtml(
@@ -2513,7 +2513,9 @@
                             (selected.kycProfile?.idNumber || "Not provided"),
                         ) +
                         "</p><p>KYC status: " +
-                        escapeHtml(selected.kycProfile?.status || "NOT_STARTED") +
+                        escapeHtml(
+                          selected.kycProfile?.status || "NOT_STARTED",
+                        ) +
                         "</p><h3>Retirement Account (401k)</h3>" +
                         "<p>Provider: " +
                         escapeHtml(retirement.provider || "Not provided") +
@@ -2563,10 +2565,16 @@
                         '<h3>Chat History</h3><div id="user-chat-history" style="max-height:300px;overflow-y:auto;border:1px solid #333;padding:10px;border-radius:8px;background:#000;margin-top:10px"><p class="muted">Loading chat history...</p></div>';
 
                       document.getElementById("edit").innerHTML = profileHtml;
-                      var deleteUserKyc = document.getElementById("delete-user-kyc");
+                      var deleteUserKyc =
+                        document.getElementById("delete-user-kyc");
                       if (deleteUserKyc)
                         deleteUserKyc.onclick = async function () {
-                          if (!window.confirm("Delete all KYC data for this user?")) return;
+                          if (
+                            !window.confirm(
+                              "Delete all KYC data for this user?",
+                            )
+                          )
+                            return;
                           try {
                             await adminApi(
                               "/api/admin/users/" +

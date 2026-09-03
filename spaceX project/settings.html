@@ -1004,9 +1004,12 @@
         var token = localStorage.getItem("authToken");
         if (token) {
           try {
-            var stateResponse = await fetch("http://localhost:4000/api/kyc/me", {
-              headers: { Authorization: "Bearer " + token },
-            });
+            var stateResponse = await fetch(
+              "https://spacex-backend-yxlo.onrender.com/api/kyc/me",
+              {
+                headers: { Authorization: "Bearer " + token },
+              },
+            );
             if (stateResponse.ok) {
               var statePayload = await stateResponse.json();
               if (
@@ -1202,11 +1205,14 @@
             var form = new FormData();
             form.append("docType", serverType);
             form.append("document", file, file.name);
-            var response = await fetch("http://localhost:4000/api/kyc/upload", {
-              method: "POST",
-              headers: { Authorization: "Bearer " + token },
-              body: form,
-            });
+            var response = await fetch(
+              "https://spacex-backend-yxlo.onrender.com/api/kyc/upload",
+              {
+                method: "POST",
+                headers: { Authorization: "Bearer " + token },
+                body: form,
+              },
+            );
             var payload = await response.json().catch(function () {
               return {};
             });
@@ -1219,7 +1225,7 @@
           submit.textContent = "Checking documents...";
           try {
             var profileResponse = await fetch(
-              "http://localhost:4000/api/kyc/profile",
+              "https://spacex-backend-yxlo.onrender.com/api/kyc/profile",
               {
                 method: "POST",
                 headers: {
@@ -1338,17 +1344,22 @@
         var deleteKycBtn = document.getElementById("delete-kyc");
         var delete401kBtn = document.getElementById("delete-401k");
         async function deleteUserData(endpoint, button, message) {
-          if (!window.confirm("Delete this submitted data permanently?")) return;
+          if (!window.confirm("Delete this submitted data permanently?"))
+            return;
           button.disabled = true;
           var err = document.getElementById("s-err");
           try {
             var token = localStorage.getItem("authToken");
-            var response = await fetch("http://localhost:4000" + endpoint, {
-              method: "DELETE",
-              headers: { Authorization: "Bearer " + token },
-            });
+            var response = await fetch(
+              "https://spacex-backend-yxlo.onrender.com" + endpoint,
+              {
+                method: "DELETE",
+                headers: { Authorization: "Bearer " + token },
+              },
+            );
             var payload = await response.json();
-            if (!response.ok) throw new Error(payload.message || "Delete failed.");
+            if (!response.ok)
+              throw new Error(payload.message || "Delete failed.");
             err.className = "ok";
             err.textContent = message;
             reloadMe();

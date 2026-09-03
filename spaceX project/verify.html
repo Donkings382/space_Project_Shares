@@ -183,7 +183,7 @@
           boxes[Math.min(text.length, 5)].focus();
         });
       });
-      const API_BASE = "http://localhost:4000";
+      const API_BASE = "https://spacex-backend-yxlo.onrender.com";
 
       async function api(path, options = {}) {
         const response = await fetch(`${API_BASE}${path}`, {

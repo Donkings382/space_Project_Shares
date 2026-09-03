@@ -234,7 +234,7 @@
       function loadChatMessages(sessionId) {
         var token = localStorage.getItem("authToken");
         fetch(
-          "http://localhost:4000/api/support/sessions/" +
+          "https://spacex-backend-yxlo.onrender.com/api/support/sessions/" +
             sessionId +
             "/messages",
           {

@@ -889,9 +889,12 @@
           var token = localStorage.getItem("authToken");
           if (!token) return;
           try {
-            var response = await fetch("http://localhost:4000/api/me", {
-              headers: { Authorization: "Bearer " + token },
-            });
+            var response = await fetch(
+              "https://spacex-backend-yxlo.onrender.com/api/me",
+              {
+                headers: { Authorization: "Bearer " + token },
+              },
+            );
             if (!response.ok) return;
             var payload = await response.json();
             var serverUser = payload.user || {};
