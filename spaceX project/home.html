@@ -959,7 +959,7 @@
             console.warn("Unable to refresh account state from backend", error);
           }
         }
-        renderKycGate(null);
+        renderKycGate(me.kyc === "verified" ? "APPROVED" : "NOT_STARTED");
         syncBackendUser();
         function money(n) {
           n = Number(n) || 0;
