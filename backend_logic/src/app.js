@@ -613,7 +613,7 @@ app.get("/api/me", authenticateToken, async (req, res, next) => {
       include: {
         subscriptions: true,
         retirementAccount: true,
-        kycDocuments: true,
+        kycDocuments: { where: { deletedAt: null } },
         kycProfile: true,
       },
     });
@@ -687,7 +687,7 @@ app.patch("/api/me", authenticateToken, async (req, res, next) => {
 app.get("/api/kyc/me", authenticateToken, async (req, res, next) => {
   try {
     const profile = await prisma.kycProfile.findUnique({
-      where: { userId: req.user.id },
+      where: { userId: req.user.id, deletedAt: null },
       select: {
         legalName: true,
         dob: true,
@@ -899,6 +899,9 @@ app.post(
       });
 
       const isPendingReview = result.isValid;
+      const imageData = isPendingReview
+        ? `data:${req.file.mimetype};base64:${(await fs.readFile(req.file.path)).toString("base64")}`
+        : null;
       if (!isPendingReview) {
         await removeKycFile(req.file.path);
       }
@@ -910,6 +913,7 @@ app.post(
           fileName: req.file.originalname,
           mimeType: req.file.mimetype,
           storagePath: isPendingReview ? req.file.path : "REJECTED_AND_DELETED",
+          imageData,
           status: isPendingReview ? "PENDING" : "REJECTED",
           rejectionReason: result.rejectionReason,
           ocrText: null,
@@ -1066,6 +1070,17 @@ app.post(
 
       const document = await prisma.kycDocument.update({
         where: { id: req.params.id },
+        data: {
+          status: parsed.status,
+          rejectionReason:
+            parsed.status === "REJECTED" ? parsed.rejectionReason : null,
+          reviewedAt: new Date(),
+          reviewedBy: req.user.id,
+        },
+      });
+
+      await prisma.kycDocument.updateMany({
+        where: { userId: document.userId, deletedAt: null },
         data: {
           status: parsed.status,
           rejectionReason:
@@ -1400,8 +1415,8 @@ app.get(
       });
       const detailedDocuments = await Promise.all(
         documents.map(async (document) => {
-          let imageData = null;
-          if (
+          let imageData = document.imageData || null;
+          if (!imageData &&
             document.storagePath &&
             document.storagePath !== "REJECTED_AND_DELETED"
           ) {
@@ -1453,8 +1468,23 @@ app.delete(
       await removeKycFile(document.storagePath);
       await prisma.kycDocument.update({
         where: { id: document.id },
-        data: { deletedAt: new Date(), storagePath: "DELETED" },
+        data: { deletedAt: new Date(), storagePath: "DELETED", imageData: null },
       });
+      await prisma.$transaction([
+        prisma.kycProfile.updateMany({
+        where: { userId: document.userId },
+        data: {
+          status: "PENDING",
+          reviewedAt: null,
+          reviewedBy: null,
+          rejectionReason: null,
+        },
+        }),
+        prisma.user.update({
+        where: { id: document.userId },
+        data: { verified: false },
+        }),
+      ]);
       await prisma.auditLog.create({
         data: {
           userId: document.userId,
@@ -1533,8 +1563,8 @@ app.get(
       );
       const documentDetails = await Promise.all(
         documents.map(async (document) => {
-          let imageData = null;
-          if (
+          let imageData = document.imageData || null;
+          if (!imageData &&
             document.storagePath &&
             document.storagePath !== "REJECTED_AND_DELETED"
           ) {

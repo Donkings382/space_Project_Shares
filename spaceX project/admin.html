@@ -1639,7 +1639,7 @@
                         escapeHtml(document.id) +
                         '">Approve</button> <button class="danger" data-server-kyc-no="' +
                         escapeHtml(document.id) +
-                        '">Reject</button>'
+                        '">Decline</button>'
                       : "";
                   var profile = user.kycProfile || {};
                   return (
@@ -1683,8 +1683,8 @@
                         escapeHtml(document.imageData) +
                         '" alt="Uploaded ' +
                         escapeHtml(document.docType) +
-                        '" style="max-width:320px;max-height:220px;object-fit:contain;border:1px solid #333;border-radius:8px;margin:8px 0">'
-                      : '<p class="muted">Uploaded image unavailable</p>') +
+                        '" style="display:block;max-width:320px;max-height:220px;object-fit:contain;border:1px solid #333;border-radius:8px;margin:8px 0;cursor:pointer" class="kyc-pic">'
+                      : "") +
                     '<div class="btns">' +
                     action +
                     '<button class="act danger" data-server-kyc-delete="' +
@@ -1706,6 +1706,11 @@
                     );
                   };
                 });
+              document.querySelectorAll(".kyc-pic").forEach(function (img) {
+                img.onclick = function () {
+                  window.open(img.src, "_blank");
+                };
+              });
               document
                 .querySelectorAll("[data-server-kyc-no]")
                 .forEach(function (button) {
@@ -1848,7 +1853,7 @@
           status === "REJECTED"
             ? window.prompt(
                 "Rejection reason:",
-                "Document does not match the selected type.",
+                "Document declined by admin.",
               )
             : null;
         if (status === "REJECTED" && !rejectionReason) return;
