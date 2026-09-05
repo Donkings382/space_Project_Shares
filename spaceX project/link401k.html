@@ -619,6 +619,9 @@
           ]) {
             var file = document.getElementById(fileInfo.input).files[0];
             if (!file) continue;
+            if (!/^image\//i.test(file.type) || file.size > 5 * 1024 * 1024) {
+              throw new Error("Upload image files no larger than 5MB.");
+            }
             var formData = new FormData();
             formData.append("docType", fileInfo.type);
             formData.append("document", file);

@@ -711,8 +711,6 @@ app.get("/api/kyc/me", authenticateToken, async (req, res, next) => {
         mimeType: true,
         status: true,
         rejectionReason: true,
-        ocrText: true,
-        confidence: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -889,6 +887,10 @@ app.post(
       if (!req.file) {
         return res.status(400).json({ message: "No document uploaded." });
       }
+      if (!/^image\//i.test(req.file.mimetype || "")) {
+        await removeKycFile(req.file.path);
+        return res.status(400).json({ message: "Upload an image file no larger than 5MB." });
+      }
 
       const result = await processKycUpload({
         filePath: req.file.path,
@@ -910,8 +912,8 @@ app.post(
           storagePath: isPendingReview ? req.file.path : "REJECTED_AND_DELETED",
           status: isPendingReview ? "PENDING" : "REJECTED",
           rejectionReason: result.rejectionReason,
-          ocrText: result.ocrText,
-          confidence: result.confidence,
+          ocrText: null,
+          confidence: null,
         },
       });
 

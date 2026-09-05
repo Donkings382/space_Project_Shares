@@ -1203,6 +1203,12 @@
             err.textContent = "Please select both document images again";
             return;
           }
+          for (var imageFile of [frontFile, backFile]) {
+            if (!/^image\//i.test(imageFile.type) || imageFile.size > 5 * 1024 * 1024) {
+              err.textContent = "Upload image files no larger than 5MB";
+              return;
+            }
+          }
           var token = localStorage.getItem("authToken");
           if (!token) {
             err.textContent = "Please sign in again before submitting KYC";
