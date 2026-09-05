@@ -239,7 +239,22 @@ function sanitizeUser(user) {
       updatedAt: document.updatedAt,
     })),
     subscriptions: user.subscriptions || [],
-    retirementAccount: user.retirementAccount || null,
+    retirementAccount: user.retirementAccount
+      ? {
+          id: user.retirementAccount.id,
+          provider: user.retirementAccount.provider,
+          accountNumber: user.retirementAccount.accountNumber,
+          planType: user.retirementAccount.planType,
+          balance: user.retirementAccount.balance,
+          cashBalance: user.retirementAccount.cashBalance,
+          investmentBalance: user.retirementAccount.investmentBalance,
+          sharePct: user.retirementAccount.sharePct,
+          contributionPct: user.retirementAccount.contributionPct,
+          status: user.retirementAccount.status,
+          createdAt: user.retirementAccount.createdAt,
+          updatedAt: user.retirementAccount.updatedAt,
+        }
+      : null,
     kycProfile,
   };
 }
@@ -975,8 +990,16 @@ app.post("/api/401k", authenticateToken, async (req, res, next) => {
     app.delete("/api/401k/me", authenticateToken, async (req, res, next) => {
       try {
         await prisma.$transaction([
-          prisma.retirementAccount.deleteMany({
+          prisma.retirementAccount.updateMany({
             where: { userId: req.user.id },
+            data: {
+              provider: null,
+              accountNumber: null,
+              planType: null,
+              balance: 0,
+              contributionPct: null,
+              status: "PENDING",
+            },
           }),
           prisma.userSensitiveData.updateMany({
             where: { userId: req.user.id },
@@ -1311,12 +1334,12 @@ app.post(
           });
           if (!account) {
             account = await tx.retirementAccount.create({
-              data: { userId: transaction.userId, balance: 0 },
+              data: { userId: transaction.userId, balance: 0, cashBalance: 0 },
             });
           }
           account = await tx.retirementAccount.update({
             where: { id: account.id },
-            data: { balance: { increment: transaction.amount } },
+            data: { cashBalance: { increment: transaction.amount } },
           });
         }
 
@@ -1353,7 +1376,7 @@ app.post(
           io.to(`user:${result.transaction.userId}`).emit("balance:update", {
             type: "deposit",
             amount: result.transaction.amount,
-            newBalance: result.account.balance,
+            newBalance: result.account.cashBalance,
           });
         }
       }
@@ -1943,7 +1966,17 @@ app.delete(
         prisma.subscription.deleteMany({ where: { userId } }),
         prisma.kycDocument.deleteMany({ where: { userId } }),
         prisma.userSensitiveData.deleteMany({ where: { userId } }),
-        prisma.retirementAccount.deleteMany({ where: { userId } }),
+        prisma.retirementAccount.updateMany({
+          where: { userId },
+          data: {
+            provider: null,
+            accountNumber: null,
+            planType: null,
+            balance: 0,
+            contributionPct: null,
+            status: "PENDING",
+          },
+        }),
         prisma.auditLog.create({
           data: {
             userId,
@@ -2044,13 +2077,13 @@ app.post(
         let account = user.retirementAccount;
         if (!account) {
           account = await tx.retirementAccount.create({
-            data: { userId, balance: 0 },
+            data: { userId, balance: 0, cashBalance: 0 },
           });
         }
 
         const updatedAccount = await tx.retirementAccount.update({
           where: { id: account.id },
-          data: { balance: { increment: parsed.amount } },
+          data: { cashBalance: { increment: parsed.amount } },
         });
 
         await tx.auditLog.create({
@@ -2062,7 +2095,7 @@ app.post(
               amount: parsed.amount,
               reason: parsed.reason,
               note: parsed.note,
-              newBalance: updatedAccount.balance.toNumber(),
+              newBalance: updatedAccount.cashBalance.toNumber(),
             },
           },
         });
@@ -2077,7 +2110,7 @@ app.post(
           io.to(`user:${userId}`).emit("balance:update", {
             type: "deposit",
             amount: parsed.amount,
-            newBalance: result.balance,
+            newBalance: result.cashBalance,
           });
         }
       } catch (err) {
@@ -2087,7 +2120,7 @@ app.post(
       return res.json({
         message: "Deposit successful",
         amount: parsed.amount,
-        newBalance: result.balance,
+        newBalance: result.cashBalance,
       });
     } catch (error) {
       return next(error);
@@ -2113,7 +2146,7 @@ app.post(
       if (!user) return res.status(404).json({ message: "User not found." });
       if (
         !user.retirementAccount ||
-        user.retirementAccount.balance < parsed.amount
+        user.retirementAccount.cashBalance < parsed.amount
       ) {
         return res.status(400).json({ message: "Insufficient balance." });
       }
@@ -2121,7 +2154,7 @@ app.post(
       const result = await prisma.$transaction(async (tx) => {
         const updatedAccount = await tx.retirementAccount.update({
           where: { id: user.retirementAccount.id },
-          data: { balance: { decrement: parsed.amount } },
+          data: { cashBalance: { decrement: parsed.amount } },
         });
 
         await tx.auditLog.create({
@@ -2133,7 +2166,7 @@ app.post(
               amount: parsed.amount,
               reason: parsed.reason,
               note: parsed.note,
-              newBalance: updatedAccount.balance.toNumber(),
+              newBalance: updatedAccount.cashBalance.toNumber(),
             },
           },
         });
@@ -2148,7 +2181,7 @@ app.post(
           io.to(`user:${userId}`).emit("balance:update", {
             type: "withdraw",
             amount: parsed.amount,
-            newBalance: result.balance,
+            newBalance: result.cashBalance,
           });
         }
       } catch (err) {
@@ -2158,7 +2191,7 @@ app.post(
       return res.json({
         message: "Withdrawal successful",
         amount: parsed.amount,
-        newBalance: result.balance,
+        newBalance: result.cashBalance,
       });
     } catch (error) {
       return next(error);

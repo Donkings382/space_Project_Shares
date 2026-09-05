@@ -902,7 +902,14 @@
             var profile = serverUser.kycProfile || null;
             var documents = serverUser.kycDocuments || [];
             if (serverUser.retirementAccount) {
-              me.balance = Number(serverUser.retirementAccount.balance) || 0;
+              var account = serverUser.retirementAccount;
+              me.balance = Number(account.cashBalance) || 0;
+              me.investAmount = Number(account.investmentBalance) || 0;
+              me.sharePct = Number(account.sharePct) || 0;
+              me.k401 = {
+                amount: Number(account.balance) || 0,
+                status: account.status === "DECLINED" ? "declined" : "active",
+              };
             }
             if (!profile && documents.length === 0) {
               me.kyc = "none";
@@ -955,6 +962,10 @@
                 isAdmin: me.isAdmin,
                 verified: me.verified,
                 kyc: me.kyc,
+                balance: me.balance,
+                investAmount: me.investAmount,
+                sharePct: me.sharePct,
+                k401: me.k401,
               });
             }
             localStorage.setItem("spacex.v1", JSON.stringify(local));
