@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>SPACEX — Assets</title>
     <style>
       * {
@@ -357,7 +358,7 @@
         document.getElementById("pend").textContent = money(pending);
         var token = localStorage.getItem("authToken");
         if (token) {
-          fetch("https://spacex-backend-yxlo.onrender.com/api/me", {
+          fetch(window.SPACEX_CONFIG.apiBase + "/api/me", {
             headers: { Authorization: "Bearer " + token },
           })
             .then(function (response) {

@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>Admin Live Support</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
@@ -68,107 +69,194 @@
     </div>
 
     <script>
-      const API_BASE = 'https://spacex-backend-yxlo.onrender.com';
-      const SOCKET_URL = 'https://spacex-backend-yxlo.onrender.com';
-      const token = localStorage.getItem('authToken');
+      const API_BASE = window.SPACEX_CONFIG.apiBase;
+      const SOCKET_URL = API_BASE;
+      const token = localStorage.getItem("authToken");
       if (!token) {
-        alert('Please sign in as admin first (login.html)');
+        alert("Please sign in as admin first (login.html)");
       }
 
       let socket = null;
       let currentSession = null;
 
-      const sessionsListEl = document.getElementById('sessions-list');
-      const chatArea = document.getElementById('chat-area');
-      const sessionTitle = document.getElementById('session-title');
-      const sessionSub = document.getElementById('session-sub');
-      const refreshBtn = document.getElementById('refresh-sessions');
-      const adminMsg = document.getElementById('admin-msg');
-      const adminSend = document.getElementById('admin-send');
+      const sessionsListEl = document.getElementById("sessions-list");
+      const chatArea = document.getElementById("chat-area");
+      const sessionTitle = document.getElementById("session-title");
+      const sessionSub = document.getElementById("session-sub");
+      const refreshBtn = document.getElementById("refresh-sessions");
+      const adminMsg = document.getElementById("admin-msg");
+      const adminSend = document.getElementById("admin-send");
 
-      function escapeHtml(value){ return String(value||'').replace(/[&<>'"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'":"&#39;' }[c])); }
-      function formatTime(dt){ const d=new Date(dt); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+      function escapeHtml(value) {
+        return String(value || "").replace(
+          /[&<>'"]/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+      function formatTime(dt) {
+        const d = new Date(dt);
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      }
 
-      function renderSessions(items){
-        sessionsListEl.innerHTML = '';
-        if (!items.length) sessionsListEl.innerHTML = '<p class="text-gray-500">No open sessions</p>';
-        items.forEach(s=>{
-          const div = document.createElement('div');
-          div.className = 'p-3 border rounded hover:bg-gray-50 cursor-pointer';
-          div.innerHTML = `<div class='flex justify-between'><div><b>${escapeHtml(s.user.name||s.user.email)}</b><div class='text-sm text-gray-500'>${escapeHtml(s.context)}</div></div><div class='text-sm text-gray-500'>${s.messages && s.messages[0] ? escapeHtml((s.messages[0].content||'').slice(0,40)) : 'No messages'}</div></div>`;
-          div.onclick = ()=>{ openSession(s.id); };
+      function renderSessions(items) {
+        sessionsListEl.innerHTML = "";
+        if (!items.length)
+          sessionsListEl.innerHTML =
+            '<p class="text-gray-500">No open sessions</p>';
+        items.forEach((s) => {
+          const div = document.createElement("div");
+          div.className = "p-3 border rounded hover:bg-gray-50 cursor-pointer";
+          div.innerHTML = `<div class='flex justify-between'><div><b>${escapeHtml(s.user.name || s.user.email)}</b><div class='text-sm text-gray-500'>${escapeHtml(s.context)}</div></div><div class='text-sm text-gray-500'>${s.messages && s.messages[0] ? escapeHtml((s.messages[0].content || "").slice(0, 40)) : "No messages"}</div></div>`;
+          div.onclick = () => {
+            openSession(s.id);
+          };
           sessionsListEl.appendChild(div);
         });
       }
 
-      async function fetchSessions(){
-        const res = await fetch(API_BASE + '/api/admin/support/sessions', { headers: { Authorization: 'Bearer '+token } });
-        if (!res.ok) throw new Error('Failed to load sessions');
+      async function fetchSessions() {
+        const res = await fetch(API_BASE + "/api/admin/support/sessions", {
+          headers: { Authorization: "Bearer " + token },
+        });
+        if (!res.ok) throw new Error("Failed to load sessions");
         const p = await res.json();
         return p.sessions || [];
       }
 
-      async function loadAndRenderSessions(){
-        try{
+      async function loadAndRenderSessions() {
+        try {
           const items = await fetchSessions();
           renderSessions(items);
-        }catch(err){ console.warn(err); sessionsListEl.innerHTML = '<p class="text-red-500">Failed to load</p>' }
+        } catch (err) {
+          console.warn(err);
+          sessionsListEl.innerHTML =
+            '<p class="text-red-500">Failed to load</p>';
+        }
       }
 
-      async function openSession(id){
+      async function openSession(id) {
         currentSession = id;
         // join session room
-        if (socket && socket.connected) socket.emit('joinSession', id);
+        if (socket && socket.connected) socket.emit("joinSession", id);
         // load messages
-        const res = await fetch(API_BASE + '/api/admin/support/sessions/'+encodeURIComponent(id)+'/messages', { headers: { Authorization: 'Bearer '+token } });
-        if (!res.ok) { chatArea.innerHTML = '<p class="text-red-500">Failed to load messages</p>'; return; }
+        const res = await fetch(
+          API_BASE +
+            "/api/admin/support/sessions/" +
+            encodeURIComponent(id) +
+            "/messages",
+          { headers: { Authorization: "Bearer " + token } },
+        );
+        if (!res.ok) {
+          chatArea.innerHTML =
+            '<p class="text-red-500">Failed to load messages</p>';
+          return;
+        }
         const p = await res.json();
-        chatArea.innerHTML = '';
-        p.messages.forEach(m=>{ appendChatMessage(m); });
-        sessionTitle.textContent = 'Conversation';
-        sessionSub.textContent = 'Session: ' + id;
+        chatArea.innerHTML = "";
+        p.messages.forEach((m) => {
+          appendChatMessage(m);
+        });
+        sessionTitle.textContent = "Conversation";
+        sessionSub.textContent = "Session: " + id;
         chatArea.scrollTop = chatArea.scrollHeight;
       }
 
-      function appendChatMessage(m){
-        const el = document.createElement('div');
-        el.className = 'mb-3 '+(m.senderRole==='ADMIN' ? 'text-right' : 'text-left');
-        el.innerHTML = `<div class='inline-block ${m.senderRole==='ADMIN' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'} px-3 py-2 rounded-lg msg-arrive' style='max-width:75%'>${escapeHtml(m.content)}<div class='text-xs text-gray-400 mt-1'>${m.sender && m.sender.name ? escapeHtml(m.sender.name) : m.senderRole} · ${formatTime(m.createdAt)}</div></div>`;
+      function appendChatMessage(m) {
+        const el = document.createElement("div");
+        el.className =
+          "mb-3 " + (m.senderRole === "ADMIN" ? "text-right" : "text-left");
+        el.innerHTML = `<div class='inline-block ${m.senderRole === "ADMIN" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800"} px-3 py-2 rounded-lg msg-arrive' style='max-width:75%'>${escapeHtml(m.content)}<div class='text-xs text-gray-400 mt-1'>${m.sender && m.sender.name ? escapeHtml(m.sender.name) : m.senderRole} · ${formatTime(m.createdAt)}</div></div>`;
         chatArea.appendChild(el);
         chatArea.scrollTop = chatArea.scrollHeight;
       }
 
-      function connectSocket(){
+      function connectSocket() {
         socket = io(SOCKET_URL, { auth: { token } });
-        socket.on('connect', ()=>{ console.log('admin socket connected'); loadAndRenderSessions(); });
-        socket.on('support:session:new', (payload)=>{ loadAndRenderSessions(); });
-        socket.on('support:session:message', (payload)=>{ // payload: { sessionId, message }
+        socket.on("connect", () => {
+          console.log("admin socket connected");
+          loadAndRenderSessions();
+        });
+        socket.on("support:session:new", (payload) => {
+          loadAndRenderSessions();
+        });
+        socket.on("support:session:message", (payload) => {
+          // payload: { sessionId, message }
           // If current session open, append; else mark new
-          if (payload.sessionId === currentSession){ appendChatMessage(payload.message); }
-          else { loadAndRenderSessions(); }
+          if (payload.sessionId === currentSession) {
+            appendChatMessage(payload.message);
+          } else {
+            loadAndRenderSessions();
+          }
         });
-        socket.on('support:message', (payload)=>{ // message broadcast to room
-          if (payload && payload.message && payload.message.sessionId===currentSession) appendChatMessage(payload.message);
+        socket.on("support:message", (payload) => {
+          // message broadcast to room
+          if (
+            payload &&
+            payload.message &&
+            payload.message.sessionId === currentSession
+          )
+            appendChatMessage(payload.message);
         });
-        socket.on('support:session:closed', (payload)=>{ if (payload.sessionId===currentSession) showSystem('Client closed chat'); loadAndRenderSessions(); });
+        socket.on("support:session:closed", (payload) => {
+          if (payload.sessionId === currentSession)
+            showSystem("Client closed chat");
+          loadAndRenderSessions();
+        });
       }
 
-      function showSystem(text){
-        const el = document.createElement('div'); el.className='text-center text-sm text-gray-500 my-2'; el.textContent=text; chatArea.appendChild(el); }
+      function showSystem(text) {
+        const el = document.createElement("div");
+        el.className = "text-center text-sm text-gray-500 my-2";
+        el.textContent = text;
+        chatArea.appendChild(el);
+      }
 
-      adminSend.addEventListener('click', sendAdminMsg);
-      adminMsg.addEventListener('keydown', (e)=>{ if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendAdminMsg(); } });
+      adminSend.addEventListener("click", sendAdminMsg);
+      adminMsg.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendAdminMsg();
+        }
+      });
 
-      function sendAdminMsg(){
-        const txt = adminMsg.value.trim(); if (!txt || !currentSession) return; adminMsg.value='';
-        if (socket && socket.connected){
-          socket.emit('support:send', { sessionId: currentSession, content: txt }, (ack)=>{ if (!ack || ack.error) alert('Failed to send'); else console.log('sent'); });
+      function sendAdminMsg() {
+        const txt = adminMsg.value.trim();
+        if (!txt || !currentSession) return;
+        adminMsg.value = "";
+        if (socket && socket.connected) {
+          socket.emit(
+            "support:send",
+            { sessionId: currentSession, content: txt },
+            (ack) => {
+              if (!ack || ack.error) alert("Failed to send");
+              else console.log("sent");
+            },
+          );
         } else {
-          fetch(API_BASE + '/api/admin/support/messages', { method:'POST', headers:{ 'Content-Type':'application/json', Authorization: 'Bearer '+token }, body: JSON.stringify({ sessionId: currentSession, content: txt })}).then(r=>r.ok? r.json(): r.text()).then(p=>{ if(p && p.data) appendChatMessage(p.data); }).catch(e=>alert('Failed'));
+          fetch(API_BASE + "/api/admin/support/messages", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({ sessionId: currentSession, content: txt }),
+          })
+            .then((r) => (r.ok ? r.json() : r.text()))
+            .then((p) => {
+              if (p && p.data) appendChatMessage(p.data);
+            })
+            .catch((e) => alert("Failed"));
         }
       }
 
-      refreshBtn.addEventListener('click', loadAndRenderSessions);
+      refreshBtn.addEventListener("click", loadAndRenderSessions);
 
       connectSocket();
       loadAndRenderSessions();

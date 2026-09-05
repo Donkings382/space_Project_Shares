@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>SPACEX — Verify Withdrawal</title>
     <style>
       * {
@@ -190,7 +191,8 @@
       });
       document.getElementById("req").onclick = function (e) {
         e.preventDefault();
-        alert("Contact live support. Only admin can issue a token code.");
+        if (window.openLiveChat) window.openLiveChat();
+        else window.__openLiveChatRequested = true;
       };
       document.getElementById("form").onsubmit = function (e) {
         e.preventDefault();
@@ -246,6 +248,12 @@
         sessionStorage.removeItem("spacex-withdraw");
         window.location.href = "transactions.html";
       };
+      (function () {
+        var script = document.createElement("script");
+        script.src = "livechat-loader.js";
+        script.async = false;
+        document.body.appendChild(script);
+      })();
       boxes[0].focus();
     </script>
   </body>

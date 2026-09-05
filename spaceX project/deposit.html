@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>SPACEX — Deposit</title>
     <style>
       * {
@@ -696,21 +697,18 @@
         if (!amount || !token) return;
         button.disabled = true;
         button.textContent = "Saving deposit...";
-        fetch(
-          "https://spacex-backend-yxlo.onrender.com/api/me/transactions/deposit",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + token,
-            },
-            body: JSON.stringify({
-              amount: amount,
-              method: method,
-              note: document.getElementById("note").value.trim(),
-            }),
+        fetch(window.SPACEX_CONFIG.apiBase + "/api/me/transactions/deposit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
           },
-        )
+          body: JSON.stringify({
+            amount: amount,
+            method: method,
+            note: document.getElementById("note").value.trim(),
+          }),
+        })
           .then(function (response) {
             return response.json().then(function (payload) {
               if (!response.ok)
@@ -854,7 +852,8 @@
       function loadChatMessages(sessionId) {
         var token = localStorage.getItem("authToken");
         fetch(
-          "https://spacex-backend-yxlo.onrender.com/api/support/sessions/" +
+          window.SPACEX_CONFIG.apiBase +
+            "/api/support/sessions/" +
             sessionId +
             "/messages",
           {

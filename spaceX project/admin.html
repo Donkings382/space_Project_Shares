@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>SPACEX — Admin</title>
     <style>
       * {
@@ -812,7 +813,7 @@
         )
           me = db.users[i];
       var adminToken = localStorage.getItem("authToken");
-      var API_BASE = "https://spacex-backend-yxlo.onrender.com";
+      var API_BASE = window.SPACEX_CONFIG.apiBase;
       function escapeHtml(value) {
         return String(value == null ? "" : value).replace(
           /[&<>'"]/g,
@@ -864,7 +865,7 @@
         if (!adminToken) return;
         try {
           var response = await fetch(
-            "https://spacex-backend-yxlo.onrender.com/api/admin/dashboard",
+            window.SPACEX_CONFIG.apiBase + "/api/admin/dashboard",
             {
               headers: { Authorization: "Bearer " + adminToken },
             },

@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>SPACEX — Home</title>
     <style>
       * {
@@ -890,7 +891,7 @@
           if (!token) return;
           try {
             var response = await fetch(
-              "https://spacex-backend-yxlo.onrender.com/api/me",
+              window.SPACEX_CONFIG.apiBase + "/api/me",
               {
                 headers: { Authorization: "Bearer " + token },
               },

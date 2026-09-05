@@ -50,8 +50,16 @@ app.use(express.json({ limit: "2mb" }));
 
 const registerSchema = z.object({
   name: z.string().min(2),
+  username: z
+    .string()
+    .trim()
+    .min(3)
+    .max(60)
+    .regex(/^[a-zA-Z0-9_.-]+$/)
+    .optional(),
   email: z.string().email(),
   password: z.string().min(8),
+  recoveryContact: z.string().trim().max(254).optional(),
 });
 
 const loginSchema = z.object({
@@ -62,6 +70,20 @@ const loginSchema = z.object({
 const verifyOtpSchema = z.object({
   email: z.string().email(),
   otp: z.string().min(6).max(6),
+});
+
+const passwordResetRequestSchema = z.object({
+  recoveryContact: z.string().trim().min(1).max(254),
+});
+
+const passwordResetVerifySchema = z.object({
+  recoveryContact: z.string().trim().min(1).max(254),
+  otp: z.string().length(6),
+});
+
+const passwordResetCompleteSchema = passwordResetVerifySchema.extend({
+  password: z.string().min(8),
+  confirmPassword: z.string().min(8),
 });
 
 const sensitiveSchema = z.object({
@@ -286,7 +308,9 @@ app.post("/api/auth/register", async (req, res, next) => {
     const user = await prisma.user.create({
       data: {
         name: parsed.name,
+        username: parsed.username || null,
         email,
+        recoveryContact: parsed.recoveryContact || null,
         passwordHash,
         role: "USER",
         isActive: bypassEmailOtp,
@@ -394,6 +418,146 @@ app.post("/api/auth/resend-otp", async (req, res, next) => {
     return res.json({
       message: "A new verification code has been sent to your email.",
     });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post("/api/auth/password-reset/request", async (req, res, next) => {
+  try {
+    const parsed = passwordResetRequestSchema.parse(req.body);
+    const recoveryContact = parsed.recoveryContact.toLowerCase();
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: recoveryContact },
+          { recoveryContact: parsed.recoveryContact },
+        ],
+      },
+    });
+
+    if (!user) {
+      return res.json({
+        message: "If the account exists, a reset code has been sent.",
+      });
+    }
+
+    const otp = bypassEmailOtp ? "000000" : generateOtp();
+    await prisma.signupOtp.updateMany({
+      where: { userId: user.id, purpose: "password_reset", usedAt: null },
+      data: { usedAt: new Date() },
+    });
+    await prisma.signupOtp.create({
+      data: {
+        userId: user.id,
+        email: user.email,
+        otp: hashOtp(otp),
+        purpose: "password_reset",
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      },
+    });
+
+    if (!bypassEmailOtp) {
+      await sendOtpEmail({
+        to: user.email,
+        otp,
+        purpose: "password reset",
+        userEmail: user.email,
+      });
+    }
+
+    return res.json({
+      message: "If the account exists, a reset code has been sent.",
+      otpBypass: bypassEmailOtp,
+      ...(bypassEmailOtp ? { otp } : {}),
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post("/api/auth/password-reset/verify", async (req, res, next) => {
+  try {
+    const parsed = passwordResetVerifySchema.parse(req.body);
+    const identifier = parsed.recoveryContact.toLowerCase();
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { recoveryContact: parsed.recoveryContact },
+        ],
+      },
+    });
+    const record = user
+      ? await prisma.signupOtp.findFirst({
+          where: {
+            userId: user.id,
+            purpose: "password_reset",
+            otp: hashOtp(parsed.otp),
+            usedAt: null,
+            expiresAt: { gt: new Date() },
+          },
+          orderBy: { createdAt: "desc" },
+        })
+      : null;
+
+    if (!record)
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired reset code." });
+    return res.json({ message: "Reset code verified." });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post("/api/auth/password-reset/complete", async (req, res, next) => {
+  try {
+    const parsed = passwordResetCompleteSchema.parse(req.body);
+    if (parsed.password !== parsed.confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match." });
+    }
+
+    const identifier = parsed.recoveryContact.toLowerCase();
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { recoveryContact: parsed.recoveryContact },
+        ],
+      },
+    });
+    const record = user
+      ? await prisma.signupOtp.findFirst({
+          where: {
+            userId: user.id,
+            purpose: "password_reset",
+            otp: hashOtp(parsed.otp),
+            usedAt: null,
+            expiresAt: { gt: new Date() },
+          },
+          orderBy: { createdAt: "desc" },
+        })
+      : null;
+
+    if (!user || !record) {
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired reset code." });
+    }
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash: await bcrypt.hash(parsed.password, 12) },
+      }),
+      prisma.signupOtp.update({
+        where: { id: record.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    return res.json({ message: "Password updated successfully." });
   } catch (error) {
     return next(error);
   }

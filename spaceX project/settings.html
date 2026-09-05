@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>SPACEX — Settings</title>
     <style>
       * {
@@ -1005,7 +1006,7 @@
         if (token) {
           try {
             var stateResponse = await fetch(
-              "https://spacex-backend-yxlo.onrender.com/api/kyc/me",
+              window.SPACEX_CONFIG.apiBase + "/api/kyc/me",
               {
                 headers: { Authorization: "Bearer " + token },
               },
@@ -1208,7 +1209,7 @@
             form.append("docType", serverType);
             form.append("document", file, file.name);
             var response = await fetch(
-              "https://spacex-backend-yxlo.onrender.com/api/kyc/upload",
+              window.SPACEX_CONFIG.apiBase + "/api/kyc/upload",
               {
                 method: "POST",
                 headers: { Authorization: "Bearer " + token },
@@ -1227,7 +1228,7 @@
           submit.textContent = "Submitting documents...";
           try {
             var profileResponse = await fetch(
-              "https://spacex-backend-yxlo.onrender.com/api/kyc/profile",
+              window.SPACEX_CONFIG.apiBase + "/api/kyc/profile",
               {
                 method: "POST",
                 headers: {
@@ -1325,7 +1326,7 @@
         if (k === "help") body = "<p>Use Contact Live Support.</p>";
         if (k === "live")
           body =
-            "<label>Message</label><input id='s-msg'><button class='go' type='button' id='s-save'>Save</button><p class='err' id='s-err'></p>";
+            "<p class='lead'>Open an in-page conversation with the support team.</p><button class='go' type='button' id='open-live-support'>Contact Live Support</button><p class='err' id='s-err'></p>";
         document.getElementById("page-body").innerHTML = body;
         var pendingAvatar = me.avatar || "";
         var picIn = document.getElementById("s-pic");
@@ -1343,6 +1344,7 @@
             r.readAsDataURL(f);
           };
         var saveBtn = document.getElementById("s-save");
+        var liveSupportBtn = document.getElementById("open-live-support");
         var deleteKycBtn = document.getElementById("delete-kyc");
         var delete401kBtn = document.getElementById("delete-401k");
         async function deleteUserData(endpoint, button, message) {
@@ -1353,7 +1355,7 @@
           try {
             var token = localStorage.getItem("authToken");
             var response = await fetch(
-              "https://spacex-backend-yxlo.onrender.com" + endpoint,
+              window.SPACEX_CONFIG.apiBase + endpoint,
               {
                 method: "DELETE",
                 headers: { Authorization: "Bearer " + token },
@@ -1434,9 +1436,14 @@
               window.location.href = "login.html";
             }
             if (k === "live") {
-              err.className = "ok";
-              err.textContent = "Saved";
+              if (window.openLiveChat) window.openLiveChat();
+              else window.__openLiveChatRequested = true;
             }
+          };
+        if (liveSupportBtn)
+          liveSupportBtn.onclick = function () {
+            if (window.openLiveChat) window.openLiveChat();
+            else window.__openLiveChatRequested = true;
           };
       }
       document.querySelectorAll(".item").forEach(function (btn) {
@@ -1453,6 +1460,12 @@
       };
       if (location.hash === "#profile")
         openPage("profile", "Profile Information");
+      (function () {
+        var script = document.createElement("script");
+        script.src = "livechat-loader.js";
+        script.async = false;
+        document.body.appendChild(script);
+      })();
     </script>
   </body>
 </html>

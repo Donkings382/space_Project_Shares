@@ -4,6 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>SPACEX — Link 401(k)</title>
     <style>
       * {
@@ -481,7 +482,7 @@
         document.getElementById("intro").style.display = "block";
       };
 
-      fetch("https://spacex-backend-yxlo.onrender.com/api/me", {
+      fetch(window.SPACEX_CONFIG.apiBase + "/api/me", {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("authToken"),
         },
@@ -583,7 +584,7 @@
         try {
           var token = localStorage.getItem("authToken");
           var response = await fetch(
-            "https://spacex-backend-yxlo.onrender.com/api/401k",
+            window.SPACEX_CONFIG.apiBase + "/api/401k",
             {
               method: "POST",
               headers: {
@@ -622,7 +623,7 @@
             formData.append("docType", fileInfo.type);
             formData.append("document", file);
             var uploadResponse = await fetch(
-              "https://spacex-backend-yxlo.onrender.com/api/kyc/upload",
+              window.SPACEX_CONFIG.apiBase + "/api/kyc/upload",
               {
                 method: "POST",
                 headers: { Authorization: "Bearer " + token },

@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>SPACEX — Confirm Investment</title>
     <style>
       * {
@@ -429,7 +430,8 @@
       function loadChatMessages(sessionId) {
         var token = localStorage.getItem("authToken");
         fetch(
-          "https://spacex-backend-yxlo.onrender.com/api/support/sessions/" +
+          window.SPACEX_CONFIG.apiBase +
+            "/api/support/sessions/" +
             sessionId +
             "/messages",
           {

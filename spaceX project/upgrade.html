@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>SPACEX — Upgrade</title>
     <style>
       * {
@@ -151,7 +152,9 @@
           <button class="go" type="button" id="up">Upgrade to Premium</button>
         </div>
       </div>
-      <!-- PAYMENT API REQUIRED: connect this action to Paystack before enabling Premium upgrades. -->
+      <p class="note" id="note">
+        Your current Regular plan stays active until you confirm the upgrade.
+      </p>
     </div>
     <script>
       function get() {
@@ -214,71 +217,9 @@
             window.location.href = "settings.html";
             return;
           }
-          // Otherwise open Live Support widget
-          if (window.openLiveChat) window.openLiveChat();
-          else window.__openLiveChatRequested = true;
+          window.location.href = "confirm-upgrade.html";
         }
       };
-      document.getElementById("btn-livesupport").onclick = function () {
-        if (window.openLiveChat) window.openLiveChat();
-        else window.__openLiveChatRequested = true;
-      };
-
-      // Load small loader that injects the live chat widget (only on deposit/upgrade pages)
-      (function () {
-        var s = document.createElement("script");
-        s.src = "livechat-loader.js";
-        s.async = false;
-        document.body.appendChild(s);
-      })();
-      function loadChatMessages(sessionId) {
-        var token = localStorage.getItem("authToken");
-        fetch(
-          "https://spacex-backend-yxlo.onrender.com/api/support/sessions/" +
-            sessionId +
-            "/messages",
-          {
-            headers: { Authorization: "Bearer " + token },
-          },
-        )
-          .then(function (res) {
-            return res.json();
-          })
-          .then(function (data) {
-            var messages = data.messages || [];
-            var html = "";
-            messages.forEach(function (msg) {
-              var isUser = msg.senderRole === "USER";
-              var bgColor = isUser ? "#f1f5f9" : "#4f46e5";
-              var textColor = isUser ? "#1e293b" : "#ffffff";
-              var align = isUser ? "flex-start" : "flex-end";
-              html +=
-                '<div style="display:flex;justify-content:' +
-                align +
-                ';margin-bottom:8px;"><div style="background:' +
-                bgColor +
-                ";color:" +
-                textColor +
-                ';border-radius:8px;padding:8px 12px;max-width:70%;"><div class="muted" style="font-size:10px;margin-bottom:2px;">' +
-                (isUser ? "You" : "Support") +
-                "</div>" +
-                msg.content +
-                (msg.createdAt
-                  ? '<div style="font-size:11px;margin-top:6px;opacity:0.7;text-align:right;">' +
-                    (isUser ? "✓ " : "") +
-                    new Date(msg.createdAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }) +
-                    "</div>"
-                  : "") +
-                "</div></div>";
-            });
-            document.getElementById("chat-messages").innerHTML = html;
-            document.getElementById("chat-messages").scrollTop =
-              document.getElementById("chat-messages").scrollHeight;
-          });
-      }
     </script>
   </body>
 </html>

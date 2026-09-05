@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>SPACEX</title>
     <style>
       * {
@@ -458,7 +459,7 @@
         }
         finishLogin(pendingUser);
       };
-      const API_BASE = "https://spacex-backend-yxlo.onrender.com";
+      const API_BASE = window.SPACEX_CONFIG.apiBase;
 
       async function api(path, options = {}) {
         const response = await fetch(`${API_BASE}${path}`, {

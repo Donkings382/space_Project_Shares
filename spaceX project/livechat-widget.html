@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script src="runtime-config.js"></script>
     <title>Live Support Widget</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
@@ -113,39 +114,42 @@
 
     <script>
       // Configuration
-      const API_BASE = 'https://spacex-backend-yxlo.onrender.com';
-      const SOCKET_URL = 'https://spacex-backend-yxlo.onrender.com';
-      const token = localStorage.getItem('authToken'); // user should be logged in
+      const API_BASE = window.SPACEX_CONFIG.apiBase;
+      const SOCKET_URL = API_BASE;
+      const token = localStorage.getItem("authToken"); // user should be logged in
 
       // Elements
-      const widgetBtn = document.getElementById('widget-btn');
-      const chatWindow = document.getElementById('chat-window');
-      const chatClose = document.getElementById('chat-close');
-      const messagesEl = document.getElementById('messages');
-      const msgInput = document.getElementById('msg-input');
-      const sendBtn = document.getElementById('send-btn');
-      const badge = document.getElementById('badge');
-      const statusLine = document.getElementById('status-line');
+      const widgetBtn = document.getElementById("widget-btn");
+      const chatWindow = document.getElementById("chat-window");
+      const chatClose = document.getElementById("chat-close");
+      const messagesEl = document.getElementById("messages");
+      const msgInput = document.getElementById("msg-input");
+      const sendBtn = document.getElementById("send-btn");
+      const badge = document.getElementById("badge");
+      const statusLine = document.getElementById("status-line");
 
       let socket = null;
       let currentSession = null;
       let openState = false;
       let unread = 0;
 
-      function formatTime(dt){
+      function formatTime(dt) {
         const d = new Date(dt);
-        return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       }
 
-      function appendMessage(msg, {own=false, optimistic=false, tempId=null} = {}){
-        const wrapper = document.createElement('div');
-        wrapper.className = 'flex '+(own? 'justify-end':'justify-start');
+      function appendMessage(
+        msg,
+        { own = false, optimistic = false, tempId = null } = {},
+      ) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "flex " + (own ? "justify-end" : "justify-start");
         wrapper.innerHTML = `
-          <div class="max-w-[78%] ${own? 'bg-indigo-600 text-white':'bg-gray-200 text-gray-800'} px-3 py-2 rounded-lg msg-arrive" style="word-wrap:break-word">
+          <div class="max-w-[78%] ${own ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800"} px-3 py-2 rounded-lg msg-arrive" style="word-wrap:break-word">
             ${escapeHtml(msg.content)}
-            <div class="text-[11px] mt-1 ${own? 'text-indigo-100':'text-gray-500'} flex items-center gap-2 justify-end">
+            <div class="text-[11px] mt-1 ${own ? "text-indigo-100" : "text-gray-500"} flex items-center gap-2 justify-end">
               <span>${formatTime(msg.createdAt || Date.now())}</span>
-              ${own ? `<span class="msg-status text-xs text-indigo-100">${optimistic? 'Sending...':'Sent ✓✓'}</span>` : ''}
+              ${own ? `<span class="msg-status text-xs text-indigo-100">${optimistic ? "Sending..." : "Sent ✓✓"}</span>` : ""}
             </div>
           </div>
         `;
@@ -155,69 +159,107 @@
         return wrapper;
       }
 
-      function updateOptimisticStatus(tempId, newMessage){
-        const el = messagesEl.querySelector(`[data-temp-id='${tempId}']`) || messagesEl.querySelector(`[data-temp-id="${tempId}"]`);
+      function updateOptimisticStatus(tempId, newMessage) {
+        const el =
+          messagesEl.querySelector(`[data-temp-id='${tempId}']`) ||
+          messagesEl.querySelector(`[data-temp-id="${tempId}"]`);
         // also try searching by wrapper dataset
         let wrapper = null;
         if (el) wrapper = el;
         else {
           // fallback: search wrappers with matching dataset.tempId
-          wrapper = Array.from(messagesEl.children).find(c => c.dataset.tempId == tempId);
+          wrapper = Array.from(messagesEl.children).find(
+            (c) => c.dataset.tempId == tempId,
+          );
         }
         if (!wrapper) return;
-        const statusEl = wrapper.querySelector('.msg-status');
-        if (statusEl) statusEl.textContent = 'Sent ✓✓';
-        wrapper.removeAttribute('data-temp-id');
+        const statusEl = wrapper.querySelector(".msg-status");
+        if (statusEl) statusEl.textContent = "Sent ✓✓";
+        wrapper.removeAttribute("data-temp-id");
       }
 
-      function escapeHtml(value){
-        return String(value||'').replace(/[&<>'"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'":"&#39;' }[c]));
+      function escapeHtml(value) {
+        return String(value || "").replace(
+          /[&<>'"]/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
       }
 
       // open/close animations
-      function openChat(){
-        chatWindow.style.display = 'flex';
-        requestAnimationFrame(()=>{ chatWindow.classList.remove('chat-closed'); chatWindow.classList.add('chat-open'); });
+      function openChat() {
+        chatWindow.style.display = "flex";
+        requestAnimationFrame(() => {
+          chatWindow.classList.remove("chat-closed");
+          chatWindow.classList.add("chat-open");
+        });
         openState = true;
-        unread = 0; badge.classList.add('hidden');
+        unread = 0;
+        badge.classList.add("hidden");
         // if no session, fetch/init
-        ensureSession().then(()=>{
-          if (currentSession) socket && socket.emit('joinSession', currentSession.id);
+        ensureSession().then(() => {
+          if (currentSession)
+            socket && socket.emit("joinSession", currentSession.id);
           loadMessages();
         });
       }
-      function closeChat(){
-        chatWindow.classList.remove('chat-open'); chatWindow.classList.add('chat-closed');
-        setTimeout(()=>{ if(!openState) chatWindow.style.display = 'none'; }, 240);
+      function closeChat() {
+        chatWindow.classList.remove("chat-open");
+        chatWindow.classList.add("chat-closed");
+        setTimeout(() => {
+          if (!openState) chatWindow.style.display = "none";
+        }, 240);
         openState = false;
       }
 
-      widgetBtn.addEventListener('click', ()=>{
-        if (!openState) openChat(); else closeChat();
+      widgetBtn.addEventListener("click", () => {
+        if (!openState) openChat();
+        else closeChat();
       });
-      chatClose.addEventListener('click', ()=>{ closeChat(); });
+      chatClose.addEventListener("click", () => {
+        closeChat();
+      });
 
       // Setup socket
-      function connectSocket(){
+      function connectSocket() {
         socket = io(SOCKET_URL, { auth: { token } });
-        socket.on('connect', ()=>{ console.log('socket connected'); });
+        socket.on("connect", () => {
+          console.log("socket connected");
+        });
 
-        socket.on('support:message', (payload)=>{
+        socket.on("support:message", (payload) => {
           const msg = payload.message;
           // If message is from ADMIN and chat closed -> badge + toast
-          if (msg.senderRole === 'ADMIN'){
-            if (!openState) { unread++; badge.classList.remove('hidden'); badge.textContent = unread; showToast('New message from Support'); }
+          if (msg.senderRole === "ADMIN") {
+            if (!openState) {
+              unread++;
+              badge.classList.remove("hidden");
+              badge.textContent = unread;
+              showToast("New message from Support");
+            }
           }
           // If message is from this user we may need to update optimistic status
-          const isMine = (msg.senderRole === 'USER');
-          if (isMine && msg.senderId){
+          const isMine = msg.senderRole === "USER";
+          if (isMine && msg.senderId) {
             // find optimistic by content+approx time? We rely on server ack to update
             // update any optimistic entry by matching content and recent time
-            const recent = Array.from(messagesEl.querySelectorAll('.msg-arrive')).reverse();
-            for (let el of recent){
-              const text = el.textContent || '';
-              if (text.includes(msg.content) && el.querySelector('.msg-status') && el.querySelector('.msg-status').textContent.includes('Sending')){
-                el.querySelector('.msg-status').textContent = 'Sent ✓✓';
+            const recent = Array.from(
+              messagesEl.querySelectorAll(".msg-arrive"),
+            ).reverse();
+            for (let el of recent) {
+              const text = el.textContent || "";
+              if (
+                text.includes(msg.content) &&
+                el.querySelector(".msg-status") &&
+                el.querySelector(".msg-status").textContent.includes("Sending")
+              ) {
+                el.querySelector(".msg-status").textContent = "Sent ✓✓";
                 break;
               }
             }
@@ -226,90 +268,147 @@
           }
         });
 
-        socket.on('support:session:new', (payload)=>{
+        socket.on("support:session:new", (payload) => {
           // admin created session: optional UI notify
-          console.log('new session', payload);
+          console.log("new session", payload);
         });
 
-        socket.on('support:session:closed', (payload)=>{
-          showToast('Support session closed');
+        socket.on("support:session:closed", (payload) => {
+          showToast("Support session closed");
         });
       }
 
       // load messages via API
-      async function loadMessages(){
+      async function loadMessages() {
         if (!currentSession) return;
-        try{
-          const res = await fetch(`${API_BASE}/api/support/sessions/${currentSession.id}/messages`, { headers: { Authorization: 'Bearer '+token } });
-          if (!res.ok) throw new Error('Failed to load');
+        try {
+          const res = await fetch(
+            `${API_BASE}/api/support/sessions/${currentSession.id}/messages`,
+            { headers: { Authorization: "Bearer " + token } },
+          );
+          if (!res.ok) throw new Error("Failed to load");
           const payload = await res.json();
-          messagesEl.innerHTML = '';
-          payload.messages.forEach(m=>{
-            appendMessage(m, { own: m.senderRole==='USER' });
+          messagesEl.innerHTML = "";
+          payload.messages.forEach((m) => {
+            appendMessage(m, { own: m.senderRole === "USER" });
           });
-        }catch(err){ console.warn(err); }
+        } catch (err) {
+          console.warn(err);
+        }
       }
 
-      async function ensureSession(){
+      async function ensureSession() {
         if (currentSession) return currentSession;
-        try{
-          const res = await fetch(`${API_BASE}/api/support/sessions`, { headers: { Authorization: 'Bearer '+token } });
-          if (!res.ok) throw new Error('not ok');
+        try {
+          const res = await fetch(`${API_BASE}/api/support/sessions`, {
+            headers: { Authorization: "Bearer " + token },
+          });
+          if (!res.ok) throw new Error("not ok");
           const payload = await res.json();
           const sessions = payload.sessions || [];
-          if (sessions.length>0 && sessions[0].status==='OPEN'){
+          if (sessions.length > 0 && sessions[0].status === "OPEN") {
             currentSession = sessions[0];
             return currentSession;
           }
-        }catch(e){ /* no session */ }
+        } catch (e) {
+          /* no session */
+        }
 
         // create
-        try{
-          const r = await fetch(`${API_BASE}/api/support/initiate`, { method: 'POST', headers: { 'Content-Type':'application/json', Authorization: 'Bearer '+token }, body: JSON.stringify({ context: 'web:widget' }) });
-          if (r.ok){ const p = await r.json(); currentSession = p.session; return currentSession; }
-        }catch(err){ console.warn('init session err', err); }
+        try {
+          const r = await fetch(`${API_BASE}/api/support/initiate`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({ context: "web:widget" }),
+          });
+          if (r.ok) {
+            const p = await r.json();
+            currentSession = p.session;
+            return currentSession;
+          }
+        } catch (err) {
+          console.warn("init session err", err);
+        }
       }
 
-      async function sendMessage(){
+      async function sendMessage() {
         const text = msgInput.value.trim();
         if (!text) return;
         if (!currentSession) await ensureSession();
         // optimistic in UI
-        const tempId = 't'+Date.now();
-        const wrapper = appendMessage({ content: text, createdAt: Date.now() }, { own: true, optimistic: true, tempId });
+        const tempId = "t" + Date.now();
+        const wrapper = appendMessage(
+          { content: text, createdAt: Date.now() },
+          { own: true, optimistic: true, tempId },
+        );
         wrapper.dataset.tempId = tempId;
-        msgInput.value = '';
-        statusLine.textContent = '';
+        msgInput.value = "";
+        statusLine.textContent = "";
 
         // send via socket with ack
-        if (socket && socket.connected){
-          socket.emit('support:send', { sessionId: currentSession.id, content: text }, (ack)=>{
-            if (ack && ack.ok){
-              // server will emit support:message too; update optimistic status anyway
-              updateOptimisticStatus(tempId, ack.data);
-            } else {
-              const st = wrapper.querySelector('.msg-status'); if (st) st.textContent = 'Failed';
-            }
-          });
+        if (socket && socket.connected) {
+          socket.emit(
+            "support:send",
+            { sessionId: currentSession.id, content: text },
+            (ack) => {
+              if (ack && ack.ok) {
+                // server will emit support:message too; update optimistic status anyway
+                updateOptimisticStatus(tempId, ack.data);
+              } else {
+                const st = wrapper.querySelector(".msg-status");
+                if (st) st.textContent = "Failed";
+              }
+            },
+          );
         } else {
           // fallback to REST
-          try{
-            const r = await fetch(`${API_BASE}/api/support/messages`, { method: 'POST', headers: { 'Content-Type':'application/json', Authorization: 'Bearer '+token }, body: JSON.stringify({ sessionId: currentSession.id, content: text }) });
-            if (r.ok){ const payload = await r.json(); updateOptimisticStatus(tempId, payload.data); }
-            else { const st = wrapper.querySelector('.msg-status'); if (st) st.textContent='Failed'; }
-          }catch(err){ const st = wrapper.querySelector('.msg-status'); if (st) st.textContent='Failed'; }
+          try {
+            const r = await fetch(`${API_BASE}/api/support/messages`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+              },
+              body: JSON.stringify({
+                sessionId: currentSession.id,
+                content: text,
+              }),
+            });
+            if (r.ok) {
+              const payload = await r.json();
+              updateOptimisticStatus(tempId, payload.data);
+            } else {
+              const st = wrapper.querySelector(".msg-status");
+              if (st) st.textContent = "Failed";
+            }
+          } catch (err) {
+            const st = wrapper.querySelector(".msg-status");
+            if (st) st.textContent = "Failed";
+          }
         }
       }
 
-      sendBtn.addEventListener('click', sendMessage);
-      msgInput.addEventListener('keydown', (e)=>{ if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+      sendBtn.addEventListener("click", sendMessage);
+      msgInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
 
-      function showToast(text){
-        const t = document.createElement('div');
-        t.className = 'fixed right-6 bottom-24 bg-gray-800 text-white px-4 py-2 rounded shadow';
+      function showToast(text) {
+        const t = document.createElement("div");
+        t.className =
+          "fixed right-6 bottom-24 bg-gray-800 text-white px-4 py-2 rounded shadow";
         t.textContent = text;
         document.body.appendChild(t);
-        setTimeout(()=>{ t.style.opacity=0; setTimeout(()=>t.remove(),400); }, 3000);
+        setTimeout(() => {
+          t.style.opacity = 0;
+          setTimeout(() => t.remove(), 400);
+        }, 3000);
       }
 
       // init

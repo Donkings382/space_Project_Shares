@@ -1,4 +1,41 @@
 (function () {
+  var runtimeConfig = window.SPACEX_CONFIG || {};
+  // The public Smartsupp site key is safe to expose in static frontend code.
+  // Leave the placeholder in place to use the existing local chat fallback.
+  var SMARTSUPP_KEY =
+    runtimeConfig.smartsuppKey ||
+    window.SPACEX_SMARTSUPP_KEY ||
+    "REPLACE_WITH_SMARTSUPP_SITE_KEY";
+  var hasSmartsuppKey =
+    SMARTSUPP_KEY && SMARTSUPP_KEY !== "REPLACE_WITH_SMARTSUPP_SITE_KEY";
+
+  if (hasSmartsuppKey) {
+    if (window.__smartsupp_loaded) return;
+    window.__smartsupp_loaded = true;
+
+    window._smartsupp = window._smartsupp || {};
+    window._smartsupp.key = SMARTSUPP_KEY;
+    window.smartsupp ||
+      (function (document) {
+        var script;
+        var firstScript = document.getElementsByTagName("script")[0];
+        var smartsupp = (window.smartsupp = function () {
+          smartsupp._.push(arguments);
+        });
+        smartsupp._ = [];
+        script = document.createElement("script");
+        script.type = "text/javascript";
+        script.async = true;
+        script.src = "https://www.smartsuppchat.com/loader.js";
+        firstScript.parentNode.insertBefore(script, firstScript);
+      })(document);
+
+    window.openLiveChat = function () {
+      if (window.smartsupp) window.smartsupp("chat:open");
+    };
+    return;
+  }
+
   // Prevent duplicate script execution
   if (window.__livechat_loaded) return;
   window.__livechat_loaded = true;
@@ -89,8 +126,9 @@
       var badge = document.getElementById("badge");
       var statusLine = document.getElementById("status-line");
 
-      var API_BASE = "https://spacex-backend-yxlo.onrender.com";
-      var SOCKET_URL = "https://spacex-backend-yxlo.onrender.com";
+      var API_BASE =
+        runtimeConfig.apiBase || "https://spacex-backend-yxlo.onrender.com";
+      var SOCKET_URL = API_BASE;
       var token = localStorage.getItem("authToken");
 
       var socket = null;
