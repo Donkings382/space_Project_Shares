@@ -76,6 +76,15 @@
     </div>
   </div>
   <script>
+    function get() {
+      try {
+        return JSON.parse(
+          localStorage.getItem("spacex.v1") || '{"users":[],"session":null}',
+        );
+      } catch (e) {
+        return { users: [], session: null };
+      }
+    }
     function defaults() {
       return {
         bank: { accountName: "SpaceX Holdings LLC", bankName: "JPMorgan Chase", accountNumber: "*****4829", routing: "021000021", memo: "SPX-DEP-0826" },
@@ -89,7 +98,7 @@
       };
     }
     var coins = [["btc","BTC (Bitcoin)"],["usdt","USDT (Tether)"],["eth","Ethereum (ETH)"],["sol","SOL (Solana)"],["bnb","BNB (BNB Chain)"],["xrp","XRP (Ripple)"],["ada","ADA (Cardano)"]];
-    var dep = {}, proof = "", proofName = "", extra = "", coin = "";
+    var db = get(), dep = {}, proof = "", proofName = "", extra = "", coin = "";
     try { dep = JSON.parse(sessionStorage.getItem("spacex-deposit") || "{}"); } catch (e) {}
     var token = localStorage.getItem("authToken");
     if (!token || !dep.amount) { window.location.replace("deposit.html"); }

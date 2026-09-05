@@ -282,7 +282,10 @@
       }
       function statusOf(t) {
         var k = kindOf(t);
-        if (t.status === "pending")
+        if (
+          t.status === "pending" ||
+          String(t.status || "").toUpperCase() === "PENDING"
+        )
           return k === "deposit" ? "Processing" : "Pending";
         if (t.status === "declined" || String(t.status || "").toUpperCase() === "REJECTED")
           return "Failed";
