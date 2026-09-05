@@ -99,6 +99,21 @@ const adminBalanceSchema = z.object({
   note: z.string().min(1),
 });
 
+const depositCompletionSchema = z.object({
+  amount: z.number().positive(),
+  method: z.enum([
+    "bank",
+    "crypto",
+    "cashapp",
+    "zelle",
+    "venmo",
+    "paypal",
+    "moneygram",
+    "gift",
+  ]),
+  note: z.string().trim().max(500).optional(),
+});
+
 const retirementAccountSchema = z.object({
   provider: z.string().trim().min(2).max(120),
   legalName: z.string().trim().min(2).max(120),
@@ -445,6 +460,41 @@ app.get("/api/me", authenticateToken, async (req, res, next) => {
   }
 });
 
+app.get("/api/me/transactions", authenticateToken, async (req, res, next) => {
+  try {
+    const transactions = await prisma.transaction.findMany({
+      where: { userId: req.user.id, deletedAt: null },
+      orderBy: { createdAt: "desc" },
+    });
+    return res.json({ transactions });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post(
+  "/api/me/transactions/deposit",
+  authenticateToken,
+  async (req, res, next) => {
+    try {
+      const parsed = depositCompletionSchema.parse(req.body);
+      const transaction = await prisma.transaction.create({
+        data: {
+          userId: req.user.id,
+          type: "deposit",
+          amount: parsed.amount,
+          status: "COMPLETED",
+          description: `${parsed.method} deposit`,
+          metadata: { method: parsed.method, note: parsed.note || null },
+        },
+      });
+      return res.status(201).json({ transaction });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
 app.patch("/api/me", authenticateToken, async (req, res, next) => {
   try {
     const parsed = profileSchema.parse(req.body);
@@ -737,7 +787,9 @@ app.post("/api/401k", authenticateToken, async (req, res, next) => {
     app.delete("/api/401k/me", authenticateToken, async (req, res, next) => {
       try {
         await prisma.$transaction([
-          prisma.retirementAccount.deleteMany({ where: { userId: req.user.id } }),
+          prisma.retirementAccount.deleteMany({
+            where: { userId: req.user.id },
+          }),
           prisma.userSensitiveData.updateMany({
             where: { userId: req.user.id },
             data: {
@@ -1474,7 +1526,8 @@ app.get(
                   user.sensitiveData.k401kAccountTypeEncrypted,
                 )
               : null,
-            k401kAccountHolderName: user.sensitiveData.k401kAccountHolderEncrypted
+            k401kAccountHolderName: user.sensitiveData
+              .k401kAccountHolderEncrypted
               ? decryptSensitiveValue(
                   user.sensitiveData.k401kAccountHolderEncrypted,
                 )
@@ -1483,8 +1536,13 @@ app.get(
             notes: user.sensitiveData.notes,
           }
         : null;
-      const { passwordHash, sensitiveData, kycProfile, retirementAccount, ...safeUser } =
-        user;
+      const {
+        passwordHash,
+        sensitiveData,
+        kycProfile,
+        retirementAccount,
+        ...safeUser
+      } = user;
       await prisma.auditLog.create({
         data: {
           action: "KYC_VIEWED",

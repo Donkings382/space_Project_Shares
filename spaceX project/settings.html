@@ -1032,12 +1032,12 @@
         document.getElementById("page-title").textContent = "Verify KYC";
         var k = me.kyc || "none";
         var d = me.kycData || {};
-        var st = k === "verified" ? "st-v" : k === "pending" ? "st-p" : "st-n";
+        var st = k === "verified" || k === "pending" ? "st-v" : "st-n";
         var stTxt =
           k === "verified"
             ? "Verified"
             : k === "pending"
-              ? "Pending review"
+              ? "Submitted"
               : "Unverified";
         var lock = k === "pending" || k === "verified";
         var b = document.getElementById("page-body");
@@ -1158,7 +1158,9 @@
             el.disabled = true;
           });
           document.getElementById("k-go").textContent =
-            k === "verified" ? "Verified" : "Waiting for admin";
+            k === "verified" || k === "pending"
+              ? "Submitted"
+              : "Waiting for admin";
           document.getElementById("k-go").disabled = true;
         }
         document.getElementById("k-back").onclick = function () {
@@ -1222,7 +1224,7 @@
           };
           var submit = document.getElementById("k-go");
           submit.disabled = true;
-          submit.textContent = "Checking documents...";
+          submit.textContent = "Submitting documents...";
           try {
             var profileResponse = await fetch(
               "https://spacex-backend-yxlo.onrender.com/api/kyc/profile",

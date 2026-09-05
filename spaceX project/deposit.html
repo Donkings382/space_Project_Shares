@@ -217,6 +217,65 @@
         font-size: 13px;
         margin-top: 8px;
       }
+      .instructions {
+        display: none;
+        border: 1px solid #3a3a3a;
+        border-radius: 10px;
+        padding: 16px;
+        margin-top: 12px;
+      }
+      .instructions.show {
+        display: block;
+      }
+      .instructions h2 {
+        font-size: 18px;
+        margin: 0 0 6px;
+      }
+      .instructions p {
+        color: #cfcfcf;
+        line-height: 1.5;
+      }
+      .detail {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        border-top: 1px solid #2e2e2e;
+        padding: 12px 0;
+      }
+      .detail strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .detail code {
+        color: #e5e5e5;
+        overflow-wrap: anywhere;
+      }
+      .copy {
+        border: 1px solid #555;
+        border-radius: 8px;
+        background: #000;
+        padding: 9px 12px;
+        cursor: pointer;
+      }
+      .crypto-qr {
+        width: 180px;
+        height: 180px;
+        background: #fff;
+        padding: 8px;
+        display: block;
+        margin: 12px auto;
+      }
+      .complete {
+        width: 100%;
+        height: 46px;
+        border: 1px solid #86efac;
+        border-radius: 8px;
+        background: #0b1f12;
+        color: #86efac;
+        font-weight: 600;
+        cursor: pointer;
+      }
       .foot {
         display: flex;
         gap: 8px;
@@ -390,27 +449,6 @@
               <span class="tick">✓</span> Gift Card
             </button>
           </div>
-          <!-- PAYMENT API REQUIRED: replace these demo methods with Paystack checkout channels. -->
-          <p
-            class="ok"
-            style="
-              color: #fbbf24;
-              border: 1px solid #3a2a00;
-              padding: 10px;
-              border-radius: 8px;
-              margin: 10px 0;
-            "
-          >
-            💬 To proceed with deposit, contact our Live Support team.
-          </p>
-          <button
-            class="go"
-            type="button"
-            id="btn-livesupport"
-            style="margin-top: 10px; background: #fbbf24; color: #000"
-          >
-            📞 Contact Live Support
-          </button>
           <p class="step" style="margin-top: 16px">
             <span class="num">3</span> Add a note (optional)
           </p>
@@ -428,6 +466,11 @@
           </div>
           <button class="go" type="button" id="go">Continue to Deposit</button>
           <div class="err" id="err"></div>
+          <section
+            class="instructions"
+            id="payment-instructions"
+            aria-live="polite"
+          ></section>
         </section>
         <p class="foot">
           All deposits are protected by bank-level encryption. Processing time:
@@ -612,9 +655,6 @@
             Number(b.getAttribute("data-n")),
           );
           showAmt();
-          // Auto-open Live Support when a payment plan is selected
-          if (window.openLiveChat) window.openLiveChat();
-          else window.__openLiveChatRequested = true;
         };
       });
       document.querySelectorAll(".m").forEach(function (b) {
@@ -626,19 +666,181 @@
           method = b.getAttribute("data-m");
         };
       });
+      function esc(value) {
+        return String(value || "").replace(/[&<>'"]/g, function (c) {
+          return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "'": "&#39;",
+            '"': "&quot;",
+          }[c];
+        });
+      }
+      function detail(label, value) {
+        if (!value) return "";
+        return (
+          '<div class="detail"><div><strong>' +
+          esc(label) +
+          "</strong><code>" +
+          esc(value) +
+          '</code></div><button type="button" class="copy" data-copy="' +
+          esc(value) +
+          '">Copy</button></div>'
+        );
+      }
+      function completeDeposit() {
+        var amount = parseAmt(document.getElementById("amount").value);
+        var token = localStorage.getItem("authToken");
+        var button = document.getElementById("complete-deposit");
+        if (!amount || !token) return;
+        button.disabled = true;
+        button.textContent = "Saving deposit...";
+        fetch(
+          "https://spacex-backend-yxlo.onrender.com/api/me/transactions/deposit",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+              amount: amount,
+              method: method,
+              note: document.getElementById("note").value.trim(),
+            }),
+          },
+        )
+          .then(function (response) {
+            return response.json().then(function (payload) {
+              if (!response.ok)
+                throw new Error(payload.message || "Unable to save deposit");
+              document.getElementById("err").style.color = "#86efac";
+              document.getElementById("err").textContent =
+                "Deposit completed and added to Transaction History.";
+              button.textContent = "Completed";
+            });
+          })
+          .catch(function (error) {
+            button.disabled = false;
+            button.textContent = "I have completed this payment";
+            document.getElementById("err").textContent = error.message;
+          });
+      }
+      function renderInstructions() {
+        var amount = parseAmt(document.getElementById("amount").value);
+        var pay = db.pay && db.pay[method];
+        var panel = document.getElementById("payment-instructions");
+        var names = {
+          bank: "Bank Transfer",
+          crypto: "Crypto",
+          cashapp: "Cash App",
+          zelle: "Zelle",
+          venmo: "Venmo",
+          paypal: "PayPal",
+          moneygram: "MoneyGram",
+          gift: "Gift Card",
+        };
+        if (
+          !pay ||
+          !Object.keys(pay).some(function (key) {
+            return pay[key];
+          })
+        ) {
+          panel.innerHTML =
+            "<h2>" +
+            names[method] +
+            " instructions unavailable</h2><p>An administrator must configure verified payment details before this method can be used.</p>";
+          panel.className = "instructions show";
+          return;
+        }
+        var html =
+          "<h2>" +
+          names[method] +
+          " payment details</h2><p>Send exactly " +
+          esc(money(amount)) +
+          " using the details below. Keep your receipt until the deposit is confirmed.</p>";
+        if (method === "bank")
+          html +=
+            detail("Account name", pay.accountName) +
+            detail("Bank", pay.bankName) +
+            detail("Account number", pay.accountNumber) +
+            detail("Routing", pay.routing) +
+            detail("Reference", pay.memo);
+        if (method === "cashapp")
+          html +=
+            detail("Account name", pay.accountName) +
+            detail("Cash App tag", pay.tag) +
+            detail("Reference", pay.memo);
+        if (method === "zelle")
+          html +=
+            detail("Account name", pay.accountName) +
+            detail("Zelle email / phone", pay.email) +
+            detail("Reference", pay.memo);
+        if (method === "venmo")
+          html +=
+            detail("Account name", pay.accountName) +
+            detail("Venmo username", pay.username) +
+            detail("Reference", pay.memo);
+        if (method === "paypal")
+          html +=
+            detail("Account name", pay.accountName) +
+            detail("PayPal email", pay.email) +
+            detail("Reference", pay.memo);
+        if (method === "moneygram")
+          html +=
+            detail("Recipient", pay.fullName) +
+            detail("Country", pay.country) +
+            detail("Location", pay.address) +
+            detail("Phone", pay.phone) +
+            detail("Reference", pay.memo);
+        if (method === "gift")
+          html +=
+            "<p>1. Purchase an accepted gift card. 2. Enter the code or upload proof through the secure verification flow. 3. Keep the original receipt.</p>" +
+            detail("Reference", pay.memo);
+        if (method === "crypto")
+          html +=
+            "<p>Select the network-specific wallet below. Send only the selected asset on its matching network.</p>" +
+            detail("Reference", pay.memo) +
+            '<div class="detail"><div><strong>Wallet</strong><select id="coin-select" class="note"><option value="btc">BTC</option><option value="usdt">USDT</option><option value="eth">ETH</option><option value="sol">SOL</option><option value="bnb">BNB</option><option value="xrp">XRP</option><option value="ada">ADA</option></select><code id="wallet-value"></code></div></div><img class="crypto-qr" id="crypto-qr" alt="Crypto wallet QR code" />';
+        html +=
+          '<button class="complete" type="button" id="complete-deposit">I have completed this payment</button>';
+        panel.innerHTML = html;
+        panel.className = "instructions show";
+        panel.querySelectorAll(".copy").forEach(function (button) {
+          button.onclick = function () {
+            navigator.clipboard.writeText(button.getAttribute("data-copy"));
+            button.textContent = "Copied";
+          };
+        });
+        if (method === "crypto") {
+          var select = document.getElementById("coin-select");
+          var wallet = document.getElementById("wallet-value");
+          var qr = document.getElementById("crypto-qr");
+          function updateWallet() {
+            var value = pay[select.value] || "";
+            wallet.textContent = value ? " " + value : " Wallet not configured";
+            qr.src = value
+              ? "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" +
+                encodeURIComponent(value)
+              : "";
+            qr.style.display = value ? "block" : "none";
+          }
+          select.onchange = updateWallet;
+          updateWallet();
+        }
+        document.getElementById("complete-deposit").onclick = completeDeposit;
+      }
       document.getElementById("go").onclick = function () {
         // If KYC missing or declined, force verification.
         if (!adminSession && (!me.kyc || me.kyc === "declined")) {
           document.getElementById("kyc-mask").className = "kyc-mask show";
           return;
         }
-        // Otherwise open Live Support widget
-        if (window.openLiveChat) window.openLiveChat();
-        else window.__openLiveChatRequested = true;
-      };
-      document.getElementById("btn-livesupport").onclick = function () {
-        if (window.openLiveChat) window.openLiveChat();
-        else window.__openLiveChatRequested = true;
+        renderInstructions();
+        document
+          .getElementById("payment-instructions")
+          .scrollIntoView({ behavior: "smooth", block: "nearest" });
       };
 
       // Load small loader that injects the live chat widget (only on deposit/upgrade pages)
