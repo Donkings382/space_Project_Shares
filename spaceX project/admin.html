@@ -2017,21 +2017,21 @@
                       selectedTx.delete(id);
                       drawTx();
                     });
-                    document.querySelectorAll(".review-tx-btn").forEach(function (btn) {
-                      btn.onclick = function () {
-                        reviewTransaction(
-                          btn.getAttribute("data-id"),
-                          btn.getAttribute("data-status"),
-                        );
-                      };
-                    });
-                    document.querySelectorAll(".tx-proof").forEach(function (img) {
-                      img.onclick = function () {
-                        window.open(img.src, "_blank");
-                      };
-                    });
                   },
                 });
+              };
+            });
+            document.querySelectorAll(".review-tx-btn").forEach(function (btn) {
+              btn.onclick = function () {
+                reviewTransaction(
+                  btn.getAttribute("data-id"),
+                  btn.getAttribute("data-status"),
+                );
+              };
+            });
+            document.querySelectorAll(".tx-proof").forEach(function (img) {
+              img.onclick = function () {
+                window.open(img.src, "_blank");
               };
             });
           })
