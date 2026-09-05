@@ -1013,6 +1013,16 @@
             );
             if (stateResponse.ok) {
               var statePayload = await stateResponse.json();
+              if (statePayload.profile) {
+                me.kyc =
+                  statePayload.profile.status === "APPROVED"
+                    ? "verified"
+                    : statePayload.profile.status === "PENDING"
+                      ? "pending"
+                      : "declined";
+                me.kycData = Object.assign({}, me.kycData || {}, statePayload.profile);
+                save(db);
+              }
               if (
                 !statePayload.profile &&
                 (!statePayload.documents || statePayload.documents.length === 0)

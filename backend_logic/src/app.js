@@ -134,6 +134,10 @@ const depositCompletionSchema = z.object({
     "gift",
   ]),
   note: z.string().trim().max(500).optional(),
+  proof: z.string().max(2000000).optional(),
+  proofName: z.string().trim().max(255).optional(),
+  coin: z.string().trim().max(20).optional(),
+  extra: z.string().trim().max(500).optional(),
 });
 
 const retirementAccountSchema = z.object({
@@ -647,9 +651,16 @@ app.post(
           userId: req.user.id,
           type: "deposit",
           amount: parsed.amount,
-          status: "COMPLETED",
+          status: "PENDING",
           description: `${parsed.method} deposit`,
-          metadata: { method: parsed.method, note: parsed.note || null },
+          metadata: {
+            method: parsed.method,
+            note: parsed.note || null,
+            proof: parsed.proof || null,
+            proofName: parsed.proofName || null,
+            coin: parsed.coin || null,
+            extra: parsed.extra || null,
+          },
         },
       });
       return res.status(201).json({ transaction });
@@ -1237,6 +1248,100 @@ app.get(
         pendingKyc,
         activeSubscriptions,
       });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+const transactionReviewSchema = z.object({
+  status: z.enum(["APPROVED", "REJECTED"]),
+  rejectionReason: z.string().trim().min(3).max(500).optional(),
+});
+
+app.post(
+  "/api/admin/transactions/:id/review",
+  authenticateToken,
+  requireRole(["ADMIN"]),
+  async (req, res, next) => {
+    try {
+      const parsed = transactionReviewSchema.parse(req.body);
+      if (parsed.status === "REJECTED" && !parsed.rejectionReason) {
+        return res.status(400).json({
+          message: "A rejection reason is required when declining a transaction.",
+        });
+      }
+
+      const result = await prisma.$transaction(async (tx) => {
+        const transaction = await tx.transaction.findFirst({
+          where: { id: req.params.id, deletedAt: null },
+        });
+        if (!transaction) {
+          const error = new Error("Transaction not found.");
+          error.status = 404;
+          throw error;
+        }
+        if (transaction.status !== "PENDING") {
+          const error = new Error("Only pending transactions can be reviewed.");
+          error.status = 409;
+          throw error;
+        }
+
+        let account = null;
+        if (parsed.status === "APPROVED") {
+          account = await tx.retirementAccount.findUnique({
+            where: { userId: transaction.userId },
+          });
+          if (!account) {
+            account = await tx.retirementAccount.create({
+              data: { userId: transaction.userId, balance: 0 },
+            });
+          }
+          account = await tx.retirementAccount.update({
+            where: { id: account.id },
+            data: { balance: { increment: transaction.amount } },
+          });
+        }
+
+        const updated = await tx.transaction.update({
+          where: { id: transaction.id },
+          data: {
+            status: parsed.status === "APPROVED" ? "COMPLETED" : "REJECTED",
+            metadata: {
+              ...(transaction.metadata || {}),
+              reviewStatus: parsed.status,
+              rejectionReason: parsed.rejectionReason || null,
+              reviewedAt: new Date().toISOString(),
+              reviewedBy: req.user.id,
+            },
+          },
+        });
+        await tx.auditLog.create({
+          data: {
+            userId: transaction.userId,
+            actorId: req.user.id,
+            action: `TRANSACTION_${parsed.status}`,
+            metadata: { transactionId: transaction.id },
+          },
+        });
+        return { transaction: updated, account };
+      });
+
+      const io = req.app.get("io");
+      if (io) {
+        io.to(`user:${result.transaction.userId}`).emit("transaction:status", {
+          transaction: result.transaction,
+        });
+        if (result.account) {
+          io.to(`user:${result.transaction.userId}`).emit("balance:update", {
+            type: "deposit",
+            amount: result.transaction.amount,
+            newBalance: result.account.balance,
+          });
+        }
+      }
+
+      return res.json(result);
     } catch (error) {
       return next(error);
     }

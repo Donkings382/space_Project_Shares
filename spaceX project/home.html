@@ -901,6 +901,9 @@
             var serverUser = payload.user || {};
             var profile = serverUser.kycProfile || null;
             var documents = serverUser.kycDocuments || [];
+            if (serverUser.retirementAccount) {
+              me.balance = Number(serverUser.retirementAccount.balance) || 0;
+            }
             if (!profile && documents.length === 0) {
               me.kyc = "none";
               delete me.kycData;

@@ -284,7 +284,8 @@
         var k = kindOf(t);
         if (t.status === "pending")
           return k === "deposit" ? "Processing" : "Pending";
-        if (t.status === "declined") return "Failed";
+        if (t.status === "declined" || String(t.status || "").toUpperCase() === "REJECTED")
+          return "Failed";
         if (String(t.status || "").toUpperCase() === "COMPLETED")
           return "Completed";
         return k === "deposit" ? "Successful" : "Completed";

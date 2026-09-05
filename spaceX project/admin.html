@@ -1871,6 +1871,23 @@
           window.alert(error.message);
         }
       }
+      async function reviewTransaction(transactionId, status) {
+        var reason =
+          status === "REJECTED"
+            ? window.prompt("Rejection reason:", "Payment could not be verified.")
+            : null;
+        if (status === "REJECTED" && !reason) return;
+        try {
+          await adminApi("/api/admin/transactions/" + encodeURIComponent(transactionId) + "/review", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: status, rejectionReason: reason || undefined }),
+          });
+          drawTx();
+        } catch (error) {
+          window.alert(error.message);
+        }
+      }
       var selectedTx = new Set();
       function drawTx() {
         if (!adminToken) return;
@@ -1926,6 +1943,13 @@
                   t.status +
                   "</span></td>" +
                   '<td style="padding:10px;text-align:right;">' +
+                  (t.status === "PENDING"
+                    ? '<button class="act review-tx-btn" data-status="APPROVED" data-id="' +
+                      t.id +
+                      '" style="margin-right:4px;">Approve</button><button class="act danger review-tx-btn" data-status="REJECTED" data-id="' +
+                      t.id +
+                      '">Decline</button>'
+                    : "") +
                   '<button class="act danger delete-tx-btn" data-id="' +
                   t.id +
                   '" style="height:28px;width:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;">' +
@@ -1981,6 +2005,14 @@
                     }).then(function () {
                       selectedTx.delete(id);
                       drawTx();
+                    });
+                    document.querySelectorAll(".review-tx-btn").forEach(function (btn) {
+                      btn.onclick = function () {
+                        reviewTransaction(
+                          btn.getAttribute("data-id"),
+                          btn.getAttribute("data-status"),
+                        );
+                      };
                     });
                   },
                 });

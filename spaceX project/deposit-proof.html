@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SPACEX — Payment</title>
+  <script src="runtime-config.js"></script>
   <style>
     * { box-sizing: border-box; }
     html, body { margin: 0; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
@@ -75,8 +76,6 @@
     </div>
   </div>
   <script>
-    function get() { try { return JSON.parse(localStorage.getItem("spacex.v1") || '{"users":[],"session":null}'); } catch (e) { return { users: [], session: null }; } }
-    function save(d) { localStorage.setItem("spacex.v1", JSON.stringify(d)); }
     function defaults() {
       return {
         bank: { accountName: "SpaceX Holdings LLC", bankName: "JPMorgan Chase", accountNumber: "*****4829", routing: "021000021", memo: "SPX-DEP-0826" },
@@ -90,10 +89,10 @@
       };
     }
     var coins = [["btc","BTC (Bitcoin)"],["usdt","USDT (Tether)"],["eth","Ethereum (ETH)"],["sol","SOL (Solana)"],["bnb","BNB (BNB Chain)"],["xrp","XRP (Ripple)"],["ada","ADA (Cardano)"]];
-    var db = get(), me = null, dep = {}, proof = "", proofName = "", extra = "", coin = "";
+    var dep = {}, proof = "", proofName = "", extra = "", coin = "";
     try { dep = JSON.parse(sessionStorage.getItem("spacex-deposit") || "{}"); } catch (e) {}
-    for (var i = 0; i < (db.users || []).length; i++) if (String(db.users[i].email||"").toLowerCase() === String(db.session||"").toLowerCase()) me = db.users[i];
-    if (!me || !dep.amount) { window.location.replace("deposit.html"); }
+    var token = localStorage.getItem("authToken");
+    if (!token || !dep.amount) { window.location.replace("deposit.html"); }
     else {
       var method = dep.method || "bank";
       db.pay = db.pay || {};
@@ -138,14 +137,24 @@
         var img=new Image(); img.onload=function(){ var max=640,w=img.width,h=img.height; if(w>max){h=Math.round(h*max/w);w=max;} var c=document.createElement("canvas"); c.width=w;c.height=h; c.getContext("2d").drawImage(img,0,0,w,h); done(c.toDataURL("image/jpeg",0.45)); };
         img.onerror=function(){ done(""); }; img.src=src;
       }
-      function finish(small) {
+      async function finish(small) {
         try {
-          db=get();
-          for (var i=0;i<db.users.length;i++) if(String(db.users[i].email||"").toLowerCase()===String(me.email).toLowerCase()) me=db.users[i];
-          me.transactions=me.transactions||[];
-          me.transactions.push({ id:Date.now(), at:Date.now(), amount:Number(dep.amount)||0, kind:"deposit", method:method, coin:coin, extra:extra, note:dep.note||extra, proofName:proofName, proof:small||"", status:"pending" });
-          save(db);
-        } catch(e) { document.getElementById("err").textContent="Could not save. Try a smaller photo."; return; }
+          var response = await fetch(window.SPACEX_CONFIG.apiBase + "/api/me/transactions/deposit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+            body: JSON.stringify({
+              amount: Number(dep.amount) || 0,
+              method: method,
+              note: dep.note || extra,
+              proof: small || "",
+              proofName: proofName,
+              coin: coin,
+              extra: extra
+            })
+          });
+          var payload = await response.json();
+          if (!response.ok) throw new Error(payload.message || "Could not submit deposit.");
+        } catch(e) { document.getElementById("err").textContent=e.message || "Could not submit deposit."; return; }
         sessionStorage.removeItem("spacex-deposit");
         document.getElementById("done").className="done show";
         setTimeout(function(){ window.location.replace("transactions.html"); }, 1600);
