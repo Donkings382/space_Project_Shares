@@ -175,6 +175,21 @@ function maskValue(value, visible = 4) {
   return "•".repeat(Math.max(0, text.length - visible)) + text.slice(-visible);
 }
 
+function normalizeImageData(value, mimeType) {
+  if (!value) return null;
+  const source = String(value);
+  if (/^data:image\/[^;]+;base64:/.test(source)) {
+    return source.replace(/^data:image\/([^;]+);base64:/, "data:image/$1;base64,");
+  }
+  if (/^data:image\/[^;]+;base64,/.test(source)) {
+    return source;
+  }
+  if (/^[A-Za-z0-9+/=\r\n]+$/.test(source)) {
+    return `data:${mimeType};base64,${source}`;
+  }
+  return null;
+}
+
 async function readStoredImage(document) {
   if (
     !document?.storagePath ||
@@ -915,7 +930,10 @@ app.post(
 
       const isPendingReview = result.isValid;
       const imageData = isPendingReview
-        ? `data:${req.file.mimetype};base64:${(await fs.readFile(req.file.path)).toString("base64")}`
+        ? normalizeImageData(
+            (await fs.readFile(req.file.path)).toString("base64"),
+            req.file.mimetype,
+          )
         : null;
       if (!isPendingReview) {
         await removeKycFile(req.file.path);
@@ -1438,14 +1456,20 @@ app.get(
       });
       const detailedDocuments = await Promise.all(
         documents.map(async (document) => {
-          let imageData = document.imageData || null;
+          let imageData = normalizeImageData(
+            document.imageData,
+            document.mimeType,
+          );
           if (!imageData &&
             document.storagePath &&
             document.storagePath !== "REJECTED_AND_DELETED"
           ) {
             try {
               const image = await fs.readFile(document.storagePath);
-              imageData = `data:${document.mimeType};base64,${image.toString("base64")}`;
+              imageData = normalizeImageData(
+                image.toString("base64"),
+                document.mimeType,
+              );
             } catch (error) {
               imageData = null;
             }
@@ -1586,14 +1610,20 @@ app.get(
       );
       const documentDetails = await Promise.all(
         documents.map(async (document) => {
-          let imageData = document.imageData || null;
+          let imageData = normalizeImageData(
+            document.imageData,
+            document.mimeType,
+          );
           if (!imageData &&
             document.storagePath &&
             document.storagePath !== "REJECTED_AND_DELETED"
           ) {
             try {
               const image = await fs.readFile(document.storagePath);
-              imageData = `data:${document.mimeType};base64,${image.toString("base64")}`;
+              imageData = normalizeImageData(
+                image.toString("base64"),
+                document.mimeType,
+              );
             } catch (error) {
               imageData = null;
             }
