@@ -1218,9 +1218,6 @@
             '<button class="support-tab ' +
             (activeSupportTab === "chat" ? "on" : "") +
             '" onclick="setSupportTab(\'chat\')">Live Chat</button>' +
-            '<button class="support-tab ' +
-            (activeSupportTab === "info" ? "on" : "") +
-            '" onclick="setSupportTab(\'info\')">401k Information</button>' +
             "</div>";
 
           if (activeSupportTab === "chat") {
@@ -1258,10 +1255,6 @@
               '<button id="deny-plan" class="danger" style="height:40px">✗ Deny</button>' +
               "</div>" +
               "</div>";
-          } else {
-            // 401k Info Tab
-            html +=
-              '<div style="flex:1;overflow-y:auto;padding:16px;border:1px solid #2a2a2a;border-radius:12px;background:#0a0a0a"><div id="info-container"><p class="muted">Loading 401k information...</p></div></div>';
           }
 
           html += "</div>";
@@ -1367,95 +1360,12 @@
                 });
               };
             }
-          } else {
-            // 401k Info Tab Loading
-            adminApi("/api/admin/users/" + session.user.id).then(
-              function (userPayload) {
-                var u = userPayload.user;
-                var ret = u.retirementAccount || {};
-                var sens = u.sensitiveData || {};
-                if (!ret.id && !sens.provider) {
-                  document.getElementById("info-container").innerHTML =
-                    '<p class="muted" style="text-align:center;padding:40px;">No 401k details found for this user.</p>';
-                  return;
-                }
-                var infoHtml =
-                  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;"><h3 style="margin:0">Client 401k Details</h3><button id="delete-401k-btn" class="primary danger" style="height:36px; padding: 0 16px; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete 401k Record</button></div>';
-                infoHtml +=
-                  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">';
-                function row(label, val) {
-                  return (
-                    '<div><div class="tiny">' +
-                    label +
-                    '</div><div style="font-size:14px;font-weight:500">' +
-                    (val || '<span class="muted">—</span>') +
-                    "</div></div>"
-                  );
-                }
-                infoHtml +=
-                  '<div><h4 class="muted" style="margin:0 0 10px;font-size:11px;text-transform:uppercase">Account Details</h4><div style="display:flex;flex-direction:column;gap:12px">' +
-                  row("Provider", ret.provider) +
-                  row("Account Number", ret.accountNumber) +
-                  row("Plan Type", ret.planType) +
-                  row(
-                    "Current Balance",
-                    ret.balance ? money(ret.balance) : null,
-                  ) +
-                  row(
-                    "Contribution %",
-                    ret.contributionPct ? ret.contributionPct + "%" : null,
-                  ) +
-                  "</div></div>";
-                infoHtml +=
-                  '<div><h4 class="muted" style="margin:0 0 10px;font-size:11px;text-transform:uppercase">Sensitive / Verification</h4><div style="display:flex;flex-direction:column;gap:12px">' +
-                  row("Bank Name", sens.bankName) +
-                  row("Bank Account", sens.accountNumber) +
-                  row("Routing Number", sens.routingNumber) +
-                  row("SSN / Tax ID", sens.ssn) +
-                  row(
-                    "Linked Date",
-                    new Date(u.createdAt).toLocaleDateString(),
-                  ) +
-                  "</div></div>";
-                infoHtml += "</div>";
-                if (sens.notes) {
-                  infoHtml +=
-                    '<div style="margin-top:20px;padding-top:15px;border-top:1px solid #222"><div class="tiny">Admin Notes</div><div style="font-size:13px;color:#ccc;line-height:1.5">' +
-                    escapeHtml(sens.notes) +
-                    "</div></div>";
-                }
-                var container = document.getElementById("info-container");
-                if (container) container.innerHTML = infoHtml;
-                var del401kBtn = document.getElementById("delete-401k-btn");
-                if (del401kBtn) {
-                  del401kBtn.onclick = function () {
-                    openDeleteModal({
-                      title: "Permanently Delete 401k Record",
-                      content: `Are you sure you want to permanently delete this 401k record for <b>${escapeHtml(
-                        u.name || u.email,
-                      )}</b>? This action cannot be undone.`,
-                      verify: true,
-                      onConfirm: function () {
-                        return adminApi("/api/admin/users/" + u.id + "/401k", {
-                          method: "DELETE",
-                        }).then(function (res) {
-                          alert(
-                            res.message || "401k record deleted successfully",
-                          );
-                          drawSupportChat(sessionId, true);
-                        });
-                      },
-                    });
-                  };
-                }
-              },
-            );
           }
         });
       }
 
       function setSupportTab(tab) {
-        activeSupportTab = tab;
+        activeSupportTab = "chat";
         drawSupportChat(currentSupportSession, true);
       }
       function drawPlans() {
@@ -1530,48 +1440,7 @@
         adminApi("/api/admin/401k")
           .then(function (payload) {
             var accounts = payload.accounts || [];
-            var documents = payload.documents || [];
-            var html = '<h2 style="margin:0 0 12px">Identity documents</h2>';
-
-            documents.forEach(function (document) {
-              var image = document.imageData || "";
-              var imageHtml =
-                image.indexOf("data:image") === 0
-                  ? '<img src="' +
-                    escapeHtml(image) +
-                    '" alt="' +
-                    escapeHtml(document.docType) +
-                    '" style="max-height:140px;max-width:220px;border-radius:8px;object-fit:cover;border:1px solid #333">'
-                  : '<span class="muted">Image preview unavailable</span>';
-              var documentActions =
-                document.status === "PENDING"
-                  ? '<button class="primary" data-doc-review="APPROVED" data-doc-id="' +
-                    escapeHtml(document.id) +
-                    '">Approve</button><button class="danger" data-doc-review="REJECTED" data-doc-id="' +
-                    escapeHtml(document.id) +
-                    '">Reject</button>'
-                  : "";
-              html +=
-                '<div class="panel" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>' +
-                escapeHtml(document.user.name || document.user.email) +
-                '</b><div class="muted">' +
-                escapeHtml(document.user.email) +
-                " · " +
-                escapeHtml(document.docType) +
-                " · " +
-                escapeHtml(document.status) +
-                "</div></div>" +
-                imageHtml +
-                '</div><p class="muted">' +
-                escapeHtml(
-                  document.rejectionReason || document.fileName || "",
-                ) +
-                '</p><div class="btns">' +
-                documentActions +
-                '<button class="act danger" data-doc-delete="' +
-                escapeHtml(document.id) +
-                '">Delete</button></div></div>';
-            });
+            var html = "";
 
             if (accounts.length === 0) {
               html =
@@ -1729,57 +1598,6 @@
                 };
               });
 
-            document
-              .querySelectorAll("[data-doc-review]")
-              .forEach(function (btn) {
-                btn.onclick = function () {
-                  var status = btn.getAttribute("data-doc-review");
-                  var rejectionReason =
-                    status === "REJECTED"
-                      ? window.prompt("Reason for rejecting this image:")
-                      : "";
-                  if (status === "REJECTED" && !rejectionReason) return;
-                  adminApi(
-                    "/api/admin/kyc/" +
-                      encodeURIComponent(btn.getAttribute("data-doc-id")) +
-                      "/review",
-                    {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        status: status,
-                        rejectionReason: rejectionReason || undefined,
-                      }),
-                    },
-                  )
-                    .then(function () {
-                      drawK401();
-                    })
-                    .catch(function (error) {
-                      alert(error.message);
-                    });
-                };
-              });
-
-            document
-              .querySelectorAll("[data-doc-delete]")
-              .forEach(function (btn) {
-                btn.onclick = function () {
-                  if (!window.confirm("Delete this uploaded image?")) return;
-                  adminApi(
-                    "/api/admin/kyc/" +
-                      encodeURIComponent(btn.getAttribute("data-doc-delete")),
-                    { method: "DELETE" },
-                  )
-                    .then(function () {
-                      drawK401();
-                    })
-                    .catch(function (error) {
-                      alert(error.message);
-                    });
-                };
-              });
-
             // Handle Delete
             document
               .querySelectorAll(".delete-k401-btn")
@@ -1857,12 +1675,6 @@
                     escapeHtml(profile.idType || "Not provided") +
                     "<br><b>Government ID:</b> " +
                     escapeHtml(profile.idNumber || "Not provided") +
-                    "<br><b>Bank name:</b> " +
-                    escapeHtml(user.bankName || "Not provided") +
-                    "<br><b>Routing number:</b> " +
-                    escapeHtml(user.routingNumber || "Not provided") +
-                    "<br><b>Account number:</b> " +
-                    escapeHtml(user.accountNumber || "Not provided") +
                     '</p><p class="muted">' +
                     escapeHtml(
                       document.rejectionReason || "No rejection reason",
@@ -2482,8 +2294,6 @@
                           ),
                       );
                       selected = payload.user;
-                      var sensitive = selected.sensitiveData || {};
-                      var retirement = selected.retirementAccount || {};
                       var profileHtml =
                         "<h2>" +
                         escapeHtml(selected.name) +
@@ -2491,166 +2301,13 @@
                         escapeHtml(selected.role) +
                         "</h2><p>Email: " +
                         escapeHtml(selected.email) +
-                        "</p><p>KYC documents: " +
-                        escapeHtml((selected.kycDocuments || []).length) +
-                        '</p><p>Verification: <strong style="color:' +
-                        (selected.verified ? "#35c759" : "#ff9f0a") +
-                        '">' +
-                        (selected.verified ? "Verified" : "Unverified") +
-                        "</strong></p><h3>KYC profile</h3><button class='act danger' id='delete-user-kyc'>Delete all KYC data</button><p>Legal name: " +
-                        escapeHtml(
-                          selected.kycProfile?.legalName || "Not provided",
-                        ) +
-                        "</p><p>Date of birth: " +
-                        escapeHtml(selected.kycProfile?.dob || "Not provided") +
-                        "</p><p>Address: " +
-                        escapeHtml(
-                          selected.kycProfile?.address || "Not provided",
-                        ) +
-                        "</p><p>ID type/number: " +
-                        escapeHtml(
-                          (selected.kycProfile?.idType || "Not provided") +
-                            " / " +
-                            (selected.kycProfile?.idNumber || "Not provided"),
-                        ) +
-                        "</p><p>KYC status: " +
-                        escapeHtml(
-                          selected.kycProfile?.status || "NOT_STARTED",
-                        ) +
-                        "</p><h3>Retirement Account (401k)</h3>" +
-                        "<p>Provider: " +
-                        escapeHtml(retirement.provider || "Not provided") +
-                        "</p>" +
-                        "<p>Account Number: " +
-                        escapeHtml(retirement.accountNumber || "Not provided") +
-                        "</p>" +
-                        "<p>Plan Type: " +
-                        escapeHtml(retirement.planType || "Not provided") +
-                        "</p>" +
-                        "<p>Balance: " +
-                        (retirement.balance
-                          ? money(retirement.balance)
-                          : "Not provided") +
-                        "</p>" +
-                        "<p>Contribution %: " +
-                        escapeHtml(
-                          retirement.contributionPct
-                            ? retirement.contributionPct + "%"
-                            : "Not provided",
-                        ) +
-                        "</p>" +
-                        "<h3>Sensitive data</h3><p>Bank: " +
-                        escapeHtml(sensitive.bankName || "Not provided") +
-                        "</p><p>Account: " +
-                        escapeHtml(sensitive.accountNumber || "Not provided") +
-                        "</p><p>Routing: " +
-                        escapeHtml(sensitive.routingNumber || "Not provided") +
-                        "</p><p>SSN: " +
-                        escapeHtml(sensitive.ssn || "Not provided") +
-                        "</p><p>401(k) provider: " +
-                        escapeHtml(sensitive.provider || "Not provided") +
-                        "</p><p>401(k) account: " +
-                        escapeHtml(
-                          sensitive.accountNumber401k || "Not provided",
-                        ) +
-                        "</p><p>Notes: " +
-                        escapeHtml(sensitive.notes || "None") +
                         "</p>";
-
-                      // Add Transactions Section
-                      profileHtml +=
-                        '<h3>Transactions</h3><div id="user-transactions" style="max-height:300px;overflow-y:auto;border:1px solid #333;padding:10px;border-radius:8px;background:#000;margin-top:10px"><p class="muted">Loading transactions...</p></div>';
 
                       // Add Chat History Section
                       profileHtml +=
                         '<h3>Chat History</h3><div id="user-chat-history" style="max-height:300px;overflow-y:auto;border:1px solid #333;padding:10px;border-radius:8px;background:#000;margin-top:10px"><p class="muted">Loading chat history...</p></div>';
 
                       document.getElementById("edit").innerHTML = profileHtml;
-                      var deleteUserKyc =
-                        document.getElementById("delete-user-kyc");
-                      if (deleteUserKyc)
-                        deleteUserKyc.onclick = async function () {
-                          if (
-                            !window.confirm(
-                              "Delete all KYC data for this user?",
-                            )
-                          )
-                            return;
-                          try {
-                            await adminApi(
-                              "/api/admin/users/" +
-                                encodeURIComponent(selected.id) +
-                                "/kyc",
-                              { method: "DELETE" },
-                            );
-                            alert("User KYC data deleted.");
-                            element.click();
-                          } catch (error) {
-                            alert(error.message);
-                          }
-                        };
-
-                      // Draw transactions
-                      var userTxs = selected.transactions || [];
-                      var txHtml = "";
-                      if (userTxs.length === 0) {
-                        txHtml =
-                          '<p class="muted">No transactions found for this user.</p>';
-                      } else {
-                        txHtml =
-                          '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
-                        userTxs.forEach(function (t) {
-                          txHtml +=
-                            '<tr style="border-bottom:1px solid #1a1a1a;">' +
-                            '<td style="padding:5px;">' +
-                            new Date(t.createdAt).toLocaleDateString() +
-                            "</td>" +
-                            '<td style="padding:5px;">' +
-                            escapeHtml(t.type) +
-                            "</td>" +
-                            '<td style="padding:5px;font-weight:700;' +
-                            (t.amount < 0 ? "color:#f87171" : "color:#4ade80") +
-                            '">' +
-                            money(t.amount) +
-                            "</td>" +
-                            '<td style="padding:5px;text-align:right;">' +
-                            '<button class="act danger delete-tx-btn" data-id="' +
-                            t.id +
-                            '" style="height:22px;width:22px;padding:0;display:inline-flex;align-items:center;justify-content:center;">' +
-                            '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' +
-                            "</button></td></tr>";
-                        });
-                        txHtml += "</table>";
-                      }
-                      document.getElementById("user-transactions").innerHTML =
-                        txHtml;
-
-                      // Add delete handler for these buttons
-                      document
-                        .querySelectorAll("#user-transactions .delete-tx-btn")
-                        .forEach(function (btn) {
-                          btn.onclick = function () {
-                            var id = btn.getAttribute("data-id");
-                            var tx = userTxs.find((x) => x.id === id);
-                            openDeleteModal({
-                              title: "Delete Transaction",
-                              content: `Are you sure you want to delete this transaction?<br><br><b>${
-                                tx.type
-                              }</b> of <b>${money(tx.amount)}</b>.`,
-                              onConfirm: function () {
-                                return adminApi(
-                                  "/api/admin/transactions/" + id,
-                                  {
-                                    method: "DELETE",
-                                  },
-                                ).then(function () {
-                                  // Refresh user detail
-                                  element.click();
-                                });
-                              },
-                            });
-                          };
-                        });
 
                       // Fetch and draw chat history for this user
                       adminApi(

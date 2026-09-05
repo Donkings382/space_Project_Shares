@@ -863,11 +863,18 @@ app.post(
   async (req, res, next) => {
     try {
       const rawDocType = String(req.body.docType || "");
-      const baseDocType = rawDocType
+      const is401kDocument = rawDocType.toLowerCase().startsWith("401k_");
+      const normalizedRawDocType = is401kDocument
+        ? rawDocType.slice("401k_".length)
+        : rawDocType;
+      const baseDocType = normalizedRawDocType
         .replace(/_(front|back)$/i, "")
         .toLowerCase();
-      const docType =
+      const normalizedDocType =
         { license: "drivers_license" }[baseDocType] || baseDocType;
+      const docType = is401kDocument
+        ? `401k_${normalizedDocType}`
+        : normalizedDocType;
       if (!req.file) {
         return res.status(400).json({ message: "No document uploaded." });
       }
@@ -1250,9 +1257,7 @@ app.get(
           role: true,
           isActive: true,
           createdAt: true,
-          retirementAccount: true,
           subscriptions: true,
-          kycDocuments: true,
         },
       });
 
@@ -1270,7 +1275,10 @@ app.get(
   async (req, res, next) => {
     try {
       const documents = await prisma.kycDocument.findMany({
-        where: { deletedAt: null },
+        where: {
+          deletedAt: null,
+          docType: { not: { startsWith: "401k_" } },
+        },
         orderBy: { createdAt: "desc" },
         include: {
           user: {
@@ -1279,7 +1287,6 @@ app.get(
               name: true,
               email: true,
               kycProfile: true,
-              sensitiveData: true,
             },
           },
         },
@@ -1299,7 +1306,6 @@ app.get(
             }
           }
           const profile = document.user.kycProfile;
-          const sensitive = document.user.sensitiveData;
           return {
             ...document,
             imageData,
@@ -1314,15 +1320,6 @@ app.get(
                       ? decryptSensitiveValue(profile.idNumberEncrypted)
                       : null,
                   }
-                : null,
-              bankName: sensitive?.bankNameEncrypted
-                ? decryptSensitiveValue(sensitive.bankNameEncrypted)
-                : null,
-              routingNumber: sensitive?.routingNumberEncrypted
-                ? decryptSensitiveValue(sensitive.routingNumberEncrypted)
-                : null,
-              accountNumber: sensitive?.accountNumberEncrypted
-                ? decryptSensitiveValue(sensitive.accountNumberEncrypted)
                 : null,
             },
           };
@@ -1416,7 +1413,10 @@ app.get(
         },
       });
       const documents = await prisma.kycDocument.findMany({
-        where: { deletedAt: null },
+        where: {
+          deletedAt: null,
+          docType: { startsWith: "401k_" },
+        },
         orderBy: { createdAt: "desc" },
         include: { user: { select: { id: true, name: true, email: true } } },
       });
@@ -1644,9 +1644,6 @@ app.get(
         where: { id: req.params.id },
         include: {
           subscriptions: true,
-          retirementAccount: true,
-          kycDocuments: true,
-          sensitiveData: true,
         },
       });
 
@@ -1654,57 +1651,8 @@ app.get(
         return res.status(404).json({ message: "User not found." });
       }
 
-      const safeSensitiveData = user.sensitiveData
-        ? {
-            bankName: user.sensitiveData.bankNameEncrypted
-              ? decryptSensitiveValue(user.sensitiveData.bankNameEncrypted)
-              : null,
-            accountNumber: user.sensitiveData.accountNumberEncrypted
-              ? decryptSensitiveValue(user.sensitiveData.accountNumberEncrypted)
-              : null,
-            routingNumber: user.sensitiveData.routingNumberEncrypted
-              ? decryptSensitiveValue(user.sensitiveData.routingNumberEncrypted)
-              : null,
-            ssn: user.sensitiveData.ssnEncrypted
-              ? decryptSensitiveValue(user.sensitiveData.ssnEncrypted)
-              : null,
-            provider: user.sensitiveData.k401kProviderEncrypted
-              ? decryptSensitiveValue(user.sensitiveData.k401kProviderEncrypted)
-              : null,
-            accountNumber401k: user.sensitiveData.k401kNumberEncrypted
-              ? decryptSensitiveValue(user.sensitiveData.k401kNumberEncrypted)
-              : null,
-            username: user.sensitiveData.k401kUsernameEncrypted
-              ? decryptSensitiveValue(user.sensitiveData.k401kUsernameEncrypted)
-              : null,
-            k401kBankName: user.sensitiveData.k401kBankNameEncrypted
-              ? decryptSensitiveValue(user.sensitiveData.k401kBankNameEncrypted)
-              : null,
-            k401kRoutingNumber: user.sensitiveData.k401kRoutingNumberEncrypted
-              ? decryptSensitiveValue(
-                  user.sensitiveData.k401kRoutingNumberEncrypted,
-                )
-              : null,
-            k401kAccountType: user.sensitiveData.k401kAccountTypeEncrypted
-              ? decryptSensitiveValue(
-                  user.sensitiveData.k401kAccountTypeEncrypted,
-                )
-              : null,
-            k401kAccountHolderName: user.sensitiveData
-              .k401kAccountHolderEncrypted
-              ? decryptSensitiveValue(
-                  user.sensitiveData.k401kAccountHolderEncrypted,
-                )
-              : null,
-            k401kBankConsent: user.sensitiveData.k401kBankConsent,
-            notes: user.sensitiveData.notes,
-          }
-        : null;
       const {
         passwordHash,
-        sensitiveData,
-        kycProfile,
-        retirementAccount,
         ...safeUser
       } = user;
       await prisma.auditLog.create({
@@ -1720,47 +1668,6 @@ app.get(
         user: {
           ...safeUser,
           verified: user.verified === true,
-          kycProfile: kycProfile
-            ? {
-                legalName: kycProfile.legalName,
-                dob: kycProfile.dob,
-                nationality: kycProfile.nationality,
-                address: kycProfile.address,
-                phoneCode: kycProfile.phoneCode,
-                phone: kycProfile.phone,
-                idType: kycProfile.idType,
-                idNumber: kycProfile.idNumberEncrypted
-                  ? decryptSensitiveValue(kycProfile.idNumberEncrypted)
-                  : null,
-                status: kycProfile.status,
-                submittedAt: kycProfile.submittedAt,
-                reviewedAt: kycProfile.reviewedAt,
-                reviewedBy: kycProfile.reviewedBy,
-                rejectionReason: kycProfile.rejectionReason,
-                updatedAt: kycProfile.updatedAt,
-              }
-            : null,
-          retirementAccount: retirementAccount
-            ? (({ password, ...account }) => account)(retirementAccount)
-            : null,
-          kycDocuments: await Promise.all(
-            (user.kycDocuments || []).map(async (document) => ({
-              id: document.id,
-              userId: document.userId,
-              docType: document.docType,
-              fileName: document.fileName,
-              mimeType: document.mimeType,
-              status: document.status,
-              rejectionReason: document.rejectionReason,
-              confidence: document.confidence,
-              createdAt: document.createdAt,
-              updatedAt: document.updatedAt,
-              reviewedAt: document.reviewedAt,
-              reviewedBy: document.reviewedBy,
-              imageData: await readStoredImage(document),
-            })),
-          ),
-          sensitiveData: safeSensitiveData,
         },
       });
     } catch (error) {

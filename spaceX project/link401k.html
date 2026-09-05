@@ -614,8 +614,8 @@
 
           // Upload ID documents
           for (var fileInfo of [
-            { input: "f-front", type: currentIdType + "_front" },
-            { input: "f-back", type: currentIdType + "_back" },
+            { input: "f-front", type: "401k_" + currentIdType + "_front" },
+            { input: "f-back", type: "401k_" + currentIdType + "_back" },
           ]) {
             var file = document.getElementById(fileInfo.input).files[0];
             if (!file) continue;
