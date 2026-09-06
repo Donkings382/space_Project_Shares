@@ -877,10 +877,40 @@
         }
       }
       verifyAdminSession();
-      document.getElementById("admin-login-form").onsubmit = function (e) {
+      document.getElementById("admin-login-form").onsubmit = async function (
+        e,
+      ) {
         e.preventDefault();
-        document.getElementById("a-err").textContent =
-          "Sign in through the main login page with an admin account.";
+        var error = document.getElementById("a-err");
+        var button = document.getElementById("a-go");
+        error.textContent = "";
+        button.disabled = true;
+        try {
+          var response = await fetch(API_BASE + "/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              identifier: document.getElementById("a-email").value.trim(),
+              password: document.getElementById("a-pass").value,
+            }),
+          });
+          var payload = await response.json().catch(function () {
+            return {};
+          });
+          if (!response.ok) throw new Error(payload.message || "Login failed.");
+          if (!payload.user || payload.user.role !== "ADMIN") {
+            throw new Error("This account is not an admin.");
+          }
+          adminToken = payload.token;
+          me = payload.user;
+          localStorage.setItem("authToken", payload.token);
+          localStorage.setItem("spacex.user", JSON.stringify(payload.user));
+          showDesk();
+        } catch (loginError) {
+          error.textContent = loginError.message;
+        } finally {
+          button.disabled = false;
+        }
       };
       function setNav(on) {
         [
