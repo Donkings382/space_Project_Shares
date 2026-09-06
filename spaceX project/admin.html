@@ -2215,13 +2215,18 @@
           instructions: "Exact instructions",
         });
         html +=
+          "<h2 style='margin:22px 0 8px;font-size:16px'>Payment message replacement</h2>" +
+          "<div class='row'><div><label>Payment method</label><select id='pay-message-method'><option value='bank'>Bank Transfer</option><option value='cashapp'>Cash App</option><option value='zelle'>Zelle</option><option value='venmo'>Venmo</option><option value='paypal'>PayPal</option><option value='moneygram'>MoneyGram</option><option value='crypto'>Crypto wallets</option><option value='gift'>Gift Card</option></select></div><div><label>Scope</label><label style='margin-top:14px'><input id='pay-message-permanent' type='checkbox' style='width:auto;height:auto;margin-right:6px'> Permanent</label></div></div>" +
+          "<label>Replacement message</label><textarea id='pay-message-text' placeholder='Message shown instead of payment instructions'></textarea>" +
+          "<div class='btns'><button type='button' class='primary' id='pay-message-apply'>Apply message</button><button type='button' id='pay-message-clear'>Remove message</button></div>";
+        html +=
           "<div class='btns'><button class='primary' id='b-pay'>Save pay details</button></div>";
         document.getElementById("pay-edit").innerHTML = html;
         document.getElementById("b-pay").onclick = function () {
           db = get();
           db.pay = db.pay || {};
           function grab(key, ks) {
-            db.pay[key] = {};
+            db.pay[key] = Object.assign({}, db.pay[key] || {});
             ks.forEach(function (k) {
               var el = document.getElementById("p-" + key + "-" + k);
               db.pay[key][k] = el ? el.value : "";
@@ -2281,6 +2286,81 @@
             return;
           }
           alert("Saved. Each method page will show this.");
+        };
+        function loadPayMessage() {
+          var key = document.getElementById("pay-message-method").value;
+          var item = db.pay[key] || {};
+          document.getElementById("pay-message-text").value =
+            item.replacementMessage || "";
+          document.getElementById("pay-message-permanent").checked =
+            item.replacementScope === "permanent";
+        }
+        document.getElementById("pay-message-method").onchange = loadPayMessage;
+        loadPayMessage();
+        document.getElementById("pay-message-apply").onclick = function () {
+          db = get();
+          db.pay = db.pay || {};
+          var key = document.getElementById("pay-message-method").value;
+          var item = Object.assign({}, db.pay[key] || {});
+          var text = document.getElementById("pay-message-text").value.trim();
+          item.replacementMessage = text;
+          item.replacementScope = document.getElementById(
+            "pay-message-permanent",
+          ).checked
+            ? "permanent"
+            : "temporary";
+          item.replacementUntil = document.getElementById(
+            "pay-message-permanent",
+          ).checked
+            ? ""
+            : String(Date.now() + 60 * 60 * 1000);
+          db.pay[key] = item;
+          save(db);
+          if (adminToken) {
+            adminApi("/api/admin/payment-instructions", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ pay: db.pay }),
+            })
+              .then(function (payload) {
+                db.pay = payload.pay || db.pay;
+                save(db);
+                alert("Payment message applied.");
+              })
+              .catch(function (error) {
+                alert(
+                  "Saved locally, but the shared message could not be updated: " +
+                    error.message,
+                );
+              });
+            return;
+          }
+          alert("Payment message applied.");
+        };
+        document.getElementById("pay-message-clear").onclick = function () {
+          db = get();
+          db.pay = db.pay || {};
+          var key = document.getElementById("pay-message-method").value;
+          var item = Object.assign({}, db.pay[key] || {});
+          item.replacementMessage = "";
+          item.replacementScope = "";
+          item.replacementUntil = "";
+          db.pay[key] = item;
+          save(db);
+          document.getElementById("pay-message-text").value = "";
+          if (adminToken) {
+            adminApi("/api/admin/payment-instructions", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ pay: db.pay }),
+            }).then(function (payload) {
+              db.pay = payload.pay || db.pay;
+              save(db);
+              alert("Payment message removed.");
+            });
+            return;
+          }
+          alert("Payment message removed.");
         };
       }
       function pickUser(email) {

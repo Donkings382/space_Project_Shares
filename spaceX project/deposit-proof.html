@@ -340,6 +340,17 @@
         ["xrp", "XRP (Ripple)"],
         ["ada", "ADA (Cardano)"],
       ];
+      function esc(value) {
+        return String(value || "").replace(/[&<>'"]/g, function (c) {
+          return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "'": "&#39;",
+            '"': "&quot;",
+          }[c];
+        });
+      }
       var db = get(),
         dep = {},
         proof = "",
@@ -357,6 +368,10 @@
         db.pay = db.pay || {};
         var dft = defaults(),
           p = Object.assign({}, dft[method] || {}, db.pay[method] || {});
+        var replacementActive =
+          p.replacementMessage &&
+          (p.replacementScope === "permanent" ||
+            Number(p.replacementUntil) > Date.now());
         var titles = {
           bank: "Bank Transfer Instructions",
           cashapp: "Cash App Payment Instructions",
@@ -397,8 +412,12 @@
             "</div></div></div>"
           );
         }
-        var html = "";
-        if (method === "bank")
+        var html = replacementActive
+          ? '<div class="note" style="padding:18px;border:1px solid #f59e0b;border-radius:10px;background:#fff7ed;color:#92400e;font-weight:600">' +
+            esc(p.replacementMessage) +
+            "</div>"
+          : "";
+        if (!replacementActive && method === "bank")
           html =
             '<div class="card">' +
             line("Account Name", p.accountName) +
@@ -407,7 +426,7 @@
             line("Routing Number", p.routing) +
             line("Reference / Memo", p.memo) +
             "</div>";
-        if (method === "cashapp")
+        if (!replacementActive && method === "cashapp")
           html =
             '<div class="card">' +
             line("Account Name", p.accountName) +
@@ -415,7 +434,7 @@
             '</div><p class="note">Please include the reference <b>' +
             p.memo +
             "</b> in the payment note.</p>";
-        if (method === "zelle")
+        if (!replacementActive && method === "zelle")
           html =
             '<div class="card">' +
             line("Account Name", p.accountName) +
@@ -423,7 +442,7 @@
             '</div><p class="note">Please include the reference ' +
             p.memo +
             " in the payment memo.</p>";
-        if (method === "venmo")
+        if (!replacementActive && method === "venmo")
           html =
             '<div class="card">' +
             line("Account Name", p.accountName) +
@@ -431,7 +450,7 @@
             '</div><p class="note">Please include the reference ' +
             p.memo +
             " in the payment note.</p>";
-        if (method === "paypal")
+        if (!replacementActive && method === "paypal")
           html =
             '<div class="card">' +
             line("Account Name", p.accountName) +
@@ -439,7 +458,7 @@
             '</div><p class="note">Please include the reference ' +
             p.memo +
             " in the payment note / description.</p>";
-        if (method === "moneygram")
+        if (!replacementActive && method === "moneygram")
           html =
             '<div class="card">' +
             line("Full Name", p.fullName) +
@@ -449,13 +468,13 @@
             '</div><p class="note">Please include the reference ' +
             p.memo +
             " when sending.</p>";
-        if (method === "gift") {
+        if (!replacementActive && method === "gift") {
           html =
             '<p class="sec">1. Gift Card Code</p><input class="code" id="giftcode" placeholder="Enter gift card code" /><p class="or">OR</p>';
           document.getElementById("up-label").textContent =
             "2. Upload Card Photo";
         }
-        if (method === "crypto") {
+        if (!replacementActive && method === "crypto") {
           html = '<p class="sec">1 SELECT CRYPTOCURRENCY</p><div id="coins">';
           coins.forEach(function (c) {
             html +=
@@ -483,7 +502,7 @@
           instructionText.textContent = text;
           document.getElementById("details").appendChild(instructionText);
         }
-        showInstructions(p.instructions);
+        showInstructions(replacementActive ? "" : p.instructions);
         fetch(window.SPACEX_CONFIG.apiBase + "/api/payment-instructions", {
           headers: { Authorization: "Bearer " + token },
         })
@@ -492,7 +511,18 @@
           })
           .then(function (payload) {
             var serverPay = payload && payload.pay && payload.pay[method];
-            if (serverPay) showInstructions(serverPay.instructions || "");
+            if (serverPay) {
+              var serverReplacement =
+                serverPay.replacementMessage &&
+                (serverPay.replacementScope === "permanent" ||
+                  Number(serverPay.replacementUntil) > Date.now());
+              if (serverReplacement) {
+                document.getElementById("details").innerHTML =
+                  '<div class="note" style="padding:18px;border:1px solid #f59e0b;border-radius:10px;background:#fff7ed;color:#92400e;font-weight:600">' +
+                  esc(serverPay.replacementMessage) +
+                  "</div>";
+              } else showInstructions(serverPay.instructions || "");
+            }
           })
           .catch(function () {});
         if (method === "crypto") {

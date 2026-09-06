@@ -533,6 +533,20 @@
           );
         }) ||
         (me && (me.isAdmin || me.role === "ADMIN"));
+      fetch(window.SPACEX_CONFIG.apiBase + "/api/payment-instructions", {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("authToken"),
+        },
+      })
+        .then(function (response) {
+          return response.ok ? response.json() : null;
+        })
+        .then(function (payload) {
+          if (!payload || !payload.pay) return;
+          db.pay = payload.pay;
+          save(db);
+        })
+        .catch(function () {});
       if (!me) window.location.href = "login.html";
       document.getElementById("who").textContent = me.fullName || me.email;
       document.getElementById("amount").value = money(0);
@@ -682,6 +696,19 @@
           })
         )
           return;
+        var replacementActive =
+          pay.replacementMessage &&
+          (pay.replacementScope === "permanent" ||
+            Number(pay.replacementUntil) > Date.now());
+        if (replacementActive) {
+          panel.innerHTML =
+            '<div style="padding:18px;border:1px solid #f59e0b;border-radius:10px;background:#fff7ed;color:#92400e;font-weight:600">' +
+            esc(pay.replacementMessage) +
+            '</div><button class="complete" type="button" id="complete-deposit">I have completed this payment</button>';
+          panel.className = "instructions show";
+          document.getElementById("complete-deposit").onclick = completeDeposit;
+          return;
+        }
         var html =
           "<h2>" +
           names[method] +
