@@ -179,7 +179,10 @@ function normalizeImageData(value, mimeType) {
   if (!value) return null;
   const source = String(value);
   if (/^data:image\/[^;]+;base64:/.test(source)) {
-    return source.replace(/^data:image\/([^;]+);base64:/, "data:image/$1;base64,");
+    return source.replace(
+      /^data:image\/([^;]+);base64:/,
+      "data:image/$1;base64,",
+    );
   }
   if (/^data:image\/[^;]+;base64,/.test(source)) {
     return source;
@@ -919,7 +922,9 @@ app.post(
       }
       if (!/^image\//i.test(req.file.mimetype || "")) {
         await removeKycFile(req.file.path);
-        return res.status(400).json({ message: "Upload an image file no larger than 5MB." });
+        return res
+          .status(400)
+          .json({ message: "Upload an image file no larger than 5MB." });
       }
 
       const result = await processKycUpload({
@@ -1317,6 +1322,51 @@ const transactionReviewSchema = z.object({
   rejectionReason: z.string().trim().min(3).max(500).optional(),
 });
 
+const paymentInstructionsSchema = z.record(
+  z.string(),
+  z.record(z.string(), z.string().max(5000)),
+);
+
+app.get(
+  "/api/payment-instructions",
+  authenticateToken,
+  async (req, res, next) => {
+    try {
+      const setting = await prisma.appSetting.findUnique({
+        where: { key: "payment_instructions" },
+      });
+      return res.json({ pay: setting?.value || {} });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+app.put(
+  "/api/admin/payment-instructions",
+  authenticateToken,
+  requireRole(["ADMIN"]),
+  async (req, res, next) => {
+    try {
+      const pay = paymentInstructionsSchema.parse(req.body.pay || req.body);
+      const setting = await prisma.appSetting.upsert({
+        where: { key: "payment_instructions" },
+        update: { value: pay },
+        create: { key: "payment_instructions", value: pay },
+      });
+      await prisma.auditLog.create({
+        data: {
+          actorId: req.user.id,
+          action: "PAYMENT_INSTRUCTIONS_UPDATED",
+        },
+      });
+      return res.json({ pay: setting.value });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
 app.post(
   "/api/admin/transactions/:id/review",
   authenticateToken,
@@ -1326,7 +1376,8 @@ app.post(
       const parsed = transactionReviewSchema.parse(req.body);
       if (parsed.status === "REJECTED" && !parsed.rejectionReason) {
         return res.status(400).json({
-          message: "A rejection reason is required when declining a transaction.",
+          message:
+            "A rejection reason is required when declining a transaction.",
         });
       }
 
@@ -1460,7 +1511,8 @@ app.get(
             document.imageData,
             document.mimeType,
           );
-          if (!imageData &&
+          if (
+            !imageData &&
             document.storagePath &&
             document.storagePath !== "REJECTED_AND_DELETED"
           ) {
@@ -1515,21 +1567,25 @@ app.delete(
       await removeKycFile(document.storagePath);
       await prisma.kycDocument.update({
         where: { id: document.id },
-        data: { deletedAt: new Date(), storagePath: "DELETED", imageData: null },
+        data: {
+          deletedAt: new Date(),
+          storagePath: "DELETED",
+          imageData: null,
+        },
       });
       await prisma.$transaction([
         prisma.kycProfile.updateMany({
-        where: { userId: document.userId },
-        data: {
-          status: "PENDING",
-          reviewedAt: null,
-          reviewedBy: null,
-          rejectionReason: null,
-        },
+          where: { userId: document.userId },
+          data: {
+            status: "PENDING",
+            reviewedAt: null,
+            reviewedBy: null,
+            rejectionReason: null,
+          },
         }),
         prisma.user.update({
-        where: { id: document.userId },
-        data: { verified: false },
+          where: { id: document.userId },
+          data: { verified: false },
         }),
       ]);
       await prisma.auditLog.create({
@@ -1614,7 +1670,8 @@ app.get(
             document.imageData,
             document.mimeType,
           );
-          if (!imageData &&
+          if (
+            !imageData &&
             document.storagePath &&
             document.storagePath !== "REJECTED_AND_DELETED"
           ) {
@@ -1841,10 +1898,7 @@ app.get(
         return res.status(404).json({ message: "User not found." });
       }
 
-      const {
-        passwordHash,
-        ...safeUser
-      } = user;
+      const { passwordHash, ...safeUser } = user;
       await prisma.auditLog.create({
         data: {
           action: "KYC_VIEWED",

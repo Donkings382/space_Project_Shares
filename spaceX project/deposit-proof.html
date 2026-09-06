@@ -473,6 +473,28 @@
             "3 UPLOAD PAYMENT PROOF";
         }
         document.getElementById("details").innerHTML = html;
+        function showInstructions(text) {
+          var existing = document.getElementById("admin-payment-instructions");
+          if (existing) existing.remove();
+          if (!text) return;
+          var instructionText = document.createElement("p");
+          instructionText.id = "admin-payment-instructions";
+          instructionText.className = "note";
+          instructionText.textContent = text;
+          document.getElementById("details").appendChild(instructionText);
+        }
+        showInstructions(p.instructions);
+        fetch(window.SPACEX_CONFIG.apiBase + "/api/payment-instructions", {
+          headers: { Authorization: "Bearer " + token },
+        })
+          .then(function (response) {
+            return response.ok ? response.json() : null;
+          })
+          .then(function (payload) {
+            var serverPay = payload && payload.pay && payload.pay[method];
+            if (serverPay) showInstructions(serverPay.instructions || "");
+          })
+          .catch(function () {});
         if (method === "crypto") {
           document.querySelectorAll(".coin").forEach(function (el) {
             el.onclick = function () {
