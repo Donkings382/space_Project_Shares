@@ -2578,12 +2578,76 @@
               "/api/admin/users/" + user.id + "/impersonate",
               { method: "POST" },
             );
+            var liveResponse = await fetch(API_BASE + "/api/me", {
+              headers: { Authorization: "Bearer " + response.token },
+            });
+            var livePayload = liveResponse.ok ? await liveResponse.json() : {};
+            var txResponse = await fetch(API_BASE + "/api/me/transactions", {
+              headers: { Authorization: "Bearer " + response.token },
+            });
+            var txPayload = txResponse.ok ? await txResponse.json() : {};
+            var liveUser = livePayload.user || {};
+            var current = get();
+            current.users = current.users || [];
+            var target = null;
+            for (var i = 0; i < current.users.length; i++) {
+              if (
+                String(current.users[i].email || "").toLowerCase() ===
+                String(response.user.email || user.email).toLowerCase()
+              ) {
+                target = current.users[i];
+                break;
+              }
+            }
+            if (!target) {
+              target = {};
+              current.users.push(target);
+            }
+            Object.assign(target, response.user, {
+              fullName: response.user.name || user.name || "",
+              email: response.user.email || user.email,
+              isAdmin: false,
+              role: liveUser.role || "USER",
+              kyc: liveUser.kycProfile
+                ? liveUser.kycProfile.status === "APPROVED"
+                  ? "verified"
+                  : liveUser.kycProfile.status === "PENDING"
+                    ? "pending"
+                    : "declined"
+                : "none",
+              kycData: liveUser.kycProfile || null,
+              retirementAccount: liveUser.retirementAccount || null,
+              k401: liveUser.retirementAccount
+                ? {
+                    amount: Number(liveUser.retirementAccount.balance) || 0,
+                    status: String(
+                      liveUser.retirementAccount.status || "",
+                    ).toLowerCase(),
+                  }
+                : null,
+              balance:
+                Number(liveUser.retirementAccount?.cashBalance) ||
+                Number(response.user.balance) ||
+                0,
+              investAmount:
+                Number(liveUser.retirementAccount?.investmentBalance) ||
+                Number(response.user.investAmount) ||
+                0,
+              sharePct:
+                Number(liveUser.retirementAccount?.sharePct) ||
+                Number(response.user.sharePct) ||
+                0,
+              transactions: txPayload.transactions || [],
+              notes: liveUser.notes || response.user.notes || [],
+            });
+            current.session = target.email;
+            save(current);
             localStorage.setItem(
               "adminReturn",
               localStorage.getItem("authToken"),
             );
             localStorage.setItem("authToken", response.token);
-            localStorage.setItem("spacex.user", JSON.stringify(response.user));
+            localStorage.setItem("spacex.user", JSON.stringify(liveUser));
             window.location.href = "home.html";
           } catch (error) {
             alert(error.message);
