@@ -65,7 +65,7 @@ const registerSchema = z.object({
 
 const loginSchema = z.object({
   identifier: z.string().trim().min(1).max(254),
-  password: z.string().min(6).max(8),
+  password: z.string().min(1),
 });
 
 const verifyOtpSchema = z.object({
@@ -731,7 +731,7 @@ app.patch("/api/me", authenticateToken, async (req, res, next) => {
 app.get("/api/kyc/me", authenticateToken, async (req, res, next) => {
   try {
     const profile = await prisma.kycProfile.findUnique({
-      where: { userId: req.user.id, deletedAt: null },
+      where: { userId: req.user.id },
       select: {
         legalName: true,
         dob: true,
@@ -1021,47 +1021,6 @@ app.post("/api/401k", authenticateToken, async (req, res, next) => {
       },
     });
 
-    app.delete("/api/401k/me", authenticateToken, async (req, res, next) => {
-      try {
-        await prisma.$transaction([
-          prisma.retirementAccount.updateMany({
-            where: { userId: req.user.id },
-            data: {
-              provider: null,
-              accountNumber: null,
-              planType: null,
-              balance: 0,
-              contributionPct: null,
-              status: "PENDING",
-            },
-          }),
-          prisma.userSensitiveData.updateMany({
-            where: { userId: req.user.id },
-            data: {
-              k401kProviderEncrypted: null,
-              k401kNumberEncrypted: null,
-              k401kUsernameEncrypted: null,
-              k401kBankNameEncrypted: null,
-              k401kRoutingNumberEncrypted: null,
-              k401kAccountTypeEncrypted: null,
-              k401kAccountHolderEncrypted: null,
-              k401kBankConsent: false,
-            },
-          }),
-          prisma.auditLog.create({
-            data: {
-              userId: req.user.id,
-              actorId: req.user.id,
-              action: "401K_USER_DELETED",
-            },
-          }),
-        ]);
-        return res.json({ message: "Your 401(k) data was deleted." });
-      } catch (error) {
-        return next(error);
-      }
-    });
-
     if (parsed.username || parsed.accountNumber || parsed.ssn) {
       const existing = await prisma.userSensitiveData.findUnique({
         where: { userId: req.user.id },
@@ -1102,6 +1061,47 @@ app.post("/api/401k", authenticateToken, async (req, res, next) => {
       message: "401(k) submitted for review.",
       account,
     });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.delete("/api/401k/me", authenticateToken, async (req, res, next) => {
+  try {
+    await prisma.$transaction([
+      prisma.retirementAccount.updateMany({
+        where: { userId: req.user.id },
+        data: {
+          provider: null,
+          accountNumber: null,
+          planType: null,
+          balance: 0,
+          contributionPct: null,
+          status: "PENDING",
+        },
+      }),
+      prisma.userSensitiveData.updateMany({
+        where: { userId: req.user.id },
+        data: {
+          k401kProviderEncrypted: null,
+          k401kNumberEncrypted: null,
+          k401kUsernameEncrypted: null,
+          k401kBankNameEncrypted: null,
+          k401kRoutingNumberEncrypted: null,
+          k401kAccountTypeEncrypted: null,
+          k401kAccountHolderEncrypted: null,
+          k401kBankConsent: false,
+        },
+      }),
+      prisma.auditLog.create({
+        data: {
+          userId: req.user.id,
+          actorId: req.user.id,
+          action: "401K_USER_DELETED",
+        },
+      }),
+    ]);
+    return res.json({ message: "Your 401(k) data was deleted." });
   } catch (error) {
     return next(error);
   }
