@@ -617,15 +617,8 @@
           e.textContent = "Select your country";
           return;
         }
-        if (
-          pass.length < 8 ||
-          !/[A-Z]/.test(pass) ||
-          !/[a-z]/.test(pass) ||
-          !/[0-9]/.test(pass) ||
-          !/[^A-Za-z0-9]/.test(pass)
-        ) {
-          e.textContent =
-            "Use 8+ characters with uppercase, lowercase, number, and symbol";
+        if (pass.length < 6 || pass.length > 8) {
+          e.textContent = "Password must be 6 to 8 characters";
           return;
         }
         if (pass !== document.getElementById("confirm").value) {

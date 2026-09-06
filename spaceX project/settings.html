@@ -361,7 +361,19 @@
       }
       @media (max-width: 980px) {
         .side {
-          display: none;
+          display: block;
+          width: 100%;
+          border-right: 0;
+          border-bottom: 1px solid #2a2a2a;
+          padding: 8px 10px;
+        }
+        .nav {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 4px;
+        }
+        .nav a {
+          margin-bottom: 0;
         }
         .card2 {
           grid-template-columns: 1fr;
@@ -1020,7 +1032,11 @@
                     : statePayload.profile.status === "PENDING"
                       ? "pending"
                       : "declined";
-                me.kycData = Object.assign({}, me.kycData || {}, statePayload.profile);
+                me.kycData = Object.assign(
+                  {},
+                  me.kycData || {},
+                  statePayload.profile,
+                );
                 save(db);
               }
               if (
@@ -1204,7 +1220,10 @@
             return;
           }
           for (var imageFile of [frontFile, backFile]) {
-            if (!/^image\//i.test(imageFile.type) || imageFile.size > 5 * 1024 * 1024) {
+            if (
+              !/^image\//i.test(imageFile.type) ||
+              imageFile.size > 5 * 1024 * 1024
+            ) {
               err.textContent = "Upload image files no larger than 5MB";
               return;
             }
@@ -1431,6 +1450,11 @@
                 .value.trim()
                 .toLowerCase();
               var np = document.getElementById("s-new").value;
+              if (np && (np.length < 6 || np.length > 8)) {
+                err.className = "err";
+                err.textContent = "Password must be 6 to 8 characters";
+                return;
+              }
               if (em) me.email = em;
               if (np) me.password = np;
               db.session = me.email;

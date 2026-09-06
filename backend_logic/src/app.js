@@ -58,14 +58,14 @@ const registerSchema = z.object({
     .regex(/^[a-zA-Z0-9_.-]+$/)
     .optional(),
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(6).max(8),
   recoveryContact: z.string().trim().max(254).optional(),
   country: z.string().trim().max(80).optional(),
 });
 
 const loginSchema = z.object({
   identifier: z.string().trim().min(1).max(254),
-  password: z.string().min(8),
+  password: z.string().min(6).max(8),
 });
 
 const verifyOtpSchema = z.object({
@@ -83,8 +83,8 @@ const passwordResetVerifySchema = z.object({
 });
 
 const passwordResetCompleteSchema = passwordResetVerifySchema.extend({
-  password: z.string().min(8),
-  confirmPassword: z.string().min(8),
+  password: z.string().min(6).max(8),
+  confirmPassword: z.string().min(6).max(8),
 });
 
 const sensitiveSchema = z.object({
@@ -1342,7 +1342,7 @@ const adminUserProfileSchema = z.object({
   name: z.string().trim().min(2).max(120).optional(),
   username: z.string().trim().max(60).optional(),
   email: z.string().email().optional(),
-  password: z.string().min(8).optional(),
+  password: z.string().min(6).max(8).optional(),
   phone: z.string().trim().max(80).optional(),
   country: z.string().trim().max(80).optional(),
   currency: z.string().trim().max(12).optional(),
