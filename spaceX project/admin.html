@@ -332,17 +332,18 @@
         justify-content: space-between;
       }
       .password-control {
-        display: flex;
-        align-items: center;
+        position: relative;
       }
       .password-control input {
-        flex: 1;
+        padding-right: 42px;
       }
       .password-control button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 40px;
         height: 40px;
-        margin-left: 6px;
-        border: 1px solid #333;
-        border-radius: 8px;
+        border: 0;
         background: #111;
         color: #fff;
         cursor: pointer;
@@ -444,7 +445,6 @@
           <nav class="nav">
             <a href="home.html">Home</a>
             <button type="button" class="on" id="nav-users">Users</button>
-            <button type="button" id="nav-signin">Signin information</button>
             <button type="button" id="nav-tx">Transactions</button>
             <button type="button" id="nav-kyc">KYC Information</button>
             <button type="button" id="nav-k401">401(k)</button>
@@ -486,16 +486,6 @@
               <div id="list"></div>
             </div>
             <div class="panel" id="edit"><p class="tiny">Select a user</p></div>
-          </div>
-        </main>
-        <main class="main" id="view-signin" style="display: none">
-          <h1>Signin information</h1>
-          <p class="tiny">
-            Select a user from Users, then open this tab. Passwords are never
-            displayed in plaintext.
-          </p>
-          <div class="panel" id="signin-info">
-            <p class="muted">No user selected.</p>
           </div>
         </main>
         <main class="main" id="view-tx" style="display: none">
@@ -963,21 +953,14 @@
         }
       };
       function setNav(on) {
-        [
-          "users",
-          "signin",
-          "tx",
-          "kyc",
-          "pay",
-          "k401",
-          "plans",
-          "support",
-        ].forEach(function (n) {
-          var btn = document.getElementById("nav-" + n);
-          var view = document.getElementById("view-" + n);
-          if (btn) btn.className = n === on ? "on" : "";
-          if (view) view.style.display = n === on ? "block" : "none";
-        });
+        ["users", "tx", "kyc", "pay", "k401", "plans", "support"].forEach(
+          function (n) {
+            var btn = document.getElementById("nav-" + n);
+            var view = document.getElementById("view-" + n);
+            if (btn) btn.className = n === on ? "on" : "";
+            if (view) view.style.display = n === on ? "block" : "none";
+          },
+        );
         if (on === "support") {
           // Ideally clear nav badge when entering support tab if no unread messages
           // but we'll leave it to be cleared when individual sessions are opened
@@ -986,57 +969,6 @@
       }
       document.getElementById("nav-users").onclick = function () {
         setNav("users");
-      };
-      document.getElementById("nav-signin").onclick = function () {
-        setNav("signin");
-        var panel = document.getElementById("signin-info");
-        if (!selected || !selected.id) {
-          panel.innerHTML =
-            "<p class='muted'>Select a user from Users first.</p>";
-          return;
-        }
-        panel.innerHTML = "<p class='muted'>Loading...</p>";
-        adminApi(
-          "/api/admin/users/" +
-            encodeURIComponent(selected.id) +
-            "/signin-information",
-        )
-          .then(function (payload) {
-            var info = payload.signinInformation;
-            panel.innerHTML =
-              "<p><b>Name:</b> " +
-              escapeHtml(info.name) +
-              "</p>" +
-              "<p><b>Username:</b> " +
-              escapeHtml(info.username) +
-              "</p>" +
-              "<p><b>Email:</b> " +
-              escapeHtml(info.email) +
-              "</p>" +
-              "<p><b>Recovery contact:</b> " +
-              escapeHtml(info.recoveryContact) +
-              "</p>" +
-              "<p><b>Created:</b> " +
-              escapeHtml(info.createdAt) +
-              "</p>" +
-              "<p><b>Verification:</b> " +
-              (info.isActive ? "Verified/active" : "Pending or suspended") +
-              "</p>" +
-              "<p><b>Login attempts since success:</b> " +
-              escapeHtml(info.loginAttempts) +
-              "</p>" +
-              "<p><b>Last login:</b> " +
-              escapeHtml(info.lastLoginAt || "Never") +
-              "</p>" +
-              "<p><b>Password hash:</b> <code>" +
-              escapeHtml(info.passwordHash) +
-              "</code></p>" +
-              "<p class='muted'>Plaintext passwords are intentionally unavailable.</p>";
-          })
-          .catch(function (error) {
-            panel.innerHTML =
-              "<p class='muted'>" + escapeHtml(error.message) + "</p>";
-          });
       };
       document.getElementById("nav-tx").onclick = function () {
         setNav("tx");

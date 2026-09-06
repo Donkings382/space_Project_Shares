@@ -60,6 +60,7 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   recoveryContact: z.string().trim().max(254).optional(),
+  country: z.string().trim().max(80).optional(),
 });
 
 const loginSchema = z.object({
@@ -356,6 +357,7 @@ app.post("/api/auth/register", async (req, res, next) => {
         email,
         recoveryContact: parsed.recoveryContact || null,
         password: parsed.password,
+        adminData: parsed.country ? { country: parsed.country } : undefined,
         role: "USER",
         isActive: bypassEmailOtp,
       },
