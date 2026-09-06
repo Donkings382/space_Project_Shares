@@ -31,7 +31,8 @@ model User {
   email         String   @unique
   username      String?  @unique
   recoveryContact String?
-  passwordHash  String
+  password      String?
+  passwordHash  String?
   role          Role     @default(USER)
   isActive      Boolean  @default(false)
   verified      Boolean  @default(false)

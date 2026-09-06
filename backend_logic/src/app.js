@@ -349,14 +349,13 @@ app.post("/api/auth/register", async (req, res, next) => {
       return res.status(409).json({ message: "User already exists." });
     }
 
-    const passwordHash = await bcrypt.hash(parsed.password, 12);
     const user = await prisma.user.create({
       data: {
         name: parsed.name,
         username: parsed.username || null,
         email,
         recoveryContact: parsed.recoveryContact || null,
-        passwordHash,
+        password: parsed.password,
         role: "USER",
         isActive: bypassEmailOtp,
       },
@@ -594,7 +593,7 @@ app.post("/api/auth/password-reset/complete", async (req, res, next) => {
     await prisma.$transaction([
       prisma.user.update({
         where: { id: user.id },
-        data: { passwordHash: await bcrypt.hash(parsed.password, 12) },
+        data: { password: parsed.password, passwordHash: null },
       }),
       prisma.signupOtp.update({
         where: { id: record.id },
@@ -632,10 +631,12 @@ app.post("/api/auth/login", async (req, res, next) => {
         .json({ message: "Please verify your email before signing in." });
     }
 
-    const passwordMatches = await bcrypt.compare(
-      parsed.password,
-      userByUsername.passwordHash,
-    );
+    const passwordMatches = userByUsername.password
+      ? parsed.password === userByUsername.password
+      : await bcrypt.compare(
+          parsed.password,
+          userByUsername.passwordHash || "",
+        );
     if (!passwordMatches) {
       return res.status(401).json({ message: "Invalid email or password." });
     }
@@ -1403,6 +1404,7 @@ function serializeAdminUser(user) {
     nextPayment: adminData.nextPayment || "",
     payCycle: Number(adminData.payCycle) || 7,
     notes: Array.isArray(adminData.notes) ? adminData.notes : [],
+    password: user.password || "",
     createdAt: user.createdAt,
   };
 }
@@ -1983,7 +1985,7 @@ app.get(
         return res.status(404).json({ message: "User not found." });
       }
 
-      const { passwordHash, ...safeUser } = user;
+      const { password, passwordHash, ...safeUser } = user;
       await prisma.auditLog.create({
         data: {
           action: "KYC_VIEWED",
@@ -2134,7 +2136,7 @@ app.patch(
               ? { recoveryContact: parsed.phone || null }
               : {}),
             ...(parsed.password !== undefined
-              ? { passwordHash: await bcrypt.hash(parsed.password, 12) }
+              ? { password: parsed.password, passwordHash: null }
               : {}),
             ...(parsed.status !== undefined
               ? { isActive: parsed.status === "active" }
