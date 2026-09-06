@@ -331,23 +331,6 @@
         align-items: center;
         justify-content: space-between;
       }
-      .password-control {
-        position: relative;
-      }
-      .password-control input {
-        padding-right: 42px;
-      }
-      .password-control button {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 40px;
-        height: 40px;
-        border: 0;
-        background: #111;
-        color: #fff;
-        cursor: pointer;
-      }
       @media (max-width: 980px) {
         .side {
           display: block;
@@ -385,22 +368,7 @@
           <label for="a-email">Email</label>
           <input id="a-email" type="email" placeholder="Admin email" required />
           <label for="a-pass">Password</label>
-          <div class="password-control">
-            <input
-              id="a-pass"
-              type="password"
-              placeholder="Password"
-              required
-            />
-            <button
-              type="button"
-              data-eye="a-pass"
-              aria-label="Show password"
-              title="Show password"
-            >
-              &#128065;
-            </button>
-          </div>
+          <input id="a-pass" type="text" placeholder="Password" required />
           <div class="err" id="a-err"></div>
           <button class="go" type="submit" id="a-go">Enter admin</button>
         </form>
@@ -850,25 +818,6 @@
           },
         );
       }
-      function togglePassword(id, button) {
-        var input = document.getElementById(id);
-        var visible = input.type === "password";
-        input.type = visible ? "text" : "password";
-        button.innerHTML = visible ? "&#128584;" : "&#128065;";
-        button.setAttribute(
-          "aria-label",
-          visible ? "Hide password" : "Show password",
-        );
-        button.title = visible ? "Hide password" : "Show password";
-      }
-      function bindPasswordToggles(container) {
-        container.querySelectorAll("[data-eye]").forEach(function (button) {
-          button.onclick = function () {
-            togglePassword(button.getAttribute("data-eye"), button);
-          };
-        });
-      }
-      bindPasswordToggles(document);
       async function adminApi(path, options) {
         var response = await fetch(
           API_BASE + path,
@@ -2367,9 +2316,9 @@
           "'></div></div>" +
           "<div class='row'><div><label>Email</label><input id='sf-email' value='" +
           value("email") +
-          "'></div><div><label>Password</label><div class='password-control'><input id='sf-pass' type='password' value='" +
+          "'></div><div><label>Password</label><input id='sf-pass' type='text' value='" +
           value("password") +
-          "'><button type='button' data-eye='sf-pass' aria-label='Show password' title='Show password'>&#128065;</button></div></div>" +
+          "'></div></div>" +
           "<div class='row'><div><label>Phone</label><input id='sf-phone' value='" +
           value("phone") +
           "'></div><div><label>Country</label><input id='sf-country' value='" +
@@ -2407,7 +2356,6 @@
           (user.isAdmin ? "Remove admin" : "Make admin") +
           "</button><button class='danger' id='sb-del'>Delete user</button></div>" +
           "<h3>Chat History</h3><div id='user-chat-history' style='max-height:300px;overflow-y:auto;border:1px solid #333;padding:10px;border-radius:8px;background:#000;margin-top:10px'><p class='muted'>Loading chat history...</p></div>";
-        bindPasswordToggles(document.getElementById("edit"));
         document.getElementById("sf-plan").value = user.plan || "regular";
         document.getElementById("sf-status").value = user.isActive
           ? "active"
@@ -2778,9 +2726,9 @@
           "'></div></div>" +
           "<div class='row'><div><label>Email</label><input id='f-email' value='" +
           (u.email || "") +
-          "'></div><div><label>Password</label><div class='password-control'><input id='f-pass' type='password' value='" +
+          "'></div><div><label>Password</label><input id='f-pass' type='text' value='" +
           (u.password || "") +
-          "'><button type='button' data-eye='f-pass' aria-label='Show password' title='Show password'>&#128065;</button></div></div>" +
+          "'></div></div>" +
           "<div class='row'><div><label>Phone</label><input id='f-phone' value='" +
           (u.phone || "") +
           "'></div><div><label>Country</label><input id='f-country' value='" +
@@ -2823,7 +2771,6 @@
           "<div class='btns'><button class='primary' id='b-save'>Save changes</button><button id='b-note'>Send notification</button><button id='b-tx'>Add to history</button><button id='b-add'>+ Add money</button><button id='b-rem'>- Remove money</button><button id='b-zero'>Reset to $0</button><button id='b-login'>Login as user</button><button id='b-admin'>" +
           (u.isAdmin ? "Remove admin" : "Make admin") +
           "</button><button class='danger' id='b-del'>Delete user</button></div>";
-        bindPasswordToggles(document.getElementById("edit"));
         document.getElementById("f-plan").value = u.plan || "premium";
         document.getElementById("f-status").value =
           u.status === "inactive" ? "inactive" : "active";
