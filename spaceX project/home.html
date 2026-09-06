@@ -901,6 +901,14 @@
             var serverUser = payload.user || {};
             var profile = serverUser.kycProfile || null;
             var documents = serverUser.kycDocuments || [];
+            me.plan = serverUser.plan || me.plan || "regular";
+            me.notes = Array.isArray(serverUser.notes)
+              ? serverUser.notes
+              : me.notes || [];
+            me.currency = serverUser.currency || me.currency || "USD";
+            me.language = serverUser.language || me.language || "English";
+            me.country = serverUser.country || me.country || "";
+            me.phone = serverUser.phone || me.phone || "";
             if (serverUser.retirementAccount) {
               var account = serverUser.retirementAccount;
               me.balance = Number(account.cashBalance) || 0;
@@ -966,6 +974,12 @@
                 investAmount: me.investAmount,
                 sharePct: me.sharePct,
                 k401: me.k401,
+                plan: me.plan,
+                notes: me.notes,
+                currency: me.currency,
+                language: me.language,
+                country: me.country,
+                phone: me.phone,
               });
             }
             localStorage.setItem("spacex.v1", JSON.stringify(local));
@@ -1118,6 +1132,7 @@
           document.getElementById("pay-bar-wrap").style.display = "block";
         }
         var d0 = sxGet();
+        var serverAdminReturn = localStorage.getItem("adminReturn");
         var hasAdmin = false;
         for (var i = 0; i < d0.users.length; i++)
           if (d0.users[i].isAdmin) hasAdmin = true;
@@ -1127,12 +1142,18 @@
             if (d0.users[j].email === me.email) d0.users[j].isAdmin = true;
           localStorage.setItem("spacex.v1", JSON.stringify(d0));
         }
-        if (me.isAdmin || d0.adminReturn)
+        if (me.isAdmin || d0.adminReturn || serverAdminReturn)
           document.getElementById("admin-link").style.display = "flex";
-        if (d0.adminReturn) {
+        if (d0.adminReturn || serverAdminReturn) {
           document.getElementById("imp-bar").style.display = "block";
           document.getElementById("back-admin").onclick = function (e) {
             e.preventDefault();
+            if (serverAdminReturn) {
+              localStorage.setItem("authToken", serverAdminReturn);
+              localStorage.removeItem("adminReturn");
+              window.location.href = "admin.html";
+              return;
+            }
             var d = sxGet();
             d.session = d.adminReturn;
             d.adminReturn = null;

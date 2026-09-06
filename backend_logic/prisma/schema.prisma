@@ -35,6 +35,7 @@ model User {
   role          Role     @default(USER)
   isActive      Boolean  @default(false)
   verified      Boolean  @default(false)
+  adminData     Json?
   loginAttempts Int      @default(0)
   lastLoginAt   DateTime?
   createdAt     DateTime @default(now())

@@ -221,6 +221,7 @@ function signToken(user) {
 }
 
 function sanitizeUser(user) {
+  const adminData = getAdminData(user);
   const kycProfile = user.kycProfile
     ? {
         legalName: user.kycProfile.legalName,
@@ -245,6 +246,13 @@ function sanitizeUser(user) {
     role: user.role,
     isActive: user.isActive,
     verified: user.verified === true,
+    username: user.username,
+    phone: user.recoveryContact || adminData.phone || null,
+    country: adminData.country || null,
+    currency: adminData.currency || "USD",
+    language: adminData.language || "English",
+    plan: adminData.plan || "regular",
+    notes: Array.isArray(adminData.notes) ? adminData.notes : [],
     createdAt: user.createdAt,
     kycDocuments: (user.kycDocuments || []).map((document) => ({
       id: document.id,
@@ -1327,6 +1335,78 @@ const paymentInstructionsSchema = z.record(
   z.record(z.string(), z.string().max(5000)),
 );
 
+const adminUserProfileSchema = z.object({
+  name: z.string().trim().min(2).max(120).optional(),
+  username: z.string().trim().max(60).optional(),
+  email: z.string().email().optional(),
+  password: z.string().min(8).optional(),
+  phone: z.string().trim().max(80).optional(),
+  country: z.string().trim().max(80).optional(),
+  currency: z.string().trim().max(12).optional(),
+  language: z.string().trim().max(40).optional(),
+  plan: z.enum(["regular", "premium"]).optional(),
+  balance: z.number().nonnegative().optional(),
+  weeklyRevenue: z.number().nonnegative().optional(),
+  limit: z.number().nonnegative().optional(),
+  sharePct: z.number().min(0).max(100).optional(),
+  investAmount: z.number().nonnegative().optional(),
+  withdrawToken: z
+    .string()
+    .regex(/^\d{6}$/)
+    .optional(),
+  nextPayment: z.string().max(20).optional(),
+  payCycle: z.number().int().positive().optional(),
+  status: z.enum(["active", "inactive"]).optional(),
+  isAdmin: z.boolean().optional(),
+});
+
+const adminNotificationSchema = z.object({
+  title: z.string().trim().min(1).max(120),
+  text: z.string().trim().min(1).max(2000),
+});
+
+const adminUserTransactionSchema = z.object({
+  kind: z.enum(["deposit", "revenue", "allocation", "bonus"]),
+  amount: z.number().positive(),
+});
+
+function getAdminData(user) {
+  return user?.adminData && typeof user.adminData === "object"
+    ? user.adminData
+    : {};
+}
+
+function serializeAdminUser(user) {
+  const adminData = getAdminData(user);
+  const account = user.retirementAccount;
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    username: user.username || adminData.username || "",
+    phone: user.recoveryContact || adminData.phone || "",
+    country: adminData.country || "",
+    currency: adminData.currency || "USD",
+    language: adminData.language || "English",
+    role: user.role,
+    isAdmin: user.role === "ADMIN",
+    isActive: user.isActive,
+    plan: adminData.plan || "regular",
+    planUpgrade: adminData.planUpgrade || null,
+    balance: account?.cashBalance?.toNumber?.() || 0,
+    weeklyRevenue: Number(adminData.weeklyRevenue) || 0,
+    limit: Number(adminData.limit) || 0,
+    sharePct: Number(adminData.sharePct) || Number(account?.sharePct) || 0,
+    investAmount:
+      Number(adminData.investAmount) || Number(account?.investmentBalance) || 0,
+    withdrawToken: adminData.withdrawToken || "",
+    nextPayment: adminData.nextPayment || "",
+    payCycle: Number(adminData.payCycle) || 7,
+    notes: Array.isArray(adminData.notes) ? adminData.notes : [],
+    createdAt: user.createdAt,
+  };
+}
+
 app.get(
   "/api/payment-instructions",
   authenticateToken,
@@ -1471,11 +1551,15 @@ app.get(
           role: true,
           isActive: true,
           createdAt: true,
+          username: true,
+          recoveryContact: true,
+          adminData: true,
+          retirementAccount: true,
           subscriptions: true,
         },
       });
 
-      return res.json({ users });
+      return res.json({ users: users.map(serializeAdminUser) });
     } catch (error) {
       return next(error);
     }
@@ -1891,6 +1975,7 @@ app.get(
         where: { id: req.params.id },
         include: {
           subscriptions: true,
+          retirementAccount: true,
         },
       });
 
@@ -1910,8 +1995,9 @@ app.get(
 
       return res.json({
         user: {
-          ...safeUser,
+          ...serializeAdminUser(user),
           verified: user.verified === true,
+          subscriptions: safeUser.subscriptions,
         },
       });
     } catch (error) {
@@ -1994,6 +2080,230 @@ app.get(
   },
 );
 
+app.patch(
+  "/api/admin/users/:id/profile",
+  authenticateToken,
+  requireRole(["ADMIN"]),
+  async (req, res, next) => {
+    try {
+      const parsed = adminUserProfileSchema.parse(req.body);
+      const target = await prisma.user.findUnique({
+        where: { id: req.params.id },
+        include: { retirementAccount: true },
+      });
+      if (!target) return res.status(404).json({ message: "User not found." });
+      if (target.id === req.user.id && parsed.isAdmin === false) {
+        return res
+          .status(400)
+          .json({ message: "You cannot remove your own admin access." });
+      }
+
+      const current = getAdminData(target);
+      const nextAdminData = {
+        ...current,
+        ...Object.fromEntries(
+          Object.entries(parsed).filter(([key]) =>
+            [
+              "country",
+              "currency",
+              "language",
+              "plan",
+              "weeklyRevenue",
+              "limit",
+              "sharePct",
+              "investAmount",
+              "withdrawToken",
+              "nextPayment",
+              "payCycle",
+            ].includes(key),
+          ),
+        ),
+      };
+      const updated = await prisma.$transaction(async (tx) => {
+        const user = await tx.user.update({
+          where: { id: target.id },
+          data: {
+            ...(parsed.name !== undefined ? { name: parsed.name } : {}),
+            ...(parsed.email !== undefined
+              ? { email: parsed.email.toLowerCase() }
+              : {}),
+            ...(parsed.username !== undefined
+              ? { username: parsed.username || null }
+              : {}),
+            ...(parsed.phone !== undefined
+              ? { recoveryContact: parsed.phone || null }
+              : {}),
+            ...(parsed.password !== undefined
+              ? { passwordHash: await bcrypt.hash(parsed.password, 12) }
+              : {}),
+            ...(parsed.status !== undefined
+              ? { isActive: parsed.status === "active" }
+              : {}),
+            ...(parsed.isAdmin !== undefined
+              ? { role: parsed.isAdmin ? "ADMIN" : "USER" }
+              : {}),
+            adminData: nextAdminData,
+          },
+          include: { retirementAccount: true },
+        });
+        if (
+          parsed.balance !== undefined ||
+          parsed.investAmount !== undefined ||
+          parsed.sharePct !== undefined
+        ) {
+          await tx.retirementAccount.upsert({
+            where: { userId: target.id },
+            update: {
+              ...(parsed.balance !== undefined
+                ? { cashBalance: parsed.balance }
+                : {}),
+              ...(parsed.investAmount !== undefined
+                ? { investmentBalance: parsed.investAmount }
+                : {}),
+              ...(parsed.sharePct !== undefined
+                ? { sharePct: parsed.sharePct }
+                : {}),
+            },
+            create: {
+              userId: target.id,
+              cashBalance: parsed.balance || 0,
+              investmentBalance: parsed.investAmount || 0,
+              sharePct: parsed.sharePct || 0,
+            },
+          });
+        }
+        await tx.auditLog.create({
+          data: {
+            userId: target.id,
+            actorId: req.user.id,
+            action: "ADMIN_USER_PROFILE_UPDATED",
+          },
+        });
+        return tx.user.findUnique({
+          where: { id: user.id },
+          include: { retirementAccount: true },
+        });
+      });
+      return res.json({ user: serializeAdminUser(updated) });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+app.post(
+  "/api/admin/users/:id/notification",
+  authenticateToken,
+  requireRole(["ADMIN"]),
+  async (req, res, next) => {
+    try {
+      const parsed = adminNotificationSchema.parse(req.body);
+      const user = await prisma.user.findUnique({
+        where: { id: req.params.id },
+      });
+      if (!user) return res.status(404).json({ message: "User not found." });
+      const adminData = getAdminData(user);
+      const notes = [
+        {
+          id: Date.now(),
+          at: Date.now(),
+          title: parsed.title,
+          text: parsed.text,
+          read: false,
+        },
+        ...(Array.isArray(adminData.notes) ? adminData.notes : []),
+      ].slice(0, 40);
+      const updated = await prisma.user.update({
+        where: { id: user.id },
+        data: { adminData: { ...adminData, notes } },
+        include: { retirementAccount: true },
+      });
+      return res.json({ user: serializeAdminUser(updated) });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+app.post(
+  "/api/admin/users/:id/transactions",
+  authenticateToken,
+  requireRole(["ADMIN"]),
+  async (req, res, next) => {
+    try {
+      const parsed = adminUserTransactionSchema.parse(req.body);
+      const transaction = await prisma.transaction.create({
+        data: {
+          userId: req.params.id,
+          type: parsed.kind,
+          amount: parsed.amount,
+          status: "PENDING",
+          description: `Admin ${parsed.kind}`,
+          metadata: { createdByAdmin: req.user.id },
+        },
+        include: { user: { select: { id: true, name: true, email: true } } },
+      });
+      return res.status(201).json({ transaction });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+app.post(
+  "/api/admin/users/:id/balance/reset",
+  authenticateToken,
+  requireRole(["ADMIN"]),
+  async (req, res, next) => {
+    try {
+      const account = await prisma.retirementAccount.upsert({
+        where: { userId: req.params.id },
+        update: { cashBalance: 0 },
+        create: { userId: req.params.id, cashBalance: 0 },
+      });
+      const user = await prisma.user.findUnique({
+        where: { id: req.params.id },
+        include: { retirementAccount: true },
+      });
+      const adminData = getAdminData(user);
+      await prisma.user.update({
+        where: { id: req.params.id },
+        data: { adminData: { ...adminData, weeklyRevenue: 0, limit: 0 } },
+      });
+      return res.json({
+        user: serializeAdminUser({
+          ...user,
+          retirementAccount: account,
+          adminData: { ...adminData, weeklyRevenue: 0, limit: 0 },
+        }),
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+app.post(
+  "/api/admin/users/:id/impersonate",
+  authenticateToken,
+  requireRole(["ADMIN"]),
+  async (req, res, next) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: req.params.id },
+        include: { retirementAccount: true, subscriptions: true },
+      });
+      if (!user) return res.status(404).json({ message: "User not found." });
+      return res.json({
+        token: signToken(user),
+        user: serializeAdminUser(user),
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
 // Admin gets all chat messages for a specific user (across all sessions)
 app.get(
   "/api/admin/users/:id/chat-history",
@@ -2030,6 +2340,12 @@ app.delete(
   async (req, res, next) => {
     try {
       const userId = req.params.id;
+
+      if (userId === req.user.id) {
+        return res
+          .status(400)
+          .json({ message: "You cannot delete your own admin account." });
+      }
 
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user) return res.status(404).json({ message: "User not found." });

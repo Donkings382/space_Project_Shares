@@ -2339,6 +2339,262 @@
         drawUsers();
         drawTx();
       }
+      function renderServerUserEditor(user) {
+        var value = function (key, fallback) {
+          return escapeHtml(user[key] == null ? fallback || "" : user[key]);
+        };
+        document.getElementById("edit").innerHTML =
+          "<h2 style='margin:0 0 8px'>" +
+          value("name") +
+          (user.isAdmin ? " · Admin" : "") +
+          "</h2>" +
+          "<div class='row'><div><label>Full name</label><input id='sf-name' value='" +
+          value("name") +
+          "'></div><div><label>Username</label><input id='sf-user' value='" +
+          value("username") +
+          "'></div></div>" +
+          "<div class='row'><div><label>Email</label><input id='sf-email' value='" +
+          value("email") +
+          "'></div><div><label>Password</label><input id='sf-pass' type='password' placeholder='Leave unchanged'></div></div>" +
+          "<div class='row'><div><label>Phone</label><input id='sf-phone' value='" +
+          value("phone") +
+          "'></div><div><label>Country</label><input id='sf-country' value='" +
+          value("country") +
+          "'></div></div>" +
+          "<div class='row'><div><label>Currency</label><input id='sf-cur' value='" +
+          value("currency", "USD") +
+          "'></div><div><label>Language</label><input id='sf-lang' value='" +
+          value("language", "English") +
+          "'></div></div>" +
+          "<p class='muted'>Plan at signup: regular</p>" +
+          "<div class='row'><div><label>Plan</label><select id='sf-plan'><option value='regular'>Regular</option><option value='premium'>Premium</option></select></div><div><label>Status</label><select id='sf-status'><option value='active'>Active</option><option value='inactive'>Inactive</option></select></div></div>" +
+          "<div class='row'><div><label>Balance</label><input id='sf-bal' type='number' step='0.01' value='" +
+          value("balance", 0) +
+          "'></div><div><label>Add / remove amount</label><input id='sf-delta' type='number' step='0.01' value='100'></div></div>" +
+          "<div class='row'><div><label>Weekly revenue</label><input id='sf-week' type='number' step='0.01' value='" +
+          value("weeklyRevenue", 0) +
+          "'></div><div><label>Limit</label><input id='sf-lim' type='number' step='0.01' value='" +
+          value("limit", 0) +
+          "'></div></div>" +
+          "<div class='row'><div><label>Share % (portfolio)</label><input id='sf-share' type='number' min='0' max='100' step='0.1' value='" +
+          value("sharePct", 0) +
+          "'></div><div><label>Investment amount</label><input id='sf-inv' type='number' step='0.01' value='" +
+          value("investAmount", 0) +
+          "'></div></div>" +
+          "<label>Withdrawal token (6 digits)</label><input id='sf-token' maxlength='6' value='" +
+          value("withdrawToken") +
+          "' placeholder='e.g. 482195'>" +
+          "<label>Send notification</label><input id='sf-ntitle' placeholder='Title'><textarea id='sf-ntext' placeholder='Write a message to this user'></textarea>" +
+          "<div class='row'><div><label>Next payment date</label><input id='sf-next' type='date' value='" +
+          value("nextPayment") +
+          "'></div><div><label>Repeat</label><select id='sf-cycle'><option value='7'>Every 1 week</option><option value='14'>Every 2 weeks</option></select></div></div>" +
+          "<div class='row'><div><label>Add to history</label><select id='sf-tx'><option value='deposit'>Deposit</option><option value='revenue'>Revenue Payment</option><option value='allocation'>Share Allocation</option><option value='bonus'>Bonus</option></select></div><div><label>Amount</label><input id='sf-txamt' type='number' step='0.01' value='100'></div></div>" +
+          "<div class='btns'><button class='primary' id='sb-save'>Save changes</button><button id='sb-note'>Send notification</button><button id='sb-tx'>Add to history</button><button id='sb-add'>+ Add money</button><button id='sb-rem'>- Remove money</button><button id='sb-zero'>Reset to $0</button><button id='sb-login'>Login as user</button><button id='sb-admin'>" +
+          (user.isAdmin ? "Remove admin" : "Make admin") +
+          "</button><button class='danger' id='sb-del'>Delete user</button></div>" +
+          "<h3>Chat History</h3><div id='user-chat-history' style='max-height:300px;overflow-y:auto;border:1px solid #333;padding:10px;border-radius:8px;background:#000;margin-top:10px'><p class='muted'>Loading chat history...</p></div>";
+        document.getElementById("sf-plan").value = user.plan || "regular";
+        document.getElementById("sf-status").value = user.isActive
+          ? "active"
+          : "inactive";
+        document.getElementById("sf-cycle").value = String(user.payCycle || 7);
+        document.getElementById("sb-save").onclick = async function () {
+          try {
+            var patch = {
+              name: document.getElementById("sf-name").value.trim(),
+              username: document.getElementById("sf-user").value.trim(),
+              email: document
+                .getElementById("sf-email")
+                .value.trim()
+                .toLowerCase(),
+              phone: document.getElementById("sf-phone").value.trim(),
+              country: document.getElementById("sf-country").value.trim(),
+              currency: document.getElementById("sf-cur").value.trim() || "USD",
+              language:
+                document.getElementById("sf-lang").value.trim() || "English",
+              plan: document.getElementById("sf-plan").value,
+              status: document.getElementById("sf-status").value,
+              balance: Number(document.getElementById("sf-bal").value) || 0,
+              weeklyRevenue:
+                Number(document.getElementById("sf-week").value) || 0,
+              limit: Number(document.getElementById("sf-lim").value) || 0,
+              sharePct: Math.max(
+                0,
+                Math.min(
+                  100,
+                  Number(document.getElementById("sf-share").value) || 0,
+                ),
+              ),
+              investAmount:
+                Number(document.getElementById("sf-inv").value) || 0,
+              withdrawToken: document
+                .getElementById("sf-token")
+                .value.replace(/\D/g, "")
+                .slice(0, 6),
+              nextPayment: document.getElementById("sf-next").value,
+              payCycle: Number(document.getElementById("sf-cycle").value) || 7,
+            };
+            var password = document.getElementById("sf-pass").value;
+            if (password) patch.password = password;
+            var response = await adminApi(
+              "/api/admin/users/" + encodeURIComponent(user.id) + "/profile",
+              {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(patch),
+              },
+            );
+            selected = response.user;
+            drawUsers();
+          } catch (error) {
+            alert(error.message);
+          }
+        };
+        document.getElementById("sb-note").onclick = async function () {
+          var title =
+            document.getElementById("sf-ntitle").value.trim() ||
+            "Message from admin";
+          var text = document.getElementById("sf-ntext").value.trim();
+          if (!text) return alert("Type a message first");
+          try {
+            await adminApi("/api/admin/users/" + user.id + "/notification", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ title: title, text: text }),
+            });
+            alert("Notification sent.");
+          } catch (error) {
+            alert(error.message);
+          }
+        };
+        var addPending = async function () {
+          var amount = Number(document.getElementById("sf-delta").value) || 0;
+          try {
+            await adminApi("/api/admin/users/" + user.id + "/transactions", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ kind: "deposit", amount: amount }),
+            });
+            alert("Deposit is pending.");
+            drawTx();
+          } catch (error) {
+            alert(error.message);
+          }
+        };
+        document.getElementById("sb-add").onclick = addPending;
+        document.getElementById("sb-tx").onclick = async function () {
+          var amount = Number(document.getElementById("sf-txamt").value) || 0;
+          var kind = document.getElementById("sf-tx").value;
+          try {
+            await adminApi("/api/admin/users/" + user.id + "/transactions", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ kind: kind, amount: amount }),
+            });
+            alert("Added as pending.");
+            drawTx();
+          } catch (error) {
+            alert(error.message);
+          }
+        };
+        document.getElementById("sb-rem").onclick = async function () {
+          var amount = Number(document.getElementById("sf-delta").value) || 0;
+          try {
+            await adminApi(
+              "/api/admin/users/" + user.id + "/balance/withdraw",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  amount: amount,
+                  reason: "Manual override",
+                  note: "Admin balance removal",
+                }),
+              },
+            );
+            alert("Balance updated.");
+            drawUsers();
+          } catch (error) {
+            alert(error.message);
+          }
+        };
+        document.getElementById("sb-zero").onclick = async function () {
+          try {
+            await adminApi("/api/admin/users/" + user.id + "/balance/reset", {
+              method: "POST",
+            });
+            alert("Balance, weekly revenue, and limit reset.");
+            drawUsers();
+          } catch (error) {
+            alert(error.message);
+          }
+        };
+        document.getElementById("sb-login").onclick = async function () {
+          try {
+            var response = await adminApi(
+              "/api/admin/users/" + user.id + "/impersonate",
+              { method: "POST" },
+            );
+            localStorage.setItem(
+              "adminReturn",
+              localStorage.getItem("authToken"),
+            );
+            localStorage.setItem("authToken", response.token);
+            localStorage.setItem("spacex.user", JSON.stringify(response.user));
+            window.location.href = "home.html";
+          } catch (error) {
+            alert(error.message);
+          }
+        };
+        document.getElementById("sb-admin").onclick = async function () {
+          try {
+            await adminApi("/api/admin/users/" + user.id + "/profile", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ isAdmin: !user.isAdmin }),
+            });
+            drawUsers();
+          } catch (error) {
+            alert(error.message);
+          }
+        };
+        document.getElementById("sb-del").onclick = async function () {
+          if (!window.confirm("Delete this user permanently?")) return;
+          try {
+            await adminApi("/api/admin/users/" + user.id, { method: "DELETE" });
+            selected = null;
+            drawUsers();
+          } catch (error) {
+            alert(error.message);
+          }
+        };
+        adminApi("/api/admin/users/" + user.id + "/chat-history")
+          .then(function (payload) {
+            var messages = payload.messages || [];
+            document.getElementById("user-chat-history").innerHTML =
+              messages.length
+                ? messages
+                    .map(function (message) {
+                      return (
+                        "<div style='margin-bottom:8px;font-size:12px'><b>" +
+                        escapeHtml(
+                          message.senderRole === "ADMIN" ? "Admin" : "User",
+                        ) +
+                        ":</b> " +
+                        escapeHtml(message.content) +
+                        "</div>"
+                      );
+                    })
+                    .join("")
+                : "<p class='muted'>No chat history with this user.</p>";
+          })
+          .catch(function (error) {
+            document.getElementById("user-chat-history").innerHTML =
+              "<p class='danger'>Failed to load history: " +
+              escapeHtml(error.message) +
+              "</p>";
+          });
+      }
       function drawUsers() {
         if (adminToken) {
           adminApi("/api/admin/users")
@@ -2394,6 +2650,11 @@
                   return !user.isActive;
                 },
               ).length;
+              document.getElementById("s-money").textContent = money(
+                users.reduce(function (total, user) {
+                  return total + (Number(user.balance) || 0);
+                }, 0),
+              );
 
               // Handle Manage Balance buttons
               document
@@ -2420,61 +2681,7 @@
                           ),
                       );
                       selected = payload.user;
-                      var profileHtml =
-                        "<h2>" +
-                        escapeHtml(selected.name) +
-                        " · " +
-                        escapeHtml(selected.role) +
-                        "</h2><p>Email: " +
-                        escapeHtml(selected.email) +
-                        "</p>";
-
-                      // Add Chat History Section
-                      profileHtml +=
-                        '<h3>Chat History</h3><div id="user-chat-history" style="max-height:300px;overflow-y:auto;border:1px solid #333;padding:10px;border-radius:8px;background:#000;margin-top:10px"><p class="muted">Loading chat history...</p></div>';
-
-                      document.getElementById("edit").innerHTML = profileHtml;
-
-                      // Fetch and draw chat history for this user
-                      adminApi(
-                        "/api/admin/users/" + selected.id + "/chat-history",
-                      )
-                        .then(function (chatPayload) {
-                          var historyHtml = "";
-                          var messages = chatPayload.messages || [];
-                          if (messages.length === 0) {
-                            historyHtml =
-                              '<p class="muted">No chat history with this user.</p>';
-                          } else {
-                            messages.forEach(function (m) {
-                              var isAdmin = m.senderRole === "ADMIN";
-                              var color = isAdmin ? "#86efac" : "#94a3b8";
-                              historyHtml +=
-                                '<div style="margin-bottom:8px;font-size:12px">' +
-                                '<b style="color:' +
-                                color +
-                                '">' +
-                                (isAdmin ? "Admin" : "User") +
-                                ":</b> " +
-                                escapeHtml(m.content) +
-                                '<div class="muted" style="font-size:10px">' +
-                                new Date(m.createdAt).toLocaleString() +
-                                "</div>" +
-                                "</div>";
-                            });
-                          }
-                          document.getElementById(
-                            "user-chat-history",
-                          ).innerHTML = historyHtml;
-                        })
-                        .catch(function (err) {
-                          document.getElementById(
-                            "user-chat-history",
-                          ).innerHTML =
-                            '<p class="danger">Failed to load history: ' +
-                            escapeHtml(err.message) +
-                            "</p>";
-                        });
+                      renderServerUserEditor(selected);
                       document
                         .querySelectorAll("#list .user")
                         .forEach(function (item) {
