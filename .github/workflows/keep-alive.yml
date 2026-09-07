@@ -1,0 +1,23 @@
+name: Keep Render Backend Alive
+
+# Ping every 5 minutes to prevent free Render instance from sleeping
+on:
+  schedule:
+    - cron: "*/5 * * * *" # every 5 minutes
+  workflow_dispatch: # allows manual trigger from GitHub UI
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render backend
+        run: |
+          echo "Pinging https://spacex-backend-yxlo.onrender.com/ ..."
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://spacex-backend-yxlo.onrender.com/ || echo "000")
+          echo "Response status: $status"
+          if [ "$status" = "000" ]; then
+            echo "Ping failed or timed out"
+            exit 1
+          else
+            echo "Ping successful"
+          fi
