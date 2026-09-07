@@ -389,8 +389,8 @@
           err.textContent = "Enter username/email and password";
           return false;
         }
-        if (password.length < 6 || password.length > 8) {
-          err.textContent = "Password must be 6 to 8 characters";
+        if (password.length < 6) {
+          err.textContent = "Password must be at least 6 characters";
           return false;
         }
         var db = { users: [], session: null };

@@ -58,7 +58,7 @@ const registerSchema = z.object({
     .regex(/^[a-zA-Z0-9_.-]+$/)
     .optional(),
   email: z.string().email(),
-  password: z.string().min(6).max(8),
+  password: z.string().min(6),
   recoveryContact: z.string().trim().max(254).optional(),
   country: z.string().trim().max(80).optional(),
 });
@@ -83,8 +83,8 @@ const passwordResetVerifySchema = z.object({
 });
 
 const passwordResetCompleteSchema = passwordResetVerifySchema.extend({
-  password: z.string().min(6).max(8),
-  confirmPassword: z.string().min(6).max(8),
+  password: z.string().min(6),
+  confirmPassword: z.string().min(6),
 });
 
 const sensitiveSchema = z.object({

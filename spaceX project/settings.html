@@ -1528,9 +1528,9 @@
                 .value.trim()
                 .toLowerCase();
               var np = document.getElementById("s-new").value;
-              if (np && (np.length < 6 || np.length > 8)) {
+              if (np && np.length < 6) {
                 err.className = "err";
-                err.textContent = "Password must be 6 to 8 characters";
+                err.textContent = "Password must be at least 6 characters";
                 return;
               }
               if (em) me.email = em;

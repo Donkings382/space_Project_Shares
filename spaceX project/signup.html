@@ -617,8 +617,8 @@
           e.textContent = "Select your country";
           return;
         }
-        if (pass.length < 6 || pass.length > 8) {
-          e.textContent = "Password must be 6 to 8 characters";
+        if (pass.length < 6) {
+          e.textContent = "Password must be at least 6 characters";
           return;
         }
         if (pass !== document.getElementById("confirm").value) {
