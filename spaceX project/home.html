@@ -1302,7 +1302,15 @@
         }
         var d0 = sxGet();
         var serverAdminReturn = localStorage.getItem("adminReturn");
-        var isAdminImpersonation = !!(d0.adminReturn || serverAdminReturn);
+        var currentSession = String(d0.session || "").toLowerCase();
+        var storedAdminReturn = String(d0.adminReturn || "").toLowerCase();
+        var storedServerAdminReturn = String(
+          serverAdminReturn || "",
+        ).toLowerCase();
+        var isAdminImpersonation =
+          !!(d0.adminReturn || serverAdminReturn) &&
+          currentSession !== storedAdminReturn &&
+          currentSession !== storedServerAdminReturn;
         var adminLink = document.getElementById("admin-link");
         adminLink.style.display = isAdminImpersonation ? "flex" : "none";
         if (isAdminImpersonation) {

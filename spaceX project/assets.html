@@ -421,9 +421,16 @@
           pic.src = me.avatar;
           pic.style.display = "block";
         }
-        var isAdminImpersonation = !!(
-          db.adminReturn || localStorage.getItem("adminReturn")
-        );
+        var serverAdminReturn = localStorage.getItem("adminReturn");
+        var currentSession = String(db.session || "").toLowerCase();
+        var storedAdminReturn = String(db.adminReturn || "").toLowerCase();
+        var storedServerAdminReturn = String(
+          serverAdminReturn || "",
+        ).toLowerCase();
+        var isAdminImpersonation =
+          !!(db.adminReturn || serverAdminReturn) &&
+          currentSession !== storedAdminReturn &&
+          currentSession !== storedServerAdminReturn;
         document.getElementById("admin-link").style.display =
           isAdminImpersonation ? "block" : "none";
         var cash = Number(me.balance) || 0;
