@@ -252,26 +252,6 @@
           This amount will show on your Home dashboard as revenue. Payouts are
           credited after each cycle.
         </p>
-        <p
-          class="ok"
-          style="
-            color: #fbbf24;
-            border: 1px solid #3a2a00;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-          "
-        >
-          💬 To proceed with investment, contact our Live Support team.
-        </p>
-        <button
-          class="go"
-          type="button"
-          id="btn-livesupport"
-          style="background: #fbbf24; color: #000"
-        >
-          📞 Contact Live Support
-        </button>
         <p class="err" id="err"></p>
         <div class="btns">
           <button class="ghost" type="button" id="cancel">Cancel</button>
@@ -423,56 +403,6 @@
       document.getElementById("d-rev").textContent = money(payAmt);
       */
       };
-      document.getElementById("btn-livesupport").onclick = function () {
-        if (window.openLiveChat) window.openLiveChat();
-        else window.__openLiveChatRequested = true;
-      };
-      function loadChatMessages(sessionId) {
-        var token = localStorage.getItem("authToken");
-        fetch(
-          window.SPACEX_CONFIG.apiBase +
-            "/api/support/sessions/" +
-            sessionId +
-            "/messages",
-          {
-            headers: { Authorization: "Bearer " + token },
-          },
-        )
-          .then(function (res) {
-            return res.json();
-          })
-          .then(function (data) {
-            var messages = data.messages || [];
-            var html = "";
-            messages.forEach(function (msg) {
-              var isUser = msg.senderRole === "USER";
-              var bgColor = isUser ? "#1a2e4a" : "#2a3a1a";
-              var align = isUser ? "flex-end" : "flex-start";
-              html +=
-                '<div style="display:flex;justify-content:' +
-                align +
-                ';margin-bottom:8px;"><div style="background:' +
-                bgColor +
-                ';border-radius:8px;padding:8px 12px;max-width:70%;"><div class="muted" style="font-size:10px;margin-bottom:2px;">' +
-                (isUser ? "You" : "Support") +
-                "</div>" +
-                msg.content +
-                "</div></div>";
-            });
-            document.getElementById("chat-messages").innerHTML = html;
-            document.getElementById("chat-messages").scrollTop =
-              document.getElementById("chat-messages").scrollHeight;
-          });
-      }
-    </script>
-    <script>
-      // Load the unified live chat loader used on deposit/upgrade pages
-      (function () {
-        var s = document.createElement("script");
-        s.src = "livechat-loader.js";
-        s.defer = true;
-        document.body.appendChild(s);
-      })();
     </script>
   </body>
 </html>
