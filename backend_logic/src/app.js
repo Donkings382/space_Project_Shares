@@ -221,6 +221,20 @@ function signToken(user) {
   );
 }
 
+async function verifyUserPassword(inputPassword, user) {
+  if (!user) return false;
+
+  if (typeof user.password === "string" && user.password.length > 0) {
+    if (user.password === inputPassword) return true;
+  }
+
+  if (user.passwordHash) {
+    return bcrypt.compare(inputPassword, user.passwordHash);
+  }
+
+  return false;
+}
+
 function sanitizeUser(user) {
   const adminData = getAdminData(user);
   const kycProfile = user.kycProfile
@@ -350,6 +364,7 @@ app.post("/api/auth/register", async (req, res, next) => {
       return res.status(409).json({ message: "User already exists." });
     }
 
+    const passwordHash = await bcrypt.hash(parsed.password, 10);
     const user = await prisma.user.create({
       data: {
         name: parsed.name,
@@ -357,6 +372,7 @@ app.post("/api/auth/register", async (req, res, next) => {
         email,
         recoveryContact: parsed.recoveryContact || null,
         password: parsed.password,
+        passwordHash,
         adminData: parsed.country ? { country: parsed.country } : undefined,
         role: "USER",
         isActive: bypassEmailOtp,
@@ -592,10 +608,11 @@ app.post("/api/auth/password-reset/complete", async (req, res, next) => {
         .json({ message: "Invalid or expired reset code." });
     }
 
+    const passwordHash = await bcrypt.hash(parsed.password, 10);
     await prisma.$transaction([
       prisma.user.update({
         where: { id: user.id },
-        data: { password: parsed.password, passwordHash: null },
+        data: { password: parsed.password, passwordHash },
       }),
       prisma.signupOtp.update({
         where: { id: record.id },
@@ -633,12 +650,10 @@ app.post("/api/auth/login", async (req, res, next) => {
         .json({ message: "Please verify your email before signing in." });
     }
 
-    const passwordMatches = userByUsername.password
-      ? parsed.password === userByUsername.password
-      : await bcrypt.compare(
-          parsed.password,
-          userByUsername.passwordHash || "",
-        );
+    const passwordMatches = await verifyUserPassword(
+      parsed.password,
+      userByUsername,
+    );
     if (!passwordMatches) {
       return res.status(401).json({ message: "Invalid email or password." });
     }
