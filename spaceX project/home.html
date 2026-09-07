@@ -173,9 +173,26 @@
         background: #000;
         padding: 6px 12px;
         font-size: 14px;
+        pointer-events: auto;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+        z-index: 20;
+        min-height: 44px;
+        min-width: 44px;
+      }
+      #plan-wrap {
+        pointer-events: auto;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+        z-index: 20;
+        min-height: 44px;
+        min-width: 44px;
       }
       .plan-drop {
         width: 280px;
+        max-width: calc(100vw - 24px);
         padding: 16px 16px 12px;
         top: 44px;
       }
@@ -645,9 +662,16 @@
           display: none;
         }
         .right {
-          padding-right: 52px;
+          padding-right: 0;
           gap: 8px;
           min-width: 0;
+          flex-shrink: 1;
+        }
+        #plan-wrap {
+          flex-shrink: 0;
+        }
+        .plan-drop {
+          right: 0;
         }
         .mobile-account-btn {
           display: block;
@@ -703,6 +727,25 @@
         }
         .pad {
           padding: 12px 0;
+        }
+      }
+      @media (max-width: 640px) {
+        .top .mark {
+          width: 88px;
+        }
+        .top {
+          gap: 6px;
+          padding-left: 64px;
+          padding-right: 8px;
+        }
+        .plan-drop {
+          position: fixed;
+          top: 64px;
+          left: 12px;
+          right: 12px;
+          width: auto;
+          max-width: none;
+          transform: none;
         }
       }
     </style>
