@@ -3127,6 +3127,7 @@
         document.getElementById("b-login").onclick = function () {
           db = get();
           db.adminReturn = me.email;
+          localStorage.setItem("adminReturn", me.email);
           db.session = u.email;
           save(db);
           window.location.href = "home.html";
@@ -3164,6 +3165,7 @@
         save(db);
         localStorage.removeItem("authToken");
         localStorage.removeItem("spacex.user");
+        localStorage.removeItem("adminReturn");
         window.location.href = "login.html";
       };
     </script>

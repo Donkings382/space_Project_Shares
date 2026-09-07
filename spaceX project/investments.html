@@ -744,8 +744,10 @@
         [40000, 4000000],
         [50000, 5000000],
       ];
-      var pickAmt = Number(me.investAmount) || 5000;
-      var pickLim = Number(me.limit) || 500000;
+      var realInvestAmount = Number(me.investAmount) || 0;
+      var realLimit = Number(me.limit) || 0;
+      var pickAmt = realInvestAmount > 0 ? realInvestAmount : 0;
+      var pickLim = realLimit > 0 ? realLimit : 0;
       var html = "";
       tiers.forEach(function (t, i) {
         html +=

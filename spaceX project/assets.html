@@ -427,10 +427,11 @@
         var storedServerAdminReturn = String(
           serverAdminReturn || "",
         ).toLowerCase();
+        var activeAdminReturn = storedAdminReturn || storedServerAdminReturn;
         var isAdminImpersonation =
-          !!(db.adminReturn || serverAdminReturn) &&
-          currentSession !== storedAdminReturn &&
-          currentSession !== storedServerAdminReturn;
+          !!activeAdminReturn &&
+          currentSession &&
+          currentSession !== activeAdminReturn;
         document.getElementById("admin-link").style.display =
           isAdminImpersonation ? "block" : "none";
         var cash = Number(me.balance) || 0;

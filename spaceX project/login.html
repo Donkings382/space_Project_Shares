@@ -514,6 +514,7 @@
 
           localStorage.setItem("authToken", data.token);
           localStorage.setItem("spacex.user", JSON.stringify(data.user || {}));
+          localStorage.removeItem("adminReturn");
 
           var legacy = { users: [], session: null };
           try {
@@ -522,6 +523,8 @@
                 '{"users":[],"session":null}',
             );
           } catch (x) {}
+          delete legacy.adminReturn;
+          legacy.adminReturn = null;
           legacy.session =
             data.user && data.user.email ? data.user.email : identifier;
           legacy.users = legacy.users || [];

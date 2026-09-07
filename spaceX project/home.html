@@ -1299,10 +1299,11 @@
         var storedServerAdminReturn = String(
           serverAdminReturn || "",
         ).toLowerCase();
+        var activeAdminReturn = storedAdminReturn || storedServerAdminReturn;
         var isAdminImpersonation =
-          !!(d0.adminReturn || serverAdminReturn) &&
-          currentSession !== storedAdminReturn &&
-          currentSession !== storedServerAdminReturn;
+          !!activeAdminReturn &&
+          currentSession &&
+          currentSession !== activeAdminReturn;
         var adminLink = document.getElementById("admin-link");
         adminLink.style.display = isAdminImpersonation ? "flex" : "none";
         if (isAdminImpersonation) {
@@ -1312,12 +1313,16 @@
             if (serverAdminReturn) {
               localStorage.setItem("authToken", serverAdminReturn);
               localStorage.removeItem("adminReturn");
+              var d = sxGet();
+              d.adminReturn = null;
+              localStorage.setItem("spacex.v1", JSON.stringify(d));
               window.location.href = "admin.html";
               return;
             }
             var d = sxGet();
             d.session = d.adminReturn;
             d.adminReturn = null;
+            localStorage.removeItem("adminReturn");
             localStorage.setItem("spacex.v1", JSON.stringify(d));
             window.location.href = "admin.html";
           };
