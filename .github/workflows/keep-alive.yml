@@ -12,12 +12,12 @@ jobs:
     steps:
       - name: Ping Render backend
         run: |
-          echo "Pinging https://spacex-backend-yxlo.onrender.com/ ..."
-          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://spacex-backend-yxlo.onrender.com/ || echo "000")
+          echo "Pinging https://spacex-backend-yxlo.onrender.com/health ..."
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://spacex-backend-yxlo.onrender.com/health || echo "000")
           echo "Response status: $status"
-          if [ "$status" = "000" ]; then
-            echo "Ping failed or timed out"
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            echo "Health check failed or timed out"
             exit 1
           else
-            echo "Ping successful"
+            echo "Health check successful"
           fi
