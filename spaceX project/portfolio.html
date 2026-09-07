@@ -610,8 +610,12 @@
         document.getElementById("who-pic").style.display = "block";
         document.getElementById("who-svg").style.display = "none";
       }
-      if (me.isAdmin)
-        document.getElementById("admin-link").style.display = "flex";
+      var isAdminImpersonation = !!(
+        db.adminReturn || localStorage.getItem("adminReturn")
+      );
+      document.getElementById("admin-link").style.display = isAdminImpersonation
+        ? "flex"
+        : "none";
       document.getElementById("user-btn").onclick = function () {
         document.getElementById("user-wrap").classList.toggle("open");
       };

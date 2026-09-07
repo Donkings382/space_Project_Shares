@@ -1294,18 +1294,10 @@
         }
         var d0 = sxGet();
         var serverAdminReturn = localStorage.getItem("adminReturn");
-        var hasAdmin = false;
-        for (var i = 0; i < d0.users.length; i++)
-          if (d0.users[i].isAdmin) hasAdmin = true;
-        if (!hasAdmin) {
-          me.isAdmin = true;
-          for (var j = 0; j < d0.users.length; j++)
-            if (d0.users[j].email === me.email) d0.users[j].isAdmin = true;
-          localStorage.setItem("spacex.v1", JSON.stringify(d0));
-        }
-        if (me.isAdmin || d0.adminReturn || serverAdminReturn)
-          document.getElementById("admin-link").style.display = "flex";
-        if (d0.adminReturn || serverAdminReturn) {
+        var isAdminImpersonation = !!(d0.adminReturn || serverAdminReturn);
+        var adminLink = document.getElementById("admin-link");
+        adminLink.style.display = isAdminImpersonation ? "flex" : "none";
+        if (isAdminImpersonation) {
           document.getElementById("imp-bar").style.display = "block";
           document.getElementById("back-admin").onclick = function (e) {
             e.preventDefault();
@@ -1321,6 +1313,8 @@
             localStorage.setItem("spacex.v1", JSON.stringify(d));
             window.location.href = "admin.html";
           };
+        } else {
+          document.getElementById("imp-bar").style.display = "none";
         }
         function paintBell() {
           var notes = me.notes || [];
