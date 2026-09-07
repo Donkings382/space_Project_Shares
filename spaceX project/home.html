@@ -606,6 +606,14 @@
         }
         .top {
           padding-left: 68px;
+          overflow: visible;
+        }
+        .plan-drop {
+          position: fixed;
+          right: 16px;
+          top: 72px;
+          width: min(280px, calc(100vw - 32px));
+          z-index: 80;
         }
         .mobile-menu-btn {
           display: block;
@@ -1408,10 +1416,30 @@
           document.getElementById("kyc-mask").className = "kyc-mask";
         }
       };
-      document.addEventListener("click", function () {
+      document.addEventListener("click", function (event) {
+        if (
+          event.target.closest("#plan-btn") ||
+          event.target.closest("#plan-wrap")
+        ) {
+          return;
+        }
         document.querySelectorAll(".wrap").forEach(function (w) {
           w.classList.remove("open");
         });
+      });
+      document.addEventListener("touchstart", function (event) {
+        if (
+          event.target.closest("#plan-btn") ||
+          event.target.closest("#plan-wrap")
+        ) {
+          return;
+        }
+        document.getElementById("plan-wrap").classList.remove("open");
+      });
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          document.getElementById("plan-wrap").classList.remove("open");
+        }
       });
       var loadedLiveInterval = null;
       function loadLive(interval) {
