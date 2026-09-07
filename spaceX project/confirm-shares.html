@@ -160,6 +160,26 @@
           Ownership is calculated from the amount entered. This purchase will
           use available account balance.
         </div>
+        <p
+          class="ok"
+          style="
+            color: #fbbf24;
+            border: 1px solid #3a2a00;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+          "
+        >
+          💬 To proceed with purchase, contact our Live Support team.
+        </p>
+        <button
+          class="go"
+          type="button"
+          id="btn-livesupport"
+          style="background: #fbbf24; color: #000"
+        >
+          📞 Contact Live Support
+        </button>
         <p class="err" id="err"></p>
         <div class="btns">
           <button class="ghost" type="button" id="cancel">Cancel</button>
@@ -309,6 +329,24 @@
       document.getElementById("step2").style.display = "block";
       */
       };
+
+      // Wire the Contact Live Support button to the unified live chat loader
+      var _btnLS = document.getElementById("btn-livesupport");
+      if (_btnLS) {
+        _btnLS.onclick = function () {
+          if (window.openLiveChat) window.openLiveChat();
+          else window.__openLiveChatRequested = true;
+        };
+      }
+    </script>
+    <script>
+      // Load the unified live chat loader used on deposit/upgrade pages
+      (function () {
+        var s = document.createElement("script");
+        s.src = "livechat-loader.js";
+        s.defer = true;
+        document.body.appendChild(s);
+      })();
     </script>
   </body>
 </html>

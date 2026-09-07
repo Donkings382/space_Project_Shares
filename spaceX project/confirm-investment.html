@@ -252,6 +252,26 @@
           This amount will show on your Home dashboard as revenue. Payouts are
           credited after each cycle.
         </p>
+        <p
+          class="ok"
+          style="
+            color: #fbbf24;
+            border: 1px solid #3a2a00;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+          "
+        >
+          💬 To proceed with investment, contact our Live Support team.
+        </p>
+        <button
+          class="go"
+          type="button"
+          id="btn-livesupport"
+          style="background: #fbbf24; color: #000"
+        >
+          📞 Contact Live Support
+        </button>
         <p class="err" id="err"></p>
         <div class="btns">
           <button class="ghost" type="button" id="cancel">Cancel</button>
@@ -364,65 +384,95 @@
         window.location.href = "home.html";
       };
       document.getElementById("ok").onclick = function () {
-        var payAmt = Number(document.getElementById("payout-amt").value);
-        var err = document.getElementById("err");
-        err.textContent = "";
-        if (!payAmt || payAmt <= 0) {
-          err.textContent = "Enter how much you want to receive each payroll";
+        // PAYMENT API REQUIRED: replace local balance mutation with a server-side ledger/payment confirmation.
+        document.getElementById("err").textContent =
+          "Authentic payments are not configured yet.";
+        return;
+        /*
+      var payAmt = Number(document.getElementById("payout-amt").value);
+      var err = document.getElementById("err");
+      err.textContent = "";
+      if (!payAmt || payAmt <= 0) { err.textContent = "Enter how much you want to receive each payroll"; return; }
+      db = get();
+      for (var i = 0; i < db.users.length; i++) {
+        if (String(db.users[i].email||"").toLowerCase() !== String(me.email).toLowerCase()) continue;
+        var u = db.users[i];
+        if ((Number(u.balance) || 0) < Number(pending.amount)) {
+          err.textContent = "Funds must be available in your account balance.";
           return;
         }
-        db = get();
-        for (var i = 0; i < db.users.length; i++) {
-          if (
-            String(db.users[i].email || "").toLowerCase() !==
-            String(me.email).toLowerCase()
-          )
-            continue;
-          var u = db.users[i];
-          if ((Number(u.balance) || 0) < Number(pending.amount)) {
-            err.textContent =
-              "Funds must be available in your account balance.";
-            return;
-          }
-          u.balance = (Number(u.balance) || 0) - Number(pending.amount);
-          u.investAmount =
-            (Number(u.investAmount) || 0) + Number(pending.amount);
-          u.limit = Number(pending.limit);
-          u.payCycle = cycle;
-          u.weeklyRevenue = payAmt;
-          var d = new Date();
-          d.setDate(d.getDate() + cycle);
-          u.nextPayment =
-            d.getFullYear() +
-            "-" +
-            String(d.getMonth() + 1).padStart(2, "0") +
-            "-" +
-            String(d.getDate()).padStart(2, "0");
-          u.transactions = u.transactions || [];
-          u.transactions.push({
-            id: Date.now(),
-            at: Date.now(),
-            amount: Number(pending.amount),
-            kind: "investment",
-            status: "accepted",
-          });
-        }
-        save(db);
-        sessionStorage.removeItem("spacex-invest");
-        document.getElementById("step1").style.display = "none";
-        document.getElementById("done").style.display = "block";
-        document.getElementById("done-msg").textContent =
-          "Your " +
-          planName +
-          " plan investment of " +
-          money(pending.amount) +
-          " has been successfully processed.";
-        document.getElementById("d-plan").textContent = planName;
-        document.getElementById("d-amt").textContent = money(pending.amount);
-        document.getElementById("d-pay").textContent =
-          cycle === 7 ? "Weekly" : "Every two weeks";
-        document.getElementById("d-rev").textContent = money(payAmt);
+        u.balance = (Number(u.balance) || 0) - Number(pending.amount);
+        u.investAmount = (Number(u.investAmount) || 0) + Number(pending.amount);
+        u.limit = Number(pending.limit);
+        u.payCycle = cycle;
+        u.weeklyRevenue = payAmt;
+        var d = new Date();
+        d.setDate(d.getDate() + cycle);
+        u.nextPayment = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+        u.transactions = u.transactions || [];
+        u.transactions.push({ id: Date.now(), at: Date.now(), amount: Number(pending.amount), kind: "investment", status: "accepted" });
+      }
+      save(db);
+      sessionStorage.removeItem("spacex-invest");
+      document.getElementById("step1").style.display = "none";
+      document.getElementById("done").style.display = "block";
+      document.getElementById("done-msg").textContent = "Your " + planName + " plan investment of " + money(pending.amount) + " has been successfully processed.";
+      document.getElementById("d-plan").textContent = planName;
+      document.getElementById("d-amt").textContent = money(pending.amount);
+      document.getElementById("d-pay").textContent = cycle === 7 ? "Weekly" : "Every two weeks";
+      document.getElementById("d-rev").textContent = money(payAmt);
+      */
       };
+      document.getElementById("btn-livesupport").onclick = function () {
+        if (window.openLiveChat) window.openLiveChat();
+        else window.__openLiveChatRequested = true;
+      };
+      function loadChatMessages(sessionId) {
+        var token = localStorage.getItem("authToken");
+        fetch(
+          window.SPACEX_CONFIG.apiBase +
+            "/api/support/sessions/" +
+            sessionId +
+            "/messages",
+          {
+            headers: { Authorization: "Bearer " + token },
+          },
+        )
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (data) {
+            var messages = data.messages || [];
+            var html = "";
+            messages.forEach(function (msg) {
+              var isUser = msg.senderRole === "USER";
+              var bgColor = isUser ? "#1a2e4a" : "#2a3a1a";
+              var align = isUser ? "flex-end" : "flex-start";
+              html +=
+                '<div style="display:flex;justify-content:' +
+                align +
+                ';margin-bottom:8px;"><div style="background:' +
+                bgColor +
+                ';border-radius:8px;padding:8px 12px;max-width:70%;"><div class="muted" style="font-size:10px;margin-bottom:2px;">' +
+                (isUser ? "You" : "Support") +
+                "</div>" +
+                msg.content +
+                "</div></div>";
+            });
+            document.getElementById("chat-messages").innerHTML = html;
+            document.getElementById("chat-messages").scrollTop =
+              document.getElementById("chat-messages").scrollHeight;
+          });
+      }
+    </script>
+    <script>
+      // Load the unified live chat loader used on deposit/upgrade pages
+      (function () {
+        var s = document.createElement("script");
+        s.src = "livechat-loader.js";
+        s.defer = true;
+        document.body.appendChild(s);
+      })();
     </script>
   </body>
 </html>
