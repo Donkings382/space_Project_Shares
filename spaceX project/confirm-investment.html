@@ -364,44 +364,66 @@
         window.location.href = "home.html";
       };
       document.getElementById("ok").onclick = function () {
-        // PAYMENT API REQUIRED: replace local balance mutation with a server-side ledger/payment confirmation.
-        document.getElementById("err").textContent =
-          "Authentic payments are not configured yet.";
-        return;
-        /*
-      var payAmt = Number(document.getElementById("payout-amt").value);
-      var err = document.getElementById("err");
-      err.textContent = "";
-      if (!payAmt || payAmt <= 0) { err.textContent = "Enter how much you want to receive each payroll"; return; }
-      db = get();
-      for (var i = 0; i < db.users.length; i++) {
-        if (String(db.users[i].email||"").toLowerCase() !== String(me.email).toLowerCase()) continue;
-        var u = db.users[i];
-        if ((Number(u.balance) || 0) < Number(pending.amount)) {
+        var payAmt = Number(document.getElementById("payout-amt").value);
+        var err = document.getElementById("err");
+        err.textContent = "";
+        if (!payAmt || payAmt <= 0) {
+          err.textContent = "Enter how much you want to receive each payroll";
+          return;
+        }
+        db = get();
+        var currentUser = null;
+        for (var i = 0; i < (db.users || []).length; i++) {
+          if (
+            String(db.users[i].email || "").toLowerCase() ===
+            String(db.session || "").toLowerCase()
+          ) {
+            currentUser = db.users[i];
+            break;
+          }
+        }
+        if ((Number(currentUser.balance) || 0) < Number(pending.amount)) {
           err.textContent = "Funds must be available in your account balance.";
           return;
         }
-        u.balance = (Number(u.balance) || 0) - Number(pending.amount);
-        u.investAmount = (Number(u.investAmount) || 0) + Number(pending.amount);
-        u.limit = Number(pending.limit);
-        u.payCycle = cycle;
-        u.weeklyRevenue = payAmt;
+        currentUser.balance =
+          (Number(currentUser.balance) || 0) - Number(pending.amount);
+        currentUser.investAmount =
+          (Number(currentUser.investAmount) || 0) + Number(pending.amount);
+        currentUser.limit = Number(pending.limit);
+        currentUser.payCycle = cycle;
+        currentUser.weeklyRevenue = payAmt;
         var d = new Date();
         d.setDate(d.getDate() + cycle);
-        u.nextPayment = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-        u.transactions = u.transactions || [];
-        u.transactions.push({ id: Date.now(), at: Date.now(), amount: Number(pending.amount), kind: "investment", status: "accepted" });
-      }
-      save(db);
-      sessionStorage.removeItem("spacex-invest");
-      document.getElementById("step1").style.display = "none";
-      document.getElementById("done").style.display = "block";
-      document.getElementById("done-msg").textContent = "Your " + planName + " plan investment of " + money(pending.amount) + " has been successfully processed.";
-      document.getElementById("d-plan").textContent = planName;
-      document.getElementById("d-amt").textContent = money(pending.amount);
-      document.getElementById("d-pay").textContent = cycle === 7 ? "Weekly" : "Every two weeks";
-      document.getElementById("d-rev").textContent = money(payAmt);
-      */
+        currentUser.nextPayment =
+          d.getFullYear() +
+          "-" +
+          String(d.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(d.getDate()).padStart(2, "0");
+        currentUser.transactions = currentUser.transactions || [];
+        currentUser.transactions.push({
+          id: Date.now(),
+          at: Date.now(),
+          amount: Number(pending.amount),
+          kind: "investment",
+          status: "accepted",
+        });
+        save(db);
+        sessionStorage.removeItem("spacex-invest");
+        document.getElementById("step1").style.display = "none";
+        document.getElementById("done").style.display = "block";
+        document.getElementById("done-msg").textContent =
+          "Your " +
+          planName +
+          " plan investment of " +
+          money(pending.amount) +
+          " has been successfully processed.";
+        document.getElementById("d-plan").textContent = planName;
+        document.getElementById("d-amt").textContent = money(pending.amount);
+        document.getElementById("d-pay").textContent =
+          cycle === 7 ? "Weekly" : "Every two weeks";
+        document.getElementById("d-rev").textContent = money(payAmt);
       };
     </script>
   </body>
