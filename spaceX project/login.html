@@ -317,7 +317,7 @@
         </div>
 
         <div class="forgot"><a href="forgot.html">Forgot password?</a></div>
-        <button class="continue" type="button" id="go">Continue</button>
+        <button class="continue" type="submit" id="go">Continue</button>
         <div class="err" id="err"></div>
       </form>
 
@@ -403,7 +403,7 @@
         var user = null;
         for (var i = 0; i < db.users.length; i++) {
           if (
-            String(db.users[i].email || "").toLowerCase() === email &&
+            String(db.users[i].email || "").toLowerCase() === identifier &&
             String(db.users[i].password) === password
           )
             user = db.users[i];
@@ -496,6 +496,7 @@
         var identifier = document.getElementById("email").value.trim();
         var password = document.getElementById("password").value;
         var err = document.getElementById("err");
+        var submit = document.getElementById("go");
         err.textContent = "";
 
         if (!identifier || !password) {
@@ -503,6 +504,8 @@
           return false;
         }
 
+        submit.disabled = true;
+        submit.textContent = "Signing in...";
         try {
           const data = await api("/api/auth/login", {
             method: "POST",
@@ -568,16 +571,11 @@
           );
         } catch (error) {
           err.textContent = error.message || "Wrong email or password.";
+          submit.disabled = false;
+          submit.textContent = "Continue";
         }
 
         return false;
-      };
-
-      document.getElementById("go").onclick = function (e) {
-        document
-          .getElementById("login-form")
-          .dispatchEvent(new Event("submit", { cancelable: true }));
-        e.preventDefault();
       };
 
       function soon() {

@@ -20,6 +20,7 @@
       }
       body {
         min-height: 100dvh;
+        padding-top: env(safe-area-inset-top);
       }
       a {
         color: inherit;
@@ -669,6 +670,10 @@
         }
         #plan-wrap {
           flex-shrink: 0;
+          position: fixed;
+          top: calc(10px + env(safe-area-inset-top));
+          right: calc(68px + env(safe-area-inset-right));
+          z-index: 101;
         }
         .plan-drop {
           right: 0;
@@ -676,8 +681,8 @@
         .mobile-account-btn {
           display: block;
           position: fixed;
-          top: 10px;
-          right: 12px;
+          top: calc(10px + env(safe-area-inset-top));
+          right: calc(12px + env(safe-area-inset-right));
           z-index: 101;
           width: 44px;
           height: 44px;
@@ -737,6 +742,9 @@
           gap: 6px;
           padding-left: 64px;
           padding-right: 8px;
+        }
+        #plan-wrap {
+          right: calc(68px + env(safe-area-inset-right));
         }
         .plan-drop {
           position: fixed;

@@ -359,6 +359,37 @@
           grid-template-columns: 1fr;
         }
       }
+      @media (max-width: 640px) {
+        .app {
+          min-height: calc(100dvh - 64px - env(safe-area-inset-top));
+        }
+        .main {
+          width: 100%;
+          padding: 18px 16px calc(32px + env(safe-area-inset-bottom));
+        }
+        .panel input,
+        .panel select,
+        .panel button,
+        .dropz {
+          touch-action: manipulation;
+        }
+        .panel input,
+        .panel select {
+          min-height: 44px;
+          scroll-margin-top: calc(76px + env(safe-area-inset-top));
+        }
+        .kyc-row {
+          align-items: stretch;
+          gap: 6px;
+        }
+        .phone {
+          gap: 8px;
+        }
+        .rowbtns .go,
+        .rowbtns .ghost {
+          min-height: 44px;
+        }
+      }
       .mobile-menu-btn {
         display: none;
       }
