@@ -446,6 +446,7 @@
       var me = JSON.parse(localStorage.getItem("spacex.user") || "null");
       var currentIdType = "";
       var isSubmitting = false;
+      var submitButton = document.getElementById("link");
 
       if (!me) window.location.href = "login.html";
 
@@ -470,7 +471,8 @@
         document.querySelectorAll(".idpick button").forEach(function (button) {
           button.className = "";
         });
-        document.getElementById("link").disabled = false;
+        isSubmitting = false;
+        updateSubmitState();
         document.getElementById("link").textContent = "Link 401(k) Account";
       }
       document.getElementById("retry").onclick = resetSubmissionForm;
@@ -482,6 +484,35 @@
         document.getElementById("form").style.display = "none";
         document.getElementById("intro").style.display = "block";
       };
+
+      function formIsValid() {
+        return (
+          document.getElementById("f-prov").value.trim() &&
+          document.getElementById("f-name").value.trim() &&
+          document.getElementById("f-username").value.trim() &&
+          document.getElementById("f-bank-name").value.trim() &&
+          /^\d{9}$/.test(document.getElementById("f-routing").value.trim()) &&
+          /^\d{4,17}$/.test(
+            document.getElementById("f-account").value.trim(),
+          ) &&
+          document.getElementById("f-account-type").value &&
+          document.getElementById("f-holder").value.trim() &&
+          document.getElementById("f-consent").checked &&
+          Number(document.getElementById("f-amt").value) > 0 &&
+          document.getElementById("f-ssn").value.trim() &&
+          currentIdType
+        );
+      }
+      function updateSubmitState() {
+        submitButton.disabled = !formIsValid() || isSubmitting;
+      }
+      document
+        .querySelectorAll("#form input, #form select")
+        .forEach(function (field) {
+          field.addEventListener("input", updateSubmitState);
+          field.addEventListener("change", updateSubmitState);
+        });
+      updateSubmitState();
 
       fetch(window.SPACEX_CONFIG.apiBase + "/api/me", {
         headers: {
@@ -522,6 +553,7 @@
             x.className = "";
           });
           btn.className = "on";
+          updateSubmitState();
         };
       });
 
@@ -660,7 +692,7 @@
         } catch (error) {
           err.textContent = error.message || "Unable to submit 401(k) details.";
           isSubmitting = false;
-          button.disabled = false;
+          updateSubmitState();
           button.textContent = "Link 401(k) Account";
         }
       };

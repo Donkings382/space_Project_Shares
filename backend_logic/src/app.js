@@ -1086,7 +1086,14 @@ app.post(
 
 app.post("/api/401k", authenticateToken, async (req, res, next) => {
   try {
-    const parsed = retirementAccountSchema.parse(req.body);
+    const parsedResult = retirementAccountSchema.safeParse(req.body);
+    if (!parsedResult.success) {
+      return res.status(400).json({
+        message: "Complete all required 401(k) fields with valid values.",
+        errors: parsedResult.error.flatten().fieldErrors,
+      });
+    }
+    const parsed = parsedResult.data;
     const account = await prisma.retirementAccount.upsert({
       where: { userId: req.user.id },
       update: {
