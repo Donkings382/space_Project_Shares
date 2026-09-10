@@ -148,6 +148,14 @@
         background: #3a2a00;
         color: #fbbf24;
       }
+      .kyc-pending {
+        background: #431a05;
+        color: #fb923c;
+      }
+      .kyc-approved {
+        background: #14532d;
+        color: #4ade80;
+      }
       label {
         display: block;
         font-size: 12px;
@@ -892,6 +900,7 @@
           me = db.users[i];
       var adminToken = localStorage.getItem("authToken");
       var serverPayLoaded = false;
+      var deskShown = false;
       var API_BASE = window.SPACEX_CONFIG.apiBase;
       function escapeHtml(value) {
         return String(value == null ? "" : value).replace(
@@ -925,6 +934,8 @@
         return payload;
       }
       function showDesk() {
+        if (deskShown) return;
+        deskShown = true;
         document.getElementById("gate").style.display = "none";
         document.getElementById("desk").style.display = "block";
         document.getElementById("who").textContent = me.fullName || "Admin";
@@ -1700,7 +1711,13 @@
                     escapeHtml(user.email || "") +
                     "<br>User ID: " +
                     escapeHtml(user.id || "") +
-                    '</div></div><span class="pill">' +
+                    '</div></div><span class="pill ' +
+                    (document.status === "PENDING"
+                      ? "kyc-pending"
+                      : document.status === "APPROVED"
+                        ? "kyc-approved"
+                        : "") +
+                    '">' +
                     escapeHtml(document.status) +
                     "</span></div><p>Type: " +
                     escapeHtml(document.docType) +
