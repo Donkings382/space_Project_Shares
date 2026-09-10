@@ -42,6 +42,7 @@
 
   // Small loader that injects the live chat widget DOM and initializes it.
 
+  // Keep the closed chat window out of hit-testing so it cannot block mobile taps.
   var widgetHTML = `
   <div id="chat-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:2147483640;transition:opacity .22s ease;opacity:0"></div>
   <div id="live-widget" style="position:fixed;right:18px;bottom:18px;z-index:2147483647;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;pointer-events:auto">
@@ -50,7 +51,7 @@
       <span id="badge" style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:11px;padding:2px 6px;border-radius:999px;display:none">1</span>
     </button>
 
-    <div id="chat-window" style="display:none;transition:all .22s ease;transform:translateY(8px);opacity:0;background:#fff;border-radius:12px;box-shadow:0 18px 50px rgba(2,6,23,0.3);width:400px;max-width:92vw;max-height:560px;overflow:hidden;display:flex;flex-direction:column;margin-top:12px;z-index:2147483650;">
+    <div id="chat-window" style="display:none;transition:all .22s ease;transform:translateY(8px);opacity:0;background:#fff;border-radius:12px;box-shadow:0 18px 50px rgba(2,6,23,0.3);width:400px;max-width:92vw;max-height:560px;overflow:hidden;flex-direction:column;margin-top:12px;z-index:2147483650;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid #eee">
         <div style="display:flex;align-items:center;gap:8px">
           <div style="font-weight:600">Live Support</div>
