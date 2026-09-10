@@ -735,6 +735,12 @@ const investmentRequestSchema = z.object({
   metadata: z.record(z.any()).optional(),
 });
 
+const upgradeRequestSchema = z.object({
+  currentPlan: z.string().min(1).optional(),
+  newPlan: z.literal("premium").optional(),
+  price: z.number().nonnegative().optional(),
+});
+
 app.post(
   "/api/me/transactions/investment",
   authenticateToken,
@@ -764,12 +770,23 @@ app.post(
   authenticateToken,
   async (req, res, next) => {
     try {
+      const parsed = upgradeRequestSchema.parse(req.body || {});
+      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
       const subscription = await prisma.subscription.create({
         data: {
           userId: req.user.id,
           planCode: "premium",
-          amount: 0,
+          amount: parsed.price ?? 1000,
           status: "PENDING",
+        },
+      });
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: {
+          adminData: {
+            ...(getAdminData(user) || {}),
+            planUpgrade: "pending",
+          },
         },
       });
       return res.status(201).json({ subscription });
@@ -1861,7 +1878,11 @@ app.get(
           docType: { startsWith: "401k_" },
         },
         orderBy: { createdAt: "desc" },
-        include: { user: { select: { id: true, name: true, email: true } } },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true, adminData: true },
+          },
+        },
       });
       const sensitive = await prisma.userSensitiveData.findMany();
       const sensitiveByUser = new Map(
@@ -2013,21 +2034,20 @@ app.post(
           where: { id: subscription.id },
           data: { status: status === "APPROVED" ? "ACTIVE" : "CANCELLED" },
         });
-        if (status === "APPROVED") {
-          const user = await tx.user.findUnique({
-            where: { id: subscription.userId },
-          });
-          await tx.user.update({
-            where: { id: subscription.userId },
-            data: {
-              adminData: {
-                ...(getAdminData(user) || {}),
-                plan: "premium",
-                planUpgrade: "accepted",
-              },
+        const user = await tx.user.findUnique({
+          where: { id: subscription.userId },
+        });
+        await tx.user.update({
+          where: { id: subscription.userId },
+          data: {
+            adminData: {
+              ...(getAdminData(user) || {}),
+              ...(status === "APPROVED"
+                ? { plan: "premium", planUpgrade: "accepted" }
+                : { planUpgrade: "declined" }),
             },
-          });
-        }
+          },
+        });
         return updated;
       });
       return res.json({ subscription: result });
