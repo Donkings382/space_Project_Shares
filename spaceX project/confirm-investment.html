@@ -371,45 +371,34 @@
           err.textContent = "Enter how much you want to receive each payroll";
           return;
         }
-        db = get();
-        var currentUser = null;
-        for (var i = 0; i < (db.users || []).length; i++) {
-          if (
-            String(db.users[i].email || "").toLowerCase() ===
-            String(db.session || "").toLowerCase()
-          ) {
-            currentUser = db.users[i];
-            break;
-          }
-        }
-        if ((Number(currentUser.balance) || 0) < Number(pending.amount)) {
+        if ((Number(me.balance) || 0) < Number(pending.amount)) {
           err.textContent = "Funds must be available in your account balance.";
           return;
         }
-        currentUser.balance =
-          (Number(currentUser.balance) || 0) - Number(pending.amount);
-        currentUser.investAmount =
-          (Number(currentUser.investAmount) || 0) + Number(pending.amount);
-        currentUser.limit = Number(pending.limit);
-        currentUser.payCycle = cycle;
-        currentUser.weeklyRevenue = payAmt;
-        var d = new Date();
-        d.setDate(d.getDate() + cycle);
-        currentUser.nextPayment =
-          d.getFullYear() +
-          "-" +
-          String(d.getMonth() + 1).padStart(2, "0") +
-          "-" +
-          String(d.getDate()).padStart(2, "0");
-        currentUser.transactions = currentUser.transactions || [];
-        currentUser.transactions.push({
-          id: Date.now(),
-          at: Date.now(),
-          amount: Number(pending.amount),
-          kind: "investment",
-          status: "accepted",
+        var response = await fetch(
+          window.SPACEX_CONFIG.apiBase + "/api/me/transactions/investment",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("authToken"),
+            },
+            body: JSON.stringify({
+              type: "investment",
+              amount: Number(pending.amount),
+              metadata: {
+                limit: Number(pending.limit),
+                cycle,
+                weeklyRevenue: payAmt,
+                plan: planName,
+              },
+            }),
+          },
+        );
+        var payload = await response.json().catch(function () {
+          return {};
         });
-        save(db);
+        if (!response.ok) throw new Error(payload.message || "Investment request failed.");
         sessionStorage.removeItem("spacex-invest");
         document.getElementById("step1").style.display = "none";
         document.getElementById("done").style.display = "block";
@@ -418,7 +407,7 @@
           planName +
           " plan investment of " +
           money(pending.amount) +
-          " has been successfully processed.";
+          " has been submitted for admin approval.";
         document.getElementById("d-plan").textContent = planName;
         document.getElementById("d-amt").textContent = money(pending.amount);
         document.getElementById("d-pay").textContent =

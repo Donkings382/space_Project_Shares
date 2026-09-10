@@ -1168,7 +1168,7 @@
         document.getElementById("page-title").textContent = "Verify KYC";
         var k = me.kyc || "none";
         var d = me.kycData || {};
-        var st = k === "verified" || k === "pending" ? "st-v" : "st-n";
+        var st = k === "verified" ? "st-v" : k === "pending" ? "st-p" : "st-n";
         var stTxt =
           k === "verified"
             ? "Verified"

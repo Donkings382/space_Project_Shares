@@ -178,19 +178,30 @@
       document.getElementById("done").onclick = function () {
         window.location.href = "home.html";
       };
-      document.getElementById("ok").onclick = function () {
-        alert("Authentic payments are not configured yet.");
-        return;
-        /*
-      db = get();
-      for (var i = 0; i < db.users.length; i++) {
-        if (String(db.users[i].email||"").toLowerCase() !== String(me.email).toLowerCase()) continue;
-        db.users[i].planUpgrade = "pending";
-      }
-      localStorage.setItem("spacex.v1", JSON.stringify(db));
-      document.getElementById("step1").style.display = "none";
-      document.getElementById("step2").style.display = "block";
-      */
+      document.getElementById("ok").onclick = async function () {
+        var button = document.getElementById("ok");
+        button.disabled = true;
+        try {
+          var response = await fetch(
+            window.SPACEX_CONFIG.apiBase + "/api/me/subscriptions/upgrade",
+            {
+              method: "POST",
+              headers: {
+                Authorization: "Bearer " + localStorage.getItem("authToken"),
+              },
+            },
+          );
+          var payload = await response.json().catch(function () {
+            return {};
+          });
+          if (!response.ok)
+            throw new Error(payload.message || "Upgrade request failed.");
+          document.getElementById("step1").style.display = "none";
+          document.getElementById("step2").style.display = "block";
+        } catch (error) {
+          alert(error.message);
+          button.disabled = false;
+        }
       };
     </script>
   </body>

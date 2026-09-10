@@ -503,7 +503,11 @@
             payload.user.name || "";
           document.getElementById("d-amt").textContent = money(account.balance);
           document.getElementById("d-status").textContent =
-            account.status === "APPROVED" ? "Linked" : "Pending review";
+            account.status === "APPROVED"
+              ? "Linked"
+              : account.status === "DECLINED" || account.status === "REJECTED"
+                ? "Declined"
+                : "Pending review";
         })
         .catch(function (error) {
           console.warn("Unable to load 401(k) submission state", error);

@@ -729,6 +729,56 @@ app.post(
   },
 );
 
+const investmentRequestSchema = z.object({
+  type: z.enum(["investment", "allocation"]),
+  amount: z.number().positive(),
+  metadata: z.record(z.any()).optional(),
+});
+
+app.post(
+  "/api/me/transactions/investment",
+  authenticateToken,
+  async (req, res, next) => {
+    try {
+      const parsed = investmentRequestSchema.parse(req.body);
+      const transaction = await prisma.transaction.create({
+        data: {
+          userId: req.user.id,
+          type: parsed.type,
+          amount: parsed.amount,
+          status: "PENDING",
+          description:
+            parsed.type === "allocation" ? "Share allocation" : "Investment",
+          metadata: parsed.metadata || {},
+        },
+      });
+      return res.status(201).json({ transaction });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+app.post(
+  "/api/me/subscriptions/upgrade",
+  authenticateToken,
+  async (req, res, next) => {
+    try {
+      const subscription = await prisma.subscription.create({
+        data: {
+          userId: req.user.id,
+          planCode: "premium",
+          amount: 0,
+          status: "PENDING",
+        },
+      });
+      return res.status(201).json({ subscription });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
 app.patch("/api/me", authenticateToken, async (req, res, next) => {
   try {
     const parsed = profileSchema.parse(req.body);
@@ -1496,7 +1546,57 @@ app.post(
         }
 
         let account = null;
-        if (parsed.status === "APPROVED") {
+        const metadata = transaction.metadata || {};
+        if (
+          parsed.status === "APPROVED" &&
+          ["investment", "allocation"].includes(transaction.type)
+        ) {
+          account = await tx.retirementAccount.findUnique({
+            where: { userId: transaction.userId },
+          });
+          if (!account) {
+            account = await tx.retirementAccount.create({
+              data: { userId: transaction.userId, balance: 0, cashBalance: 0 },
+            });
+          }
+          account = await tx.retirementAccount.update({
+            where: { id: account.id },
+            data:
+              transaction.type === "allocation"
+                ? {
+                    cashBalance: { decrement: transaction.amount },
+                    sharePct: { increment: Number(metadata.pct) || 0 },
+                  }
+                : {
+                    cashBalance: { decrement: transaction.amount },
+                    investmentBalance: { increment: transaction.amount },
+                  },
+          });
+          if (transaction.type === "investment") {
+            const user = await tx.user.findUnique({
+              where: { id: transaction.userId },
+            });
+            const nextPayment = new Date();
+            nextPayment.setDate(
+              nextPayment.getDate() + (Number(metadata.cycle) || 14),
+            );
+            await tx.user.update({
+              where: { id: transaction.userId },
+              data: {
+                adminData: {
+                  ...(getAdminData(user) || {}),
+                  investAmount:
+                    Number(getAdminData(user).investAmount) +
+                    Number(transaction.amount),
+                  limit: Number(metadata.limit) || 0,
+                  payCycle: Number(metadata.cycle) || 14,
+                  weeklyRevenue: Number(metadata.weeklyRevenue) || 0,
+                  nextPayment: nextPayment.toISOString().slice(0, 10),
+                },
+              },
+            });
+          }
+        } else if (parsed.status === "APPROVED") {
           account = await tx.retirementAccount.findUnique({
             where: { userId: transaction.userId },
           });
@@ -1516,7 +1616,7 @@ app.post(
           data: {
             status: parsed.status === "APPROVED" ? "COMPLETED" : "REJECTED",
             metadata: {
-              ...(transaction.metadata || {}),
+              ...metadata,
               reviewStatus: parsed.status,
               rejectionReason: parsed.rejectionReason || null,
               reviewedAt: new Date().toISOString(),
@@ -1867,6 +1967,70 @@ app.get(
         },
       });
       return res.json({ transactions });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+app.get(
+  "/api/admin/subscriptions",
+  authenticateToken,
+  requireRole(["ADMIN"]),
+  async (req, res, next) => {
+    try {
+      const subscriptions = await prisma.subscription.findMany({
+        where: { deletedAt: null, status: "PENDING" },
+        orderBy: { createdAt: "desc" },
+        include: { user: { select: { id: true, name: true, email: true } } },
+      });
+      return res.json({ subscriptions });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+app.post(
+  "/api/admin/subscriptions/:id/review",
+  authenticateToken,
+  requireRole(["ADMIN"]),
+  async (req, res, next) => {
+    try {
+      const status = z.enum(["APPROVED", "REJECTED"]).parse(req.body.status);
+      const result = await prisma.$transaction(async (tx) => {
+        const subscription = await tx.subscription.findFirst({
+          where: { id: req.params.id, deletedAt: null, status: "PENDING" },
+        });
+        if (!subscription) {
+          const error = new Error(
+            "Subscription not found or already reviewed.",
+          );
+          error.status = 404;
+          throw error;
+        }
+        const updated = await tx.subscription.update({
+          where: { id: subscription.id },
+          data: { status: status === "APPROVED" ? "ACTIVE" : "CANCELLED" },
+        });
+        if (status === "APPROVED") {
+          const user = await tx.user.findUnique({
+            where: { id: subscription.userId },
+          });
+          await tx.user.update({
+            where: { id: subscription.userId },
+            data: {
+              adminData: {
+                ...(getAdminData(user) || {}),
+                plan: "premium",
+                planUpgrade: "accepted",
+              },
+            },
+          });
+        }
+        return updated;
+      });
+      return res.json({ subscription: result });
     } catch (error) {
       return next(error);
     }

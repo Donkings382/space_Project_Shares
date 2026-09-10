@@ -1431,6 +1431,57 @@
         drawSupportChat(currentSupportSession, true);
       }
       function drawPlans() {
+        if (adminToken) {
+          adminApi("/api/admin/subscriptions")
+            .then(function (payload) {
+              var subscriptions = payload.subscriptions || [];
+              var html = subscriptions
+                .map(function (subscription) {
+                  return (
+                    "<div class='panel' style='margin-bottom:10px'><b>" +
+                    escapeHtml(
+                      subscription.user.name || subscription.user.email,
+                    ) +
+                    "</b><div class='muted'>" +
+                    escapeHtml(subscription.user.email) +
+                    " · premium</div><span class='pill wait'>PENDING</span> " +
+                    '<button class="primary" data-server-plan-ok="' +
+                    escapeHtml(subscription.id) +
+                    '">Approve Premium</button> <button class="danger" data-server-plan-no="' +
+                    escapeHtml(subscription.id) +
+                    '">Decline</button></div>'
+                  );
+                })
+                .join("");
+              document.getElementById("plan-list").innerHTML =
+                html || "<p class='muted'>No upgrade requests yet.</p>";
+              document
+                .querySelectorAll("[data-server-plan-ok]")
+                .forEach(function (button) {
+                  button.onclick = function () {
+                    reviewServerPlan(
+                      button.getAttribute("data-server-plan-ok"),
+                      "APPROVED",
+                    );
+                  };
+                });
+              document
+                .querySelectorAll("[data-server-plan-no]")
+                .forEach(function (button) {
+                  button.onclick = function () {
+                    reviewServerPlan(
+                      button.getAttribute("data-server-plan-no"),
+                      "REJECTED",
+                    );
+                  };
+                });
+            })
+            .catch(function (error) {
+              document.getElementById("plan-list").innerHTML =
+                "<p class='muted'>" + escapeHtml(error.message) + "</p>";
+            });
+          return;
+        }
         db = get();
         var html = "";
         db.users.forEach(function (u) {
@@ -1496,6 +1547,22 @@
             drawPlans();
           };
         });
+      }
+      function reviewServerPlan(subscriptionId, status) {
+        adminApi(
+          "/api/admin/subscriptions/" +
+            encodeURIComponent(subscriptionId) +
+            "/review",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
+          },
+        )
+          .then(drawPlans)
+          .catch(function (error) {
+            alert(error.message);
+          });
       }
       function drawK401() {
         if (!adminToken) return;

@@ -304,30 +304,42 @@
         window.location.href = "home.html";
       };
       document.getElementById("ok").onclick = function () {
-        // PAYMENT API REQUIRED: replace local balance mutation with a server-side ledger/payment confirmation.
-        document.getElementById("err").textContent =
-          "Authentic payments are not configured yet.";
-        return;
-        /*
-      db = get();
-      var err = document.getElementById("err");
-      err.textContent = "";
-      for (var i = 0; i < db.users.length; i++) {
-        if (String(db.users[i].email||"").toLowerCase() !== String(me.email).toLowerCase()) continue;
-        var u = db.users[i];
-        if ((u.plan || "regular") !== "premium") { err.textContent = "Premium required"; return; }
-        if (amt > (Number(u.balance) || 0)) { err.textContent = "Not enough balance"; return; }
-        u.balance = (Number(u.balance) || 0) - amt;
-        u.sharePct = Math.min(100, (Number(u.sharePct) || 0) + pct);
-        u.shareSpent = (Number(u.shareSpent) || 0) + amt;
-        u.transactions = u.transactions || [];
-        u.transactions.push({ id: Date.now(), at: Date.now(), amount: amt, kind: "allocation", status: "accepted", note: pct.toFixed(2) + "% shares" });
-      }
-      localStorage.setItem("spacex.v1", JSON.stringify(db));
-      sessionStorage.removeItem("spacex-shares");
-      document.getElementById("step1").style.display = "none";
-      document.getElementById("step2").style.display = "block";
-      */
+        var err = document.getElementById("err");
+        err.textContent = "";
+        if (amt > (Number(me.balance) || 0)) {
+          err.textContent = "Not enough balance";
+          return;
+        }
+        fetch(
+          window.SPACEX_CONFIG.apiBase + "/api/me/transactions/investment",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("authToken"),
+            },
+            body: JSON.stringify({
+              type: "allocation",
+              amount: amt,
+              metadata: { pct, note: pct.toFixed(2) + "% shares" },
+            }),
+          },
+        )
+          .then(function (response) {
+            return response.json().then(function (payload) {
+              if (!response.ok)
+                throw new Error(payload.message || "Share request failed.");
+              return payload;
+            });
+          })
+          .then(function () {
+            sessionStorage.removeItem("spacex-shares");
+            document.getElementById("step1").style.display = "none";
+            document.getElementById("step2").style.display = "block";
+          })
+          .catch(function (error) {
+            err.textContent = error.message;
+          });
       };
 
       // Wire the Contact Live Support button to the unified live chat loader
