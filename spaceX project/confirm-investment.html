@@ -270,7 +270,8 @@
         <div class="row"><span>Plan:</span><b id="d-plan">Regular</b></div>
         <div class="row"><span>Amount:</span><b id="d-amt">$0.00</b></div>
         <div class="row">
-          <span>Payout schedule:</span><b id="d-pay">Every two weeks</b>
+          <span>Payout schedule:</span
+          ><b id="d-pay">Bi-weekly (every 2 weeks)</b>
         </div>
         <div class="row"><span>Each payroll:</span><b id="d-rev">$0.00</b></div>
         <div class="row"><span>Status:</span><b>Active</b></div>
@@ -412,7 +413,7 @@
         document.getElementById("d-plan").textContent = planName;
         document.getElementById("d-amt").textContent = money(pending.amount);
         document.getElementById("d-pay").textContent =
-          cycle === 7 ? "Weekly" : "Every two weeks";
+          cycle === 7 ? "Weekly" : "Bi-weekly (every 2 weeks)";
         document.getElementById("d-rev").textContent = money(payAmt);
       };
     </script>

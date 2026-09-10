@@ -445,6 +445,7 @@
       var db = get();
       var me = JSON.parse(localStorage.getItem("spacex.user") || "null");
       var currentIdType = "";
+      var isSubmitting = false;
 
       if (!me) window.location.href = "login.html";
 
@@ -540,7 +541,9 @@
       pick("f-back", "z-back");
 
       // Submit
-      document.getElementById("link").onclick = async function () {
+      document.getElementById("link").onclick = async function (event) {
+        event.preventDefault();
+        if (isSubmitting) return;
         var prov = document.getElementById("f-prov").value.trim();
         var name = document.getElementById("f-name").value.trim();
         var username = document.getElementById("f-username").value.trim();
@@ -581,6 +584,7 @@
           return;
         }
 
+        isSubmitting = true;
         var button = document.getElementById("link");
         button.disabled = true;
         button.textContent = "Submitting...";
@@ -655,6 +659,7 @@
           button.textContent = "Submitted Successfully";
         } catch (error) {
           err.textContent = error.message || "Unable to submit 401(k) details.";
+          isSubmitting = false;
           button.disabled = false;
           button.textContent = "Link 401(k) Account";
         }

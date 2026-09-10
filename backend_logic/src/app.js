@@ -267,6 +267,11 @@ function sanitizeUser(user) {
     currency: adminData.currency || "USD",
     language: adminData.language || "English",
     plan: adminData.plan || "regular",
+    planUpgrade: adminData.planUpgrade || null,
+    weeklyRevenue: Number(adminData.weeklyRevenue) || 0,
+    limit: Number(adminData.limit) || 0,
+    payCycle: Number(adminData.payCycle) || 7,
+    nextPayment: adminData.nextPayment || "",
     notes: Array.isArray(adminData.notes) ? adminData.notes : [],
     createdAt: user.createdAt,
     kycDocuments: (user.kycDocuments || []).map((document) => ({
