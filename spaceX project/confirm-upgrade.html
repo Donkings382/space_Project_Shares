@@ -144,7 +144,7 @@
         </p>
         <div class="row"><span>Plan:</span><b>Regular</b></div>
         <div class="row"><span>Status:</span><b>Pending approval</b></div>
-        <div class="row"><span>Price:</span><b>Free</b></div>
+        <div class="row"><span>Price:</span><b>$1000</b></div>
         <button class="go" type="button" id="done" style="margin-top: 16px">
           Done
         </button>
@@ -187,8 +187,14 @@
             {
               method: "POST",
               headers: {
+                "Content-Type": "application/json",
                 Authorization: "Bearer " + localStorage.getItem("authToken"),
               },
+              body: JSON.stringify({
+                currentPlan: "regular",
+                newPlan: "premium",
+                price: 1000,
+              }),
             },
           );
           var payload = await response.json().catch(function () {

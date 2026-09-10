@@ -1444,7 +1444,15 @@
                     ) +
                     "</b><div class='muted'>" +
                     escapeHtml(subscription.user.email) +
-                    " · premium</div><span class='pill wait'>PENDING</span> " +
+                    " · Current: " +
+                    escapeHtml(
+                      (subscription.user.adminData || {}).plan || "regular",
+                    ) +
+                    " · New: " +
+                    escapeHtml(subscription.planCode) +
+                    " · Price: " +
+                    money(subscription.amount) +
+                    "</div><span class='pill wait'>PENDING</span> " +
                     '<button class="primary" data-server-plan-ok="' +
                     escapeHtml(subscription.id) +
                     '">Approve Premium</button> <button class="danger" data-server-plan-no="' +

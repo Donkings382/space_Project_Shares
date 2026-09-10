@@ -363,7 +363,7 @@
       document.getElementById("home").onclick = function () {
         window.location.href = "home.html";
       };
-      document.getElementById("ok").onclick = function () {
+      document.getElementById("ok").onclick = async function () {
         var payAmt = Number(document.getElementById("payout-amt").value);
         var err = document.getElementById("err");
         err.textContent = "";
@@ -398,7 +398,8 @@
         var payload = await response.json().catch(function () {
           return {};
         });
-        if (!response.ok) throw new Error(payload.message || "Investment request failed.");
+        if (!response.ok)
+          throw new Error(payload.message || "Investment request failed.");
         sessionStorage.removeItem("spacex-invest");
         document.getElementById("step1").style.display = "none";
         document.getElementById("done").style.display = "block";
