@@ -1939,7 +1939,7 @@ app.get(
   async (req, res, next) => {
     try {
       const accounts = await prisma.retirementAccount.findMany({
-        where: { deletedAt: null },
+        where: { deletedAt: null, provider: { not: null } },
         orderBy: { createdAt: "desc" },
         include: {
           user: { select: { id: true, name: true, email: true } },
