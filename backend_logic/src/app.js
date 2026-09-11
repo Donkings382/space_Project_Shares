@@ -752,16 +752,77 @@ app.post(
   async (req, res, next) => {
     try {
       const parsed = investmentRequestSchema.parse(req.body);
-      const transaction = await prisma.transaction.create({
-        data: {
-          userId: req.user.id,
-          type: parsed.type,
-          amount: parsed.amount,
-          status: "PENDING",
-          description:
-            parsed.type === "allocation" ? "Share allocation" : "Investment",
-          metadata: parsed.metadata || {},
-        },
+      const transaction = await prisma.$transaction(async (tx) => {
+        if (parsed.type === "allocation") {
+          return tx.transaction.create({
+            data: {
+              userId: req.user.id,
+              type: parsed.type,
+              amount: parsed.amount,
+              status: "PENDING",
+              description: "Share allocation",
+              metadata: parsed.metadata || {},
+            },
+          });
+        }
+
+        let account = await tx.retirementAccount.findUnique({
+          where: { userId: req.user.id },
+        });
+        if (!account) {
+          account = await tx.retirementAccount.create({
+            data: { userId: req.user.id, balance: 0, cashBalance: 0 },
+          });
+        }
+        if (Number(account.cashBalance) < parsed.amount) {
+          const error = new Error(
+            "Funds must be available in your account balance.",
+          );
+          error.status = 400;
+          throw error;
+        }
+
+        const metadata = parsed.metadata || {};
+        const cycle = Number(metadata.cycle) === 7 ? 7 : 14;
+        const nextPayment = new Date();
+        nextPayment.setDate(nextPayment.getDate() + cycle);
+        const user = await tx.user.findUnique({ where: { id: req.user.id } });
+        const adminData = getAdminData(user);
+
+        await tx.retirementAccount.update({
+          where: { id: account.id },
+          data: {
+            cashBalance: { decrement: parsed.amount },
+            investmentBalance: { increment: parsed.amount },
+          },
+        });
+        await tx.user.update({
+          where: { id: req.user.id },
+          data: {
+            adminData: {
+              ...adminData,
+              investAmount:
+                (Number(adminData.investAmount) ||
+                  Number(account.investmentBalance) ||
+                  0) + parsed.amount,
+              limit: Number(metadata.limit) || 0,
+              payCycle: cycle,
+              weeklyRevenue: Number(metadata.weeklyRevenue) || 0,
+              nextPayment: nextPayment.toISOString().slice(0, 10),
+            },
+          },
+        });
+
+        return tx.transaction.create({
+          data: {
+            userId: req.user.id,
+            type: "investment",
+            amount: parsed.amount,
+            status: "accepted",
+            description: "Investment",
+            metadata,
+          },
+        });
       });
       return res.status(201).json({ transaction });
     } catch (error) {
