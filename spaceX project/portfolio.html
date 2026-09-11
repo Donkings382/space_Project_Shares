@@ -712,13 +712,22 @@
         (linked ? "Linked" : "Not linked") +
         "</td></tr>";
       document.getElementById("rows").innerHTML = html;
-      var end = share;
-      if (total > 0)
-        end = Math.min(
-          100,
-          Math.max(share, 6 + Math.min(72, Math.log10(total + 1) * 18)),
-        );
-      var pts = [0, end * 0.18, end * 0.38, end * 0.58, end * 0.8, end];
+      var pts =
+        total > 0
+          ? [
+              total * 0.78,
+              total * 0.82,
+              total * 0.86,
+              total * 0.91,
+              total * 0.96,
+              total,
+            ]
+          : [0, 0, 0, 0, 0, 0];
+      var minValue = Math.min.apply(null, pts);
+      var maxValue = Math.max.apply(null, pts);
+      var valueRange = maxValue - minValue || Math.max(maxValue, 1);
+      var chartMin = Math.max(0, minValue - valueRange * 0.15);
+      var chartMax = maxValue + valueRange * 0.15;
       var labels = [];
       var now = new Date();
       for (var w = 5; w >= 0; w--) {
@@ -744,20 +753,23 @@
       }
       var left = 48,
         right = 680,
-        top = 18,
+        chartTop = 18,
         bot = 190;
       function x(i) {
         return left + (i * (right - left)) / 5;
       }
       function y(v) {
-        return bot - (v / 100) * (bot - top);
+        return (
+          bot - ((v - chartMin) / (chartMax - chartMin)) * (bot - chartTop)
+        );
       }
       var grid = "",
         line = "",
         dots = "",
         xl = "",
         yl = "";
-      [0, 25, 50, 75, 100].forEach(function (v) {
+      for (var tick = 0; tick <= 4; tick++) {
+        var v = chartMin + ((chartMax - chartMin) * tick) / 4;
         var yy = y(v);
         grid +=
           '<line x1="' +
@@ -775,9 +787,9 @@
           '" y="' +
           (yy + 4) +
           '" fill="#9a9a9a" font-size="11" text-anchor="end">' +
-          v +
-          "%</text>";
-      });
+          money(v) +
+          "</text>";
+      }
       var path = "";
       pts.forEach(function (v, i) {
         var xx = x(i),
@@ -802,7 +814,7 @@
         '<line x1="' +
         left +
         '" y1="' +
-        top +
+        chartTop +
         '" x2="' +
         left +
         '" y2="' +
