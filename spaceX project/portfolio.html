@@ -213,6 +213,18 @@
         font-weight: 700;
         margin: 8px 0;
       }
+      .share-breakdown {
+        display: grid;
+        gap: 6px;
+        margin-top: 12px;
+        text-align: left;
+        font-size: 13px;
+      }
+      .share-breakdown div {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
       .line {
         width: 80px;
         height: 1px;
@@ -549,6 +561,17 @@
             <div class="big" id="share-big">0%</div>
             <div class="line"></div>
             <div class="muted">of total share allocation</div>
+            <div class="share-breakdown">
+              <div><span>Shares</span><span id="share-detail">0%</span></div>
+              <div>
+                <span>SpaceX Investment</span
+                ><span id="investment-detail">$0.00</span>
+              </div>
+              <div><span>401(k)</span><span id="k401-detail">$0.00</span></div>
+              <div>
+                <span>Cash Balance</span><span id="cash-detail">$0.00</span>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -649,11 +672,23 @@
       document.getElementById("val").textContent = money(total);
       document.getElementById("shares").textContent = pct(share);
       document.getElementById("share-big").textContent = pct(share);
+      document.getElementById("share-detail").textContent = pct(share);
+      document.getElementById("investment-detail").textContent = money(inv);
+      document.getElementById("k401-detail").textContent = money(k);
+      document.getElementById("cash-detail").textContent = money(cash);
       document.getElementById("payout").textContent = me.nextPayment || "—";
       function alloc(part) {
         return total > 0 ? (part / total) * 100 : 0;
       }
       var html = "";
+      html +=
+        "<tr><td>Shares</td><td>" +
+        pct(share) +
+        "</td><td>" +
+        money(me.shareSpent) +
+        "</td><td>" +
+        (share > 0 ? "Active" : "Inactive") +
+        "</td></tr>";
       html +=
         "<tr><td>SpaceX Investment</td><td>" +
         pct(alloc(inv)) +
