@@ -160,26 +160,6 @@
           Ownership is calculated from the amount entered. This purchase will
           use available account balance.
         </div>
-        <p
-          class="ok"
-          style="
-            color: #fbbf24;
-            border: 1px solid #3a2a00;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-          "
-        >
-          💬 To proceed with purchase, contact our Live Support team.
-        </p>
-        <button
-          class="go"
-          type="button"
-          id="btn-livesupport"
-          style="background: #fbbf24; color: #000"
-        >
-          📞 Contact Live Support
-        </button>
         <p class="err" id="err"></p>
         <div class="btns">
           <button class="ghost" type="button" id="cancel">Cancel</button>
@@ -306,59 +286,46 @@
       document.getElementById("ok").onclick = function () {
         var err = document.getElementById("err");
         err.textContent = "";
-        if (amt > (Number(me.balance) || 0)) {
-          err.textContent = "Not enough balance";
+        if ((me.plan || "regular") !== "premium") {
+          err.textContent = "Premium plan required.";
           return;
         }
-        fetch(
-          window.SPACEX_CONFIG.apiBase + "/api/me/transactions/investment",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + localStorage.getItem("authToken"),
-            },
-            body: JSON.stringify({
-              type: "allocation",
-              amount: amt,
-              metadata: { pct, note: pct.toFixed(2) + "% shares" },
-            }),
-          },
-        )
-          .then(function (response) {
-            return response.json().then(function (payload) {
-              if (!response.ok)
-                throw new Error(payload.message || "Share request failed.");
-              return payload;
-            });
-          })
-          .then(function () {
-            sessionStorage.removeItem("spacex-shares");
-            document.getElementById("step1").style.display = "none";
-            document.getElementById("step2").style.display = "block";
-          })
-          .catch(function (error) {
-            err.textContent = error.message;
-          });
+        if (amt <= 0) {
+          err.textContent = "Enter an amount";
+          return;
+        }
+        if (amt > (Number(me.balance) || 0)) {
+          err.textContent = "Amount is more than your available balance";
+          return;
+        }
+        var now = Date.now();
+        me.balance = (Number(me.balance) || 0) - amt;
+        me.sharePct = Math.min(100, (Number(me.sharePct) || 0) + pct);
+        me.shareSpent = (Number(me.shareSpent) || 0) + amt;
+        me.transactions = Array.isArray(me.transactions) ? me.transactions : [];
+        me.transactions.push({
+          id: now,
+          at: now,
+          amount: amt,
+          kind: "allocation",
+          status: "accepted",
+          note: pct.toFixed(2) + "% shares",
+        });
+        for (
+          var userIndex = 0;
+          userIndex < (db.users || []).length;
+          userIndex++
+        ) {
+          if (db.users[userIndex] === me) {
+            db.users[userIndex] = me;
+            break;
+          }
+        }
+        localStorage.setItem("spacex.v1", JSON.stringify(db));
+        sessionStorage.removeItem("spacex-shares");
+        document.getElementById("step1").style.display = "none";
+        document.getElementById("step2").style.display = "block";
       };
-
-      // Wire the Contact Live Support button to the unified live chat loader
-      var _btnLS = document.getElementById("btn-livesupport");
-      if (_btnLS) {
-        _btnLS.onclick = function () {
-          if (window.openLiveChat) window.openLiveChat();
-          else window.__openLiveChatRequested = true;
-        };
-      }
-    </script>
-    <script>
-      // Load the unified live chat loader used on deposit/upgrade pages
-      (function () {
-        var s = document.createElement("script");
-        s.src = "livechat-loader.js";
-        s.defer = true;
-        document.body.appendChild(s);
-      })();
     </script>
   </body>
 </html>
