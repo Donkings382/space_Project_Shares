@@ -669,6 +669,7 @@
       var linked = !!(me.k401 && me.k401.status !== "declined");
       var total = cash + inv + k;
       var share = Math.max(0, Math.min(100, Number(me.sharePct) || 0));
+      var shareSpent = Number(me.shareSpent) || 0;
       document.getElementById("val").textContent = money(total);
       document.getElementById("shares").textContent = pct(share);
       document.getElementById("share-big").textContent = pct(share);
@@ -685,7 +686,7 @@
         "<tr><td>Shares</td><td>" +
         pct(share) +
         "</td><td>" +
-        money(me.shareSpent) +
+        money(shareSpent) +
         "</td><td>" +
         (share > 0 ? "Active" : "Inactive") +
         "</td></tr>";
