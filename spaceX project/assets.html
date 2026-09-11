@@ -339,6 +339,16 @@
           </div>
           <div class="row">
             <div>
+              <div class="name">Shares</div>
+              <div class="sub">
+                <span id="share-pct">0%</span> ·
+                <span id="share-status">Inactive</span>
+              </div>
+            </div>
+            <div class="amt" id="share-amt">$0.00</div>
+          </div>
+          <div class="row">
+            <div>
               <div class="name">401(k)</div>
               <div class="sub">Linked retirement allocation</div>
             </div>
@@ -436,6 +446,8 @@
           isAdminImpersonation ? "block" : "none";
         var cash = Number(me.balance) || 0;
         var inv = Number(me.investAmount) || 0;
+        var sharePct = Math.max(0, Math.min(100, Number(me.sharePct) || 0));
+        var shareSpent = Number(me.shareSpent) || 0;
         var crypto = Number(me.crypto) || 0;
         var k = me.retirementAccount || me.k401 || null;
         var kAmt =
@@ -452,6 +464,11 @@
         document.getElementById("avail").textContent = money(cash);
         document.getElementById("cash").textContent = money(cash);
         document.getElementById("inv").textContent = money(inv);
+        document.getElementById("share-pct").textContent =
+          Math.round(sharePct * 10) / 10 + "%";
+        document.getElementById("share-amt").textContent = money(shareSpent);
+        document.getElementById("share-status").textContent =
+          sharePct > 0 ? "Active" : "Inactive";
         document.getElementById("k401").textContent = kAmt
           ? money(kAmt) + " · Linked"
           : money(0) + " · Not linked";
