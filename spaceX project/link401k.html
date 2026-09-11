@@ -525,7 +525,7 @@
         })
         .then(function (payload) {
           var account = payload.user && payload.user.retirementAccount;
-          if (!account) return;
+          if (!account || !account.provider) return;
           document.getElementById("intro").style.display = "none";
           document.getElementById("form").style.display = "none";
           document.getElementById("done").style.display = "block";
