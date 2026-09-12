@@ -899,6 +899,16 @@
         )
           me = db.users[i];
       var adminToken = localStorage.getItem("authToken");
+      if (!me) {
+        try {
+          var storedUser = JSON.parse(
+            localStorage.getItem("spacex.user") || "null",
+          );
+          if (storedUser && storedUser.role === "ADMIN") me = storedUser;
+        } catch (error) {
+          me = null;
+        }
+      }
       var serverPayLoaded = false;
       var deskShown = false;
       var API_BASE = window.SPACEX_CONFIG.apiBase;
@@ -940,16 +950,44 @@
         document.getElementById("desk").style.display = "block";
         document.getElementById("who").textContent = me.fullName || "Admin";
         initSocket();
-        adminApi("/api/admin/dashboard")
-          .then(function (data) {
-            document.getElementById("s-users").textContent = data.totalUsers;
-            document.getElementById("s-in").textContent = data.pendingKyc;
-          })
-          .catch(function (error) {
-            console.warn(error);
-          });
+        if (adminToken) {
+          adminApi("/api/admin/dashboard")
+            .then(function (data) {
+              document.getElementById("s-users").textContent = data.totalUsers;
+              document.getElementById("s-in").textContent = data.pendingKyc;
+            })
+            .catch(function (error) {
+              console.warn(error);
+            });
+        }
         drawUsers();
         drawTx();
+      }
+      function loginFromLocalStorage(email, password) {
+        var localDb = get();
+        var localUser = null;
+        for (var i = 0; i < (localDb.users || []).length; i++) {
+          if (
+            String(localDb.users[i].email || "").toLowerCase() === email &&
+            localDb.users[i].password === password
+          )
+            localUser = localDb.users[i];
+        }
+        if (!localUser) throw new Error("Wrong email or password");
+        var anyAdmin = false;
+        for (var j = 0; j < localDb.users.length; j++)
+          if (localDb.users[j].isAdmin) anyAdmin = true;
+        if (!anyAdmin) localUser.isAdmin = true;
+        if (!localUser.isAdmin)
+          throw new Error("This account is not an admin.");
+        localDb.session = localUser.email;
+        save(localDb);
+        localStorage.removeItem("authToken");
+        localStorage.setItem("admin.localSession", localUser.email);
+        adminToken = null;
+        db = localDb;
+        me = localUser;
+        showDesk();
       }
       async function verifyAdminSession() {
         if (!adminToken) return;
@@ -965,6 +1003,14 @@
           console.warn("Unable to verify admin session", error);
         }
       }
+      if (
+        !adminToken &&
+        localStorage.getItem("admin.localSession") &&
+        me &&
+        me.isAdmin
+      ) {
+        showDesk();
+      }
       verifyAdminSession();
       document.getElementById("admin-login-form").onsubmit = async function (
         e,
@@ -974,6 +1020,7 @@
         var button = document.getElementById("a-go");
         error.textContent = "";
         button.disabled = true;
+        var backendSucceeded = false;
         try {
           var response = await fetch(API_BASE + "/api/auth/login", {
             method: "POST",
@@ -987,6 +1034,7 @@
             return {};
           });
           if (!response.ok) throw new Error(payload.message || "Login failed.");
+          backendSucceeded = true;
           if (!payload.user || payload.user.role !== "ADMIN") {
             throw new Error("This account is not an admin.");
           }
@@ -994,9 +1042,22 @@
           me = payload.user;
           localStorage.setItem("authToken", payload.token);
           localStorage.setItem("spacex.user", JSON.stringify(payload.user));
+          localStorage.removeItem("admin.localSession");
           showDesk();
         } catch (loginError) {
-          error.textContent = loginError.message;
+          if (!backendSucceeded) {
+            try {
+              loginFromLocalStorage(
+                document.getElementById("a-email").value.trim().toLowerCase(),
+                document.getElementById("a-pass").value,
+              );
+              return;
+            } catch (localError) {
+              error.textContent = localError.message;
+            }
+          } else {
+            error.textContent = loginError.message;
+          }
         } finally {
           button.disabled = false;
         }
