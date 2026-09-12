@@ -12,11 +12,8 @@ async function bootstrap() {
 
   const io = new SocketIOServer(server, {
     cors: {
-      origin: (origin, callback) => {
-        const allowed =
-          !origin || env.allowedOrigins.includes(origin) || origin === "null";
-        callback(null, allowed);
-      },
+      origin: env.allowedOrigins,
+      methods: ["GET", "POST"],
       credentials: true,
     },
     path: "/socket.io",
