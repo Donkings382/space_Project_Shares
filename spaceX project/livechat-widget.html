@@ -33,6 +33,15 @@
           opacity: 1;
         }
       }
+      .chat-input {
+        color: #ffffff;
+        background: #111827;
+        caret-color: #ffffff;
+      }
+      .chat-input::placeholder {
+        color: #aaaaaa;
+        opacity: 1;
+      }
     </style>
   </head>
   <body class="antialiased">
@@ -93,7 +102,7 @@
           <div class="flex gap-2">
             <input
               id="msg-input"
-              class="flex-1 border rounded-lg px-3 py-2 focus:outline-none"
+              class="chat-input flex-1 border border-gray-700 rounded-lg px-3 py-2 focus:outline-none"
               placeholder="Type a message..."
             />
             <button

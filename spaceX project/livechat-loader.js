@@ -44,6 +44,10 @@
 
   // Keep the closed chat window out of hit-testing so it cannot block mobile taps.
   var widgetHTML = `
+  <style>
+    .chat-input { color: #ffffff !important; background: #111827; caret-color: #ffffff; }
+    .chat-input::placeholder { color: #aaaaaa; opacity: 1; }
+  </style>
   <div id="chat-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:2147483640;transition:opacity .22s ease;opacity:0"></div>
   <div id="live-widget" style="position:fixed;right:18px;bottom:18px;z-index:2147483647;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;pointer-events:auto">
     <button id="widget-btn" title="Open Live Support" style="width:56px;height:56px;border-radius:9999px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(2,6,23,0.2);border:0;cursor:grab;transition:transform .18s ease,box-shadow .18s ease;touch-action:none">
@@ -62,7 +66,7 @@
       <div id="messages" style="flex:1;overflow:auto;padding:12px;background:#f8fafc;color:#111827"></div>
       <div style="padding:10px;border-top:1px solid #eee">
         <div style="display:flex;gap:8px">
-          <input id="msg-input" placeholder="Type a message..." style="flex:1;padding:10px;border-radius:8px;border:1px solid #e6e6e6;outline:none;color:#000" />
+          <input id="msg-input" class="chat-input" placeholder="Type a message..." style="flex:1;padding:10px;border-radius:8px;border:1px solid #374151;outline:none" />
           <button id="send-btn" style="background:#4f46e5;color:#fff;padding:10px 14px;border-radius:8px;border:0;cursor:pointer">Send</button>
         </div>
         <div id="status-line" style="font-size:12px;color:#6b7280;margin-top:8px;height:16px"></div>
@@ -119,10 +123,6 @@
       var chatClose = document.getElementById("chat-close");
       var messagesEl = document.getElementById("messages");
       var msgInput = document.getElementById("msg-input");
-      // ensure input text is visible (black)
-      try {
-        if (msgInput) msgInput.style.color = "#000";
-      } catch (e) {}
       var sendBtn = document.getElementById("send-btn");
       var badge = document.getElementById("badge");
       var statusLine = document.getElementById("status-line");
