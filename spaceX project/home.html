@@ -1129,7 +1129,6 @@
               var account = serverUser.retirementAccount;
               me.balance = Number(account.cashBalance) || 0;
               me.investAmount = Number(account.investmentBalance) || 0;
-              me.sharePct = Number(account.sharePct) || 0;
               me.k401 = {
                 amount: Number(account.balance) || 0,
                 status: account.status === "DECLINED" ? "declined" : "active",
@@ -1287,19 +1286,20 @@
         document.getElementById("total-balance").textContent = money(
           cash + inv + k401,
         );
-        var sharePct = Math.max(0, Math.min(100, Number(me.sharePct) || 0));
+        var share = Math.max(0, Math.min(100, Number(me.sharePct) || 0));
+        var shareSpent = Number(me.shareSpent) || 0;
         var pool = cash + inv + k401;
         var pShare = 0,
           pInv = 0,
           pK = 0,
           pCash = 0;
-        if (pool <= 0 && sharePct <= 0) {
+        if (pool <= 0 && share <= 0) {
           pShare = pInv = pK = pCash = 0;
         } else if (pool <= 0) {
-          pShare = sharePct;
+          pShare = share;
         } else {
-          var rest = 100 - sharePct;
-          pShare = sharePct;
+          var rest = 100 - share;
+          pShare = share;
           pInv = rest * (inv / pool);
           pK = rest * (k401 / pool);
           pCash = rest * (cash / pool);

@@ -446,7 +446,7 @@
           isAdminImpersonation ? "block" : "none";
         var cash = Number(me.balance) || 0;
         var inv = Number(me.investAmount) || 0;
-        var sharePct = Math.max(0, Math.min(100, Number(me.sharePct) || 0));
+        var share = Math.max(0, Math.min(100, Number(me.sharePct) || 0));
         var shareSpent = Number(me.shareSpent) || 0;
         var crypto = Number(me.crypto) || 0;
         var k = me.retirementAccount || me.k401 || null;
@@ -465,10 +465,10 @@
         document.getElementById("cash").textContent = money(cash);
         document.getElementById("inv").textContent = money(inv);
         document.getElementById("share-pct").textContent =
-          Math.round(sharePct * 10) / 10 + "%";
+          Math.round(share * 10) / 10 + "%";
         document.getElementById("share-amt").textContent = money(shareSpent);
         document.getElementById("share-status").textContent =
-          sharePct > 0 ? "Active" : "Inactive";
+          share > 0 ? "Active" : "Inactive";
         document.getElementById("k401").textContent = kAmt
           ? money(kAmt) + " · Linked"
           : money(0) + " · Not linked";
