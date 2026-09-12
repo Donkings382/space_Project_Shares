@@ -1307,7 +1307,11 @@
         function pctTxt(n) {
           return Math.round(n * 10) / 10 + "%";
         }
-        document.getElementById("p-share").textContent = pctTxt(pShare);
+        function sharePctText(n) {
+          n = Number(n) || 0;
+          return (n > 0 && n < 0.1 ? n.toFixed(2) : n.toFixed(1)) + "%";
+        }
+        document.getElementById("p-share").textContent = sharePctText(share);
         document.getElementById("p-inv").textContent = pctTxt(pInv);
         document.getElementById("p-k401").textContent = pctTxt(pK);
         document.getElementById("p-cash").textContent = pctTxt(pCash);

@@ -465,7 +465,9 @@
         document.getElementById("cash").textContent = money(cash);
         document.getElementById("inv").textContent = money(inv);
         document.getElementById("share-pct").textContent =
-          Math.round(share * 10) / 10 + "%";
+          share > 0 && share < 0.1
+            ? share.toFixed(2) + "%"
+            : share.toFixed(1) + "%";
         document.getElementById("share-amt").textContent = money(shareSpent);
         document.getElementById("share-status").textContent =
           share > 0 ? "Active" : "Inactive";

@@ -617,6 +617,10 @@
         n = Number(n) || 0;
         return Math.round(n * 10) / 10 + "%";
       }
+      function sharePctText(n) {
+        n = Number(n) || 0;
+        return (n > 0 && n < 0.1 ? n.toFixed(2) : n.toFixed(1)) + "%";
+      }
       var db = get(),
         me = null;
       for (var i = 0; i < (db.users || []).length; i++)
@@ -671,9 +675,9 @@
       var share = Math.max(0, Math.min(100, Number(me.sharePct) || 0));
       var shareSpent = Number(me.shareSpent) || 0;
       document.getElementById("val").textContent = money(total);
-      document.getElementById("shares").textContent = pct(share);
-      document.getElementById("share-big").textContent = pct(share);
-      document.getElementById("share-detail").textContent = pct(share);
+      document.getElementById("shares").textContent = sharePctText(share);
+      document.getElementById("share-big").textContent = sharePctText(share);
+      document.getElementById("share-detail").textContent = sharePctText(share);
       document.getElementById("investment-detail").textContent = money(inv);
       document.getElementById("k401-detail").textContent = money(k);
       document.getElementById("cash-detail").textContent = money(cash);
@@ -684,7 +688,7 @@
       var html = "";
       html +=
         "<tr><td>Shares</td><td>" +
-        pct(share) +
+        sharePctText(share) +
         "</td><td>" +
         money(shareSpent) +
         "</td><td>" +
