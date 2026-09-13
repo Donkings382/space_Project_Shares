@@ -9,6 +9,20 @@
   var hasSmartsuppKey =
     SMARTSUPP_KEY && SMARTSUPP_KEY !== "REPLACE_WITH_SMARTSUPP_SITE_KEY";
 
+  if (window.smartsupp && window._smartsupp && window._smartsupp.key) {
+    window.openLiveChat = function () {
+      window.smartsupp("chat:open");
+    };
+    window.closeLiveChat = function () {
+      window.smartsupp("chat:close");
+    };
+    if (window.__openLiveChatRequested) {
+      window.openLiveChat();
+      window.__openLiveChatRequested = false;
+    }
+    return;
+  }
+
   if (hasSmartsuppKey) {
     if (window.__smartsupp_loaded) return;
     window.__smartsupp_loaded = true;
@@ -32,6 +46,9 @@
 
     window.openLiveChat = function () {
       if (window.smartsupp) window.smartsupp("chat:open");
+    };
+    window.closeLiveChat = function () {
+      if (window.smartsupp) window.smartsupp("chat:close");
     };
     return;
   }
