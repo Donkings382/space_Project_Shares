@@ -387,6 +387,14 @@ app.post("/api/auth/register", async (req, res, next) => {
     try {
       await dispatchSignupOtp(email, user.id);
     } catch (error) {
+      console.error("Signup OTP dispatch failed:", {
+        name: error?.name,
+        message: error?.message,
+        status: error?.status,
+        responseStatus: error?.response?.status,
+        responseMessage: error?.response?.body?.message,
+      });
+
       await prisma.$transaction([
         prisma.signupOtp.deleteMany({ where: { userId: user.id } }),
         prisma.user.delete({ where: { id: user.id } }),
