@@ -320,7 +320,7 @@ function getAdminEmail() {
   return (process.env.ADMIN_EMAIL || "admin@yourdomain.com").trim();
 }
 
-async function dispatchSignup(email, userId) {
+async function dispatchSignupOtp(email, userId) {
   const otp = bypassEmailOtp ? "000000" : generateOtp();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
