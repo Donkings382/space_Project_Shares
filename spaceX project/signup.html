@@ -274,95 +274,99 @@
         <span class="n" id="n3">3</span> Plan
       </div>
 
-      <div id="s1">
-        <h1>Create your account</h1>
-        <p class="sub">Step 1 of 3</p>
-        <label>Full name</label>
-        <input id="fullName" />
-        <label>Choose username</label>
-        <input id="username" />
-        <label>Email</label>
-        <input id="email" type="email" />
-        <label>Recovery email or phone</label>
-        <input id="phone" placeholder="Email or phone number" />
-        <p class="err" id="e1"></p>
-        <button class="go" type="button" id="to2">Next</button>
-        <p class="foot">
-          Already have an account? <a href="login.html">Sign in</a>
-        </p>
-      </div>
+      <form id="signup-form" novalidate>
+        <div id="s1">
+          <h1>Create your account</h1>
+          <p class="sub">Step 1 of 3</p>
+          <label>Full name</label>
+          <input id="fullName" />
+          <label>Choose username</label>
+          <input id="username" />
+          <label>Email</label>
+          <input id="email" type="email" />
+          <label>Recovery email or phone</label>
+          <input id="phone" placeholder="Email or phone number" />
+          <p class="err" id="e1"></p>
+          <button class="go" type="button" id="to2">Next</button>
+          <p class="foot">
+            Already have an account? <a href="login.html">Sign in</a>
+          </p>
+        </div>
 
-      <div id="s2" style="display: none">
-        <h1>Account setup</h1>
-        <p class="sub">Step 2 of 3</p>
-        <div class="box">
-          <label>Country</label>
-          <select id="country">
-            <option value="">Select country</option>
-          </select>
-          <label>Password</label>
-          <div class="pw">
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter password"
-            /><button type="button" data-eye="password">👁</button>
+        <div id="s2" style="display: none">
+          <h1>Account setup</h1>
+          <p class="sub">Step 2 of 3</p>
+          <div class="box">
+            <label>Country</label>
+            <select id="country">
+              <option value="">Select country</option>
+            </select>
+            <label>Password</label>
+            <div class="pw">
+              <input
+                id="password"
+                type="password"
+                placeholder="Enter password"
+              /><button type="button" data-eye="password">👁</button>
+            </div>
+            <label>Confirm password</label>
+            <div class="pw">
+              <input
+                id="confirm"
+                type="password"
+                placeholder="Re-enter password"
+              /><button type="button" data-eye="confirm">👁</button>
+            </div>
+            <label>Referral ID (optional)</label>
+            <input id="referral" placeholder="Enter referral ID (optional)" />
           </div>
-          <label>Confirm password</label>
-          <div class="pw">
-            <input
-              id="confirm"
-              type="password"
-              placeholder="Re-enter password"
-            /><button type="button" data-eye="confirm">👁</button>
+          <p class="err" id="e2"></p>
+          <div class="row">
+            <button class="ghost" type="button" id="back1">Back</button>
+            <button class="next" type="button" id="to3">Next</button>
           </div>
-          <label>Referral ID (optional)</label>
-          <input id="referral" placeholder="Enter referral ID (optional)" />
         </div>
-        <p class="err" id="e2"></p>
-        <div class="row">
-          <button class="ghost" type="button" id="back1">Back</button>
-          <button class="next" type="button" id="to3">Next</button>
-        </div>
-      </div>
 
-      <div id="s3" style="display: none">
-        <h1>Choose your plan</h1>
-        <p class="sub">Step 3 of 3</p>
-        <div class="plans">
-          <div class="plan on" id="card-regular" data-plan="regular">
-            <span class="tick">✓</span>
-            <h3>Regular</h3>
-            <div class="price">Free</div>
-            <ul>
-              <li>Weekly income</li>
-              <li>Monthly income</li>
-              <li>Basic dashboard</li>
-              <li>Market charts</li>
-              <li>Standard support</li>
-            </ul>
+        <div id="s3" style="display: none">
+          <h1>Choose your plan</h1>
+          <p class="sub">Step 3 of 3</p>
+          <div class="plans">
+            <div class="plan on" id="card-regular" data-plan="regular">
+              <span class="tick">✓</span>
+              <h3>Regular</h3>
+              <div class="price">Free</div>
+              <ul>
+                <li>Weekly income</li>
+                <li>Monthly income</li>
+                <li>Basic dashboard</li>
+                <li>Market charts</li>
+                <li>Standard support</li>
+              </ul>
+            </div>
+            <div class="plan" id="card-premium" data-plan="premium">
+              <span class="badge">RECOMMENDED</span>
+              <span class="tick">✓</span>
+              <h3>Premium</h3>
+              <div class="price">$1000</div>
+              <ul>
+                <li>Buy company shares</li>
+                <li>Higher profits</li>
+                <li>More benefits</li>
+                <li>Full wealth dashboard</li>
+                <li>Priority support</li>
+                <li>Market charts</li>
+              </ul>
+            </div>
           </div>
-          <div class="plan" id="card-premium" data-plan="premium">
-            <span class="badge">RECOMMENDED</span>
-            <span class="tick">✓</span>
-            <h3>Premium</h3>
-            <div class="price">$1000</div>
-            <ul>
-              <li>Buy company shares</li>
-              <li>Higher profits</li>
-              <li>More benefits</li>
-              <li>Full wealth dashboard</li>
-              <li>Priority support</li>
-              <li>Market charts</li>
-            </ul>
+          <p class="err" id="e3"></p>
+          <div class="row">
+            <button class="ghost" type="button" id="back2">Back</button>
+            <button class="next" type="button" id="create">
+              Create account
+            </button>
           </div>
         </div>
-        <p class="err" id="e3"></p>
-        <div class="row">
-          <button class="ghost" type="button" id="back2">Back</button>
-          <button class="next" type="button" id="create">Create account</button>
-        </div>
-      </div>
+      </form>
     </div>
     <script>
       var countries = [

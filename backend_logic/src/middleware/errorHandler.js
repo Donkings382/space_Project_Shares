@@ -3,9 +3,11 @@ export function errorHandler(err, req, res, next) {
 
   const statusCode = err.statusCode || err.status || 500;
   const message =
-    statusCode >= 500
-      ? "Internal server error."
-      : err.message || "Request failed.";
+    statusCode === 503
+      ? err.message || "Service temporarily unavailable."
+      : statusCode >= 500
+        ? "Internal server error."
+        : err.message || "Request failed.";
 
   res.status(statusCode).json({
     message,
