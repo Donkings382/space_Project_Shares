@@ -27,6 +27,12 @@ export const env = {
   paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || "",
   paystackPublicKey: process.env.PAYSTACK_PUBLIC_KEY || "",
   paystackBaseUrl: process.env.PAYSTACK_BASE_URL || "https://api.paystack.co",
+  mailgunApiKey: process.env.MAILGUN_API_KEY || "",
+  mailgunDomain: process.env.MAILGUN_DOMAIN || "spacexprofit.com",
+  mailgunFromEmail:
+    process.env.MAILGUN_FROM_EMAIL || "Mailgun <postmaster@spacexprofit.com>",
+  mailgunApiBaseUrl:
+    process.env.MAILGUN_API_BASE_URL || "https://api.mailgun.net",
   encryptionKey:
     process.env.ENCRYPTION_KEY || "CHANGE_ME_32_BYTE_KEY_1234567890",
   appDomain: process.env.APP_DOMAIN || "",

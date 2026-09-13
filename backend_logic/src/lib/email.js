@@ -5,33 +5,29 @@ import { env } from "../config/env.js";
 const mailgun = new Mailgun(FormData);
 let mg = null;
 
-if (
-  env.nodeEnv !== "test" &&
-  process.env.MAILGUN_API_KEY &&
-  process.env.MAILGUN_DOMAIN
-) {
+if (env.nodeEnv !== "test" && env.mailgunApiKey && env.mailgunDomain) {
   mg = mailgun.client({
     username: "api",
-    key: process.env.MAILGUN_API_KEY,
+    key: env.mailgunApiKey,
+    url: env.mailgunApiBaseUrl,
   });
 }
 
-export async function sendOtpEmail({ to, otp, purpose, userEmail }) {
-  const from = process.env.MAILGUN_FROM_EMAIL || "noreply@sandbox.mailgun.org";
-  const domain = process.env.MAILGUN_DOMAIN;
+export async function sendOtpEmail({ to, otp }) {
+  const from = env.mailgunFromEmail;
+  const domain = env.mailgunDomain;
 
   if (!mg || !domain) {
-    console.warn("Mailgun not configured; verification email was not sent.");
-    return { skipped: true };
+    throw new Error("Mailgun is not configured.");
   }
 
-  const subject = `Your SpaceX verification code`;
+  const subject = "Your SpaceX verification code";
   const html = `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;">
-        <h2 style="margin:0 0 16px;">Verify your email</h2>
+        <h2 style="margin:0 0 16px;">Verify your SpaceX account</h2>
         <p style="margin:0 0 12px;">Your verification code is:</p>
         <p style="margin:0 0 12px; font-size:28px; letter-spacing:4px; font-weight:700;">${otp}</p>
-        <p style="margin:0;">This code expires in 5 minutes.</p>
+        <p style="margin:0;">This code expires in 10 minutes.</p>
       </div>
     `;
 
@@ -41,16 +37,16 @@ export async function sendOtpEmail({ to, otp, purpose, userEmail }) {
       to,
       subject,
       html,
-      text: `Your verification code is ${otp}. It expires in 5 minutes.`,
+      text: `Your verification code is ${otp}. It expires in 10 minutes.`,
     });
 
     return { sent: true };
   } catch (error) {
-    console.warn(
-      `Mailgun send failed for ${to}. Error: ${
+    console.error(
+      `Mailgun send failed for ${to}: ${
         error?.response?.body?.message || error?.message || "Unknown error"
       }`,
     );
-    return { skipped: true };
+    throw error;
   }
 }

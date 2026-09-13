@@ -313,6 +313,7 @@ function hashOtp(otp) {
 }
 
 const bypassEmailOtp =
+  env.nodeEnv !== "production" &&
   String(process.env.BYPASS_EMAIL_OTP || "false").toLowerCase() === "true";
 
 function getAdminEmail() {
@@ -321,7 +322,7 @@ function getAdminEmail() {
 
 async function dispatchSignupOtp(email, userId) {
   const otp = bypassEmailOtp ? "000000" : generateOtp();
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
   await prisma.signupOtp.updateMany({
     where: { userId, purpose: "signup", usedAt: null },
@@ -383,7 +384,20 @@ app.post("/api/auth/register", async (req, res, next) => {
       },
     });
 
-    await dispatchSignupOtp(email, user.id);
+    try {
+      await dispatchSignupOtp(email, user.id);
+    } catch (error) {
+      await prisma.$transaction([
+        prisma.signupOtp.deleteMany({ where: { userId: user.id } }),
+        prisma.user.delete({ where: { id: user.id } }),
+      ]);
+
+      const deliveryError = new Error(
+        "Your account could not be created because the verification email could not be sent.",
+      );
+      deliveryError.status = 503;
+      throw deliveryError;
+    }
 
     return res.status(201).json({
       message: bypassEmailOtp
@@ -426,6 +440,7 @@ app.post("/api/auth/verify-email", async (req, res, next) => {
     const otpRecord = await prisma.signupOtp.findFirst({
       where: {
         email,
+        purpose: "signup",
         otp: hashOtp(parsed.otp),
         usedAt: null,
         expiresAt: { gt: new Date() },
